@@ -1,0 +1,31 @@
+version: "3.7"
+services:
+  rabbitmq:
+    image: rabbitmq:3.11.17-management-alpine
+    container_name: 'rabbitmq'
+    restart: always
+    environment:
+      - "RABBITMQ_DEFAULT_USER=username"
+      - "RABBITMQ_DEFAULT_PASS=password"
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - orders_net
+  orderservice:
+    build: src/order-service
+    container_name: 'orderservice'
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      - ORDER_QUEUE_PROTOCOL=amqp
+      - ORDER_QUEUE_HOSTNAME=rabbitmq
+      - ORDER_QUEUE_PORT=5672
+      - ORDER_QUEUE_USERNAME=username
+      - ORDER_QUEUE_PASSWORD=password
+    networks:
+      - orders_net
+networks:
+  orders_net:
+    driver: bridge
