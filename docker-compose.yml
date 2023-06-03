@@ -1,5 +1,18 @@
 version: "3.7"
 services:
+  mongodb:
+    image: mongo:6.0.6
+    container_name: 'mongo'
+    restart: always
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - orders_net
   rabbitmq:
     image: rabbitmq:3.11.17-management-alpine
     container_name: 'rabbitmq'
@@ -10,9 +23,14 @@ services:
     ports:
       - 15672:15672
       - 5672:5672
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - orders_net
-  orderservice:
+  order-service:
     build: src/order-service
     container_name: 'orderservice'
     restart: always
@@ -26,6 +44,30 @@ services:
       - ORDER_QUEUE_PASSWORD=password
     networks:
       - orders_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+  virtualworker:
+    build: src/virtual-worker
+    container_name: 'virtualworker'
+    restart: always
+    ports:
+      - 4001:4001
+    environment:
+      - FASTIFY_PORT=4001
+      - ORDER_QUEUE_PROTOCOL=amqp
+      - ORDER_QUEUE_HOSTNAME=rabbitmq
+      - ORDER_QUEUE_PORT=5672
+      - ORDER_QUEUE_USERNAME=username
+      - ORDER_QUEUE_PASSWORD=password
+      - ORDER_DB_URL=mongodb://mongo:27017/orderdb
+    networks:
+      - orders_net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
 networks:
   orders_net:
     driver: bridge

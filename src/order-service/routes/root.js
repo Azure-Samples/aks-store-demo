@@ -4,7 +4,7 @@ module.exports = async function (fastify, opts) {
   fastify.post('/', async function (request, reply) {
     const channel = this.amqp.channel
 
-    const queue = 'order-queue'
+    const queue = 'orders'
     const msg = request.body
 
     channel.assertQueue(queue, {

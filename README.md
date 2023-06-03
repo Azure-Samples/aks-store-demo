@@ -1,4 +1,4 @@
-# Project Name
+# AKS Store Demo
 
 (short, 1-3 sentenced, description of the project)
 
@@ -6,9 +6,9 @@
 
 This project framework provides the following features:
 
-* Feature 1
-* Feature 2
-* ...
+- Feature 1
+- Feature 2
+- ...
 
 ## Getting Started
 
@@ -29,12 +29,12 @@ This project framework provides the following features:
 - ...
 
 ### Quickstart
+
 (Add steps to get up and running quickly)
 
 1. git clone [repository clone url]
 2. cd [repository name]
 3. ...
-
 
 ## Demo
 
