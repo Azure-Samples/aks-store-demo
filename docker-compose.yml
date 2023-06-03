@@ -47,7 +47,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-  virtualworker:
+  virtual-worker:
     build: src/virtual-worker
     container_name: 'virtualworker'
     restart: always
