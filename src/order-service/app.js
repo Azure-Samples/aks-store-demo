@@ -21,6 +21,10 @@ module.exports = async function (fastify, opts) {
     password: ORDER_QUEUE_PASSWORD
   })
 
+  fastify.register(require('@fastify/cors'), {
+    origin: '*'
+  })
+
   // Do not touch the following lines
 
   // This loads all plugins defined in plugins

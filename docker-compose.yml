@@ -12,7 +12,7 @@ services:
       timeout: 10s
       retries: 5
     networks:
-      - orders_net
+      - backend_services
   rabbitmq:
     image: rabbitmq:3.11.17-management-alpine
     container_name: 'rabbitmq'
@@ -29,8 +29,8 @@ services:
       timeout: 10s
       retries: 5
     networks:
-      - orders_net
-  order-service:
+      - backend_services
+  orderservice:
     build: src/order-service
     container_name: 'orderservice'
     restart: always
@@ -43,7 +43,7 @@ services:
       - ORDER_QUEUE_USERNAME=username
       - ORDER_QUEUE_PASSWORD=password
     networks:
-      - orders_net
+      - backend_services
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -62,12 +62,24 @@ services:
       - ORDER_QUEUE_PASSWORD=password
       - ORDER_DB_URL=mongodb://mongo:27017/orderdb
     networks:
-      - orders_net
+      - backend_services
     depends_on:
       rabbitmq:
         condition: service_healthy
       mongodb:
         condition: service_healthy
+  storefront:
+    build: src/store-front
+    container_name: 'storefront'
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - ORDER_SERVICE_URL=http://orderservice:3000/
+    networks:
+      - backend_services
+    depends_on:
+      - orderservice
 networks:
-  orders_net:
+  backend_services:
     driver: bridge
