@@ -1,0 +1,297 @@
+<template>
+  <TopNav :cartItemCount="cartItemCount"/>
+  <router-view
+    :products="products"
+    :cartItems="cartItems"
+    @addToCart="addToCart"
+    @removeFromCart="removeFromCart"
+    @submitOrder="submitOrder"
+  ></router-view>
+</template>
+
+<script>
+import TopNav from './components/TopNav.vue'
+import products from './products'
+
+export default {
+  name: 'App',
+  components: {
+    TopNav
+  },
+  data() {
+    return {
+      cartItems: [],
+      products,
+    }
+  },
+  computed: {
+    cartItemCount() {
+      return this.cartItems.reduce((total, item) => {
+        return total + item.quantity
+      }, 0)
+    }
+  },
+  methods: {
+    addToCart({ productId, quantity }) {
+      // check if the product is already in the cart
+      const existingCartItem = this.cartItems.find(
+        item => item.product.id == productId
+      )
+      if (existingCartItem) {
+        // if it is, increment the quantity
+        existingCartItem.quantity += quantity
+      } else {
+        // if not, find the product, and add it with quantity to the cart
+        const product = products.find(product => product.id == productId)
+        this.cartItems.push({ product, quantity })
+      }
+    },
+    removeFromCart(index) {
+      this.cartItems.splice(index, 1)
+    },
+    submitOrder() {
+      // get the order-service URL from an environment variable
+      const orderServiceUrl = process.env.ORDER_SERVICE_URL || 'http://localhost:3000/';
+ 
+      // create an order object
+      const orderObject = {
+        customerId: Math.floor(Math.random() * 10000000000).toString(),
+        items: this.cartItems.map(item => {
+          return {
+            product: item.product.id,
+            quantity: item.quantity,
+            price: item.product.price
+          }
+        })
+      }
+
+      console.log(JSON.stringify(orderObject));
+
+      // call the order-service using fetch
+      fetch(`${orderServiceUrl}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderObject)
+      })
+        .then(response => {
+          console.log(response)
+          if (!response.ok) {
+            alert('Error occurred while submitting order')
+          } else {
+            this.cartItems = []
+            alert('Order submitted successfully')
+          }
+        })
+        .catch(error => {
+          console.log(error)
+          alert('Error occurred while submitting order')
+        })
+    }
+  }
+}
+</script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #333;
+  color: #fff;
+  padding: 1rem;
+  margin: 0;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  margin: 0 1rem;
+}
+
+a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+}
+
+.product-card img {
+  max-width: 100%;
+  margin-bottom: 1rem;
+}
+
+.product-card a {
+  text-decoration: none;
+  color: #333;
+}
+
+.product-card h2 {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.product-card p {
+  margin-bottom: 1rem;
+}
+
+.product-price {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.quantity-input {
+  width: 50px;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  margin-right: 10px;
+}
+
+.product-detail {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem;
+}
+
+.product-image {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.product-image img {
+  width: 100%;
+  height: auto;
+}
+
+.product-info {
+  flex: 1;
+  text-align: left;
+}
+
+.product-info h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.product-info p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.product-controls {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.product-controls p {
+  margin-right: 20px;
+}
+
+.product-controls button {
+  padding: 10px;
+  background-color: #005f8b;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.product-controls button:hover {
+  background-color: #005f8b;
+}
+
+/* make image the width of the container */
+.product-detail img {
+  width: 100%;
+}
+
+.shopping-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+}
+
+.shopping-cart h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.shopping-cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.shopping-cart-table th,
+.shopping-cart-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.shopping-cart-table th {
+  font-weight: bold;
+}
+
+.shopping-cart-table td img {
+  display: block;
+  margin: 0 auto;
+}
+
+.checkout-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007acc;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.checkout-button:hover {
+  background-color: #005f8b;
+}
+</style>

@@ -7,12 +7,12 @@ Content-Type: application/json
     "customerId": "1234567890",
     "items": [
         {
-            "name": "Potato Chips",
+            "product": "1",
             "quantity": 1,
             "price": 10
         },
         {
-            "name": "Chocolate Chip Cookies",
+            "product": "2",
             "quantity": 2,
             "price": 20
         }
