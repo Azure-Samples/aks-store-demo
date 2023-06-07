@@ -30,6 +30,19 @@ services:
       retries: 5
     networks:
       - backend_services
+  redis:
+    image: redis:7.0.11-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - backend_services
   orderservice:
     build: src/order-service
     container_name: 'orderservice'
@@ -47,6 +60,40 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+  makelineservice:
+    build: src/makeline-service
+    container_name: 'makelineservice'
+    restart: always
+    ports:
+      - 3001:3001
+    environment:
+      - RABBITMQ_CONNECTION_STRING=amqp://username:password@rabbitmq:5672/
+      - RABBITMQ_QUEUE_NAME=orders
+      - REDIS_CONNECTION_STRING=redis://redis:6379/0
+      - MONGO_CONNECTION_STRING=mongodb://mongodb:27017
+      - MONGO_DATABASE_NAME=orderdb
+      - MONGO_COLLECTION_NAME=orders
+    networks:
+      - backend_services
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+  storefront:
+    build: src/store-front
+    container_name: 'storefront'
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - ORDER_SERVICE_URL=http://orderservice:3000/
+    networks:
+      - backend_services
+    depends_on:
+      - orderservice
   virtualworker:
     build: src/virtual-worker
     container_name: 'virtualworker'
@@ -68,18 +115,6 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
-  storefront:
-    build: src/store-front
-    container_name: 'storefront'
-    restart: always
-    ports:
-      - 8080:8080
-    environment:
-      - ORDER_SERVICE_URL=http://orderservice:3000/
-    networks:
-      - backend_services
-    depends_on:
-      - orderservice
 networks:
   backend_services:
     driver: bridge
