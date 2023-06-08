@@ -3,9 +3,12 @@
     <div class="logo">
       <a href="/">Azure Pet Supplies</a>
     </div>
-    <ul class="nav-links">
-      <li><router-link to="/">Products</router-link></li>
-      <li><router-link to="/cart">Cart ({{ cartItemCount }})</router-link></li>
+    <button class="hamburger" @click="toggleNav">
+      <span class="hamburger-icon"></span>
+    </button>
+    <ul class="nav-links" :class="{ 'nav-links--open': isNavOpen }">
+      <li><router-link to="/" @click="closeNav">Products</router-link></li>
+      <li><router-link to="/cart" @click="closeNav">Cart ({{ cartItemCount }})</router-link></li>
     </ul>
   </nav>
 </template>
@@ -13,7 +16,20 @@
 <script>
 export default {
   name: 'TopNav',
-  props: ['cartItemCount']
+  props: ['cartItemCount'],
+  data() {
+    return {
+      isNavOpen: false
+    }
+  },
+  methods: {
+    toggleNav() {
+      this.isNavOpen = !this.isNavOpen
+    },
+    closeNav() {
+      this.isNavOpen = false
+    }
+  }
 }
 </script>
 
@@ -31,50 +47,65 @@ nav {
   right: 0;
 }
 
-.logo a {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #fff;
-  text-decoration: none;
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
 }
 
-.nav-links {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
+.hamburger-icon {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: #fff;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-.nav-links li {
-  list-style: none;
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: #fff;
+  position: absolute;
+  left: 0;
 }
 
-.nav-links a {
-  color: #fff;
-  text-decoration: none;
-  font-size: 1.2rem;
+.hamburger-icon::before {
+  top: -6px;
 }
 
-@media screen and (max-width: 768px) {
+.hamburger-icon::after {
+  bottom: -6px;
+}
+
+@media (max-width: 768px) {
   .nav-links {
     display: none;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  nav {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .nav-links {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin: 0;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    padding: 1rem;
   }
 
-  .nav-links li {
-    margin: 0.5rem 0;
+  .nav-links--open {
+    display: block;
+  }
+
+  .nav-links--open li {
+    padding: 0.5rem 0;
+  }
+
+  .hamburger {
+    display: block;
   }
 }
 </style>

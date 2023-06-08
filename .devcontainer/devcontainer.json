@@ -1,41 +1,47 @@
 {
-	"name": "Ubuntu",
-	"image": "mcr.microsoft.com/devcontainers/base:jammy",
-	"features": {
-		"ghcr.io/devcontainers/features/azure-cli:1": {
-			"version": "latest",
-			"extensions": "aks-preview",
-			"installBicep": true
-		},
-		"ghcr.io/devcontainers/features/common-utils:2": {
-			"configureZshAsDefaultShell": true
-		},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/devcontainers/features/node:1": {
-			"version": "latest"
-		}
-	},
-	"overrideFeatureInstallOrder": [
-		"ghcr.io/devcontainers/features/common-utils"
-	],
-	"postCreateCommand": "/bin/sh .devcontainer/installMoreTools.sh",
-	"customizations": {
-		"vscode": {
-			"vscode": {
-				"settings": {
-					"terminal.integrated.defaultProfile.linux": "zsh",
-					"terminal.integrated.profiles.linux": {
-						"zsh": {
-							"path": "zsh",
-							"icon": "terminal-bash"
-						}
-					}
-				}
-			},
-			"extensions": [
-				"humao.rest-client",
-				"esbenp.prettier-vscode"
-			]
-		}
-	}
+  "name": "Ubuntu",
+  "image": "mcr.microsoft.com/devcontainers/base:jammy",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "version": "latest",
+      "extensions": "aks-preview",
+      "installBicep": true
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "latest"
+    }
+  },
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "postCreateCommand": "/bin/sh .devcontainer/installMoreTools.sh",
+  "customizations": {
+    "vscode": {
+      "vscode": {
+        "settings": {
+          "terminal.integrated.defaultProfile.linux": "zsh",
+          "terminal.integrated.profiles.linux": {
+            "zsh": {
+              "path": "zsh",
+              "icon": "terminal-bash"
+            }
+          }
+        }
+      },
+      "extensions": [
+        "humao.rest-client",
+        "esbenp.prettier-vscode",
+        "golang.go",
+        "Vue.volar",
+        "cweijan.vscode-redis-client"
+      ]
+    }
+  }
 }
