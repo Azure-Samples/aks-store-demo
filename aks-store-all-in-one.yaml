@@ -96,10 +96,9 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: order-service
-        image: briaracr.azurecr.io/aks-store-demo/order-service:0.20
+        image: myacr.azurecr.io/aks-store-demo/order-service:0.20
         ports:
         - containerPort: 3000
-          name: order-service
         env:
         - name: ORDER_QUEUE_PROTOCOL
           value: "amqp"
@@ -111,17 +110,21 @@ spec:
           value: "username"
         - name: ORDER_QUEUE_PASSWORD
           value: "password"
+        - name: FASTIFY_ADDRESS
+          value: "0.0.0.0"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: order-service
 spec:
+  type: LoadBalancer
   ports:
-  - port: 3000
+  - name: http
+    port: 3000
+    targetPort: 3000
   selector:
     app: order-service
-  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -141,7 +144,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: store-front
-        image: briaracr.azurecr.io/aks-store-demo/store-front:0.20
+        image: myacr.azurecr.io/aks-store-demo/store-front:0.20
         ports:
         - containerPort: 8080
           name: store-front
@@ -178,7 +181,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: virtual-worker
-        image: briaracr.azurecr.io/aks-store-demo/virtual-worker:0.20
+        image: myacr.azurecr.io/aks-store-demo/virtual-worker:0.20
         ports:
         - containerPort: 4001
           name: virtual-worker
