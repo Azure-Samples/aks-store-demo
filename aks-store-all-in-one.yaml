@@ -187,6 +187,7 @@ spec:
           name: virtual-worker
         env:
         - name: FASTIFY_PORT
+           value: "4001"
         - name: FASTIFY_ADDRESS
            value: "0.0.0.0"
         - name: ORDER_QUEUE_PROTOCOL
