@@ -1,0 +1,215 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: mongodb
+        image: mcr.microsoft.com/mirror/docker/library/mongo:4.2
+        ports:
+        - containerPort: 27017
+          name: mongodb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  ports:
+  - port: 27017
+  selector:
+    app: mongodb
+  type: LoadBalancer    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: rabbitmq
+        image: mcr.microsoft.com/mirror/docker/library/rabbitmq:3.10-management-alpine
+        ports:
+        - containerPort: 5672
+          name: rabbitmq-amqp
+        - containerPort: 15672
+          name: rabbitmq-http
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          value: "username"
+        - name: RABBITMQ_DEFAULT_PASS
+          value: "password"          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: rabbitmq-amqp
+      port: 5672
+      targetPort: 5672
+    - name: rabbitmq-http
+      port: 15672
+      targetPort: 15672
+  type: LoadBalancer      
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: order-service
+        image: myacr.azurecr.io/aks-store-demo/order-service:0.20
+        ports:
+        - containerPort: 3000
+        env:
+        - name: ORDER_QUEUE_PROTOCOL
+          value: "amqp"
+        - name: ORDER_QUEUE_HOSTNAME
+          value: "rabbitmq"
+        - name: ORDER_QUEUE_PORT
+          value: "5672"
+        - name: ORDER_QUEUE_USERNAME
+          value: "username"
+        - name: ORDER_QUEUE_PASSWORD
+          value: "password"
+        - name: FASTIFY_ADDRESS
+          value: "0.0.0.0"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+  selector:
+    app: order-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: store-front
+  template:
+    metadata:
+      labels:
+        app: store-front
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: store-front
+        image: myacr.azurecr.io/aks-store-demo/store-front:0.20
+        ports:
+        - containerPort: 8080
+          name: store-front
+        env:
+        - name: ORDER_SERVICE_URL
+          value: "http://order-service:3000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-front
+spec:
+  ports:
+  - port: 8080
+  selector:
+    app: store-front
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: virtual-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: virtual-worker
+  template:
+    metadata:
+      labels:
+        app: virtual-worker
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: virtual-worker
+        image: myacr.azurecr.io/aks-store-demo/virtual-worker:0.20
+        ports:
+        - containerPort: 4001
+          name: virtual-worker
+        env:
+        - name: FASTIFY_PORT
+          value: "4001"
+        - name: FASTIFY_ADDRESS
+          value: "0.0.0.0"
+        - name: ORDER_QUEUE_PROTOCOL
+          value: "amqp"
+        - name: ORDER_QUEUE_HOSTNAME
+          value: "rabbitmq"
+        - name: ORDER_QUEUE_PORT
+          value: "5672"
+        - name: ORDER_QUEUE_USERNAME
+          value: "username"
+        - name: ORDER_QUEUE_PASSWORD
+          value: "password"
+        - name: ORDER_DB_URL
+          value: "mongodb://mongodb:27017/orderdb"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: virtual-worker
+spec:
+  ports:
+  - port: 4001
+  selector:
+    app: virtual-worker
+  type: LoadBalancer
