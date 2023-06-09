@@ -94,6 +94,17 @@ services:
       - backend_services
     depends_on:
       - orderservice
+  virtualcustomer:
+    build: src/virtual-customer
+    container_name: 'virtualcustomer'
+    restart: always
+    environment:
+      - ORDERS_PER_MINUTE=100
+      - ORDER_SERVICE_URL=http://orderservice:3000/
+    networks:
+      - backend_services
+    depends_on:
+      - orderservice
   virtualworker:
     build: src/virtual-worker
     container_name: 'virtualworker'

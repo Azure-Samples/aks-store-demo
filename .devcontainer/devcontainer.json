@@ -16,7 +16,8 @@
     },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "latest"
-    }
+    },
+    "ghcr.io/devcontainers/features/rust:1": {}
   },
   "overrideFeatureInstallOrder": [
     "ghcr.io/devcontainers/features/common-utils"
@@ -40,7 +41,8 @@
         "esbenp.prettier-vscode",
         "golang.go",
         "Vue.volar",
-        "cweijan.vscode-redis-client"
+        "cweijan.vscode-redis-client",
+        "rust-lang.rust-analyzer"
       ]
     }
   }
