@@ -36,4 +36,4 @@ This [document](./docs/quickstart.md) has some intial commands to set this up in
 ## Additional Resources
 
 - AKS Documentation. https://learn.microsoft.com/en-us/azure/aks
-- Kubernetes Learning Path. https://azure.microsoft.com/en-us/resources/kubernetes-learning-path 
+- Kubernetes Learning Path. https://azure.microsoft.com/resources/kubernetes-learning-path 
