@@ -41,7 +41,6 @@
         "esbenp.prettier-vscode",
         "golang.go",
         "Vue.volar",
-        "cweijan.vscode-redis-client",
         "rust-lang.rust-analyzer"
       ]
     }

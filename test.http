@@ -23,18 +23,38 @@ Content-Type: application/json
 GET /
 Host: localhost:4001
 
-### Fetch orders from rabbitmq and put into redis
+### Fetch orders from rabbitmq and put into mongodb
 GET /fetch
 Host: localhost:3001
 
-### Pick up an order from makeline service for processing
-GET /order/57838
+### Get order for processing
+GET /order/56412
 Host: localhost:3001
 
-### Put the order back as it is not processed
-PUT /order/57838/incomplete
+### Update the order
+PUT /order
 Host: localhost:3001
+Content-Type: application/json
 
-### Put the order in mongodb as it has been processed
-PUT /order/57838/complete
-Host: localhost:3001
+{
+    "orderId": "56412",
+    "customerId": "1022466235",
+    "items": [
+        {
+            "product": 0,
+            "quantity": 2,
+            "price": 22.428429
+        },
+        {
+            "product": 0,
+            "quantity": 1,
+            "price": 99.63117
+        },
+        {
+            "product": 0,
+            "quantity": 2,
+            "price": 93.84932
+        }
+    ],
+    "status": 1
+}
