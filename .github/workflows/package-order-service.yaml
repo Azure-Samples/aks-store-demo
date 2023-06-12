@@ -18,9 +18,9 @@ jobs:
         run: |
           echo ::set-output name=version::$(echo ${GITHUB_SHA} | cut -c1-7)
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          echo ::set-output name=project::order-service
-          echo ::set-output name=image::reddog-java-order-service
-          echo ::set-output name=repository::ghcr.io/azure/reddog-demo
+          echo ::set-output name=project::aks-store-order-service
+          echo ::set-output name=image::aks-store-order-service
+          echo ::set-output name=repository::ghcr.io/azure-samples/aks-store
 
   package-service:
     name: Package Service
@@ -29,18 +29,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.8.2
-      - name: Build with Maven
-        run: mvn -B package --file ./order-service/pom.xml -DskipTests
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to GitHub Container Registry
@@ -52,8 +40,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: order-service
-          file: order-service/Dockerfile
+          context: src/order-service
+          file: src/order-service/Dockerfile
           push: true
           tags: |
             ${{ needs.set-env.outputs.repository }}/${{ needs.set-env.outputs.image }}:latest
