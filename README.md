@@ -23,7 +23,6 @@ The application has the following services:
 | `ai-service` | Optional service for adding generative text and graphics creation |
 | `mongodb` | MongoDB instance for persisted data |
 | `rabbitmq` | RabbitMQ for an order queue |
-| `redis` | Redis Cache |
 
 Architecure Diagram:
 
