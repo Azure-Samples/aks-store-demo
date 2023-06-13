@@ -54,11 +54,11 @@ services:
     ports:
       - 3001:3001
     environment:
-      - RABBITMQ_CONNECTION_STRING=amqp://username:password@rabbitmq:5672/
-      - RABBITMQ_QUEUE_NAME=orders
-      - MONGO_CONNECTION_STRING=mongodb://mongodb:27017
-      - MONGO_DATABASE_NAME=orderdb
-      - MONGO_COLLECTION_NAME=orders
+      - ORDER_QUEUE_CONNECTION_STRING=amqp://username:password@rabbitmq:5672/
+      - ORDER_QUEUE_NAME=orders
+      - ORDER_DB_CONNECTION_STRING=mongodb://mongodb:27017
+      - ORDER_DB_NAME=orderdb
+      - ORDER_DB_COLLECTION_NAME=orders
     networks:
       - backend_services
     depends_on:
@@ -83,8 +83,8 @@ services:
     container_name: 'virtualcustomer'
     restart: always
     environment:
-      - ORDERS_PER_MINUTE=100
       - ORDER_SERVICE_URL=http://orderservice:3000/
+      - ORDERS_PER_MINUTE=90
     networks:
       - backend_services
     depends_on:
@@ -93,23 +93,13 @@ services:
     build: src/virtual-worker
     container_name: 'virtualworker'
     restart: always
-    ports:
-      - 4001:4001
     environment:
-      - FASTIFY_PORT=4001
-      - ORDER_QUEUE_PROTOCOL=amqp
-      - ORDER_QUEUE_HOSTNAME=rabbitmq
-      - ORDER_QUEUE_PORT=5672
-      - ORDER_QUEUE_USERNAME=username
-      - ORDER_QUEUE_PASSWORD=password
-      - ORDER_DB_URL=mongodb://mongo:27017/orderdb
+      - MAKELINE_SERVICE_URL=http://makelineservice:3001
+      - ORDERS_PER_HOUR=3600
     networks:
       - backend_services
     depends_on:
-      rabbitmq:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
+      - makelineservice
 networks:
   backend_services:
     driver: bridge

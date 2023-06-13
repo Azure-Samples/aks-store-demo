@@ -20,6 +20,7 @@ spec:
         ports:
         - containerPort: 27017
           name: mongodb
+        resources: {}
 ---
 apiVersion: v1
 kind: Service
@@ -60,7 +61,8 @@ spec:
         - name: RABBITMQ_DEFAULT_USER
           value: "username"
         - name: RABBITMQ_DEFAULT_PASS
-          value: "password"          
+          value: "password"
+        resources: {}
 ---
 apiVersion: v1
 kind: Service
@@ -76,40 +78,6 @@ spec:
     - name: rabbitmq-http
       port: 15672
       targetPort: 15672
-  type: LoadBalancer
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: redis
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: redis
-  template:
-    metadata:
-      labels:
-        app: redis
-    spec:
-      nodeSelector:
-        "kubernetes.io/os": linux
-      containers:
-      - name: redis
-        image: mcr.microsoft.com/mirror/docker/library/redis:7
-        ports:
-        - containerPort: 6379
-          name: redis
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: redis
-spec:
-  ports:
-  - port: 6379
-  selector:
-    app: redis
   type: LoadBalancer
 ---
 apiVersion: apps/v1
@@ -146,6 +114,7 @@ spec:
           value: "password"
         - name: FASTIFY_ADDRESS
           value: "0.0.0.0"
+        resources: {}
 ---
 apiVersion: v1
 kind: Service
@@ -159,6 +128,53 @@ spec:
     targetPort: 3000
   selector:
     app: order-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: makeline-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: makeline-service
+  template:
+    metadata:
+      labels:
+        app: makeline-service
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: makeline-service
+        image: myacr.azurecr.io/aks-store-demo/makeline-service:0.20
+        ports:
+        - containerPort: 3001
+        env:
+        - name: ORDER_QUEUE_CONNECTION_STRING
+          value: "amqp://username:password@rabbitmq:5672/"
+        - name: ORDER_QUEUE_NAME
+          value: "orders"
+        - name: ORDER_DB_CONNECTION_STRING
+          value: "mongodb://mongodb:27017"
+        - name: ORDER_DB_NAME
+          value: "orderdb"
+        - name: ORDER_DB_COLLECTION_NAME
+          value: "orders"
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: makeline-service
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 3001
+    targetPort: 3001
+  selector:
+    app: makeline-service
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -185,6 +201,7 @@ spec:
         env:
         - name: ORDER_SERVICE_URL
           value: "http://order-service:3000"
+        resources: {}
 ---
 apiVersion: v1
 kind: Service
@@ -196,6 +213,32 @@ spec:
   selector:
     app: store-front
   type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: virtual-customer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: virtual-customer
+  template:
+    metadata:
+      labels:
+        app: virtual-customer
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: virtual-worker
+        image: myacr.azurecr.io/aks-store-demo/virtual-customer:0.20
+        env:
+        - name: ORDER_SERVICE_URL
+          value: http://order-service:3000/
+        - name: ORDERS_PER_MINUTE
+          value: "90"
+        resources: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -216,34 +259,9 @@ spec:
       containers:
       - name: virtual-worker
         image: myacr.azurecr.io/aks-store-demo/virtual-worker:0.20
-        ports:
-        - containerPort: 4001
-          name: virtual-worker
         env:
-        - name: FASTIFY_PORT
-          value: "4001"
-        - name: FASTIFY_ADDRESS
-          value: "0.0.0.0"
-        - name: ORDER_QUEUE_PROTOCOL
-          value: "amqp"
-        - name: ORDER_QUEUE_HOSTNAME
-          value: "rabbitmq"
-        - name: ORDER_QUEUE_PORT
-          value: "5672"
-        - name: ORDER_QUEUE_USERNAME
-          value: "username"
-        - name: ORDER_QUEUE_PASSWORD
-          value: "password"
-        - name: ORDER_DB_URL
-          value: "mongodb://mongodb:27017/orderdb"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: virtual-worker
-spec:
-  ports:
-  - port: 4001
-  selector:
-    app: virtual-worker
-  type: LoadBalancer
+        - name: MAKELINE_SERVICE_URL
+          value: http://makeline-service:3001
+        - name: ORDERS_PER_HOUR
+          value: "3000"
+        resources: {}
