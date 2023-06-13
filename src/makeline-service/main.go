@@ -16,51 +16,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type order struct {
-	OrderID    string `json:"orderId"`
-	CustomerID string `json:"customerId"`
-	Items      []item `json:"items"`
-	Status     Status `json:"status"`
-}
-
-type Status int
-
-const (
-	Pending Status = iota
-	Processing
-	Complete
-)
-
-type item struct {
-	Product  int     `json:"product"`
-	Quantity int     `json:"quantity"`
-	Price    float64 `json:"price"`
-}
-
-// Fetch orders from the RabbitMQ and store them in MongoDB
+// Fetch orders from the order queue and store them in database
 func fetchOrders(c *gin.Context) {
 	var orders []order
 
-	// Get RabbitMQ connection string from environment variable
-	rabbitmqConn := os.Getenv("RABBITMQ_CONNECTION_STRING")
-	if rabbitmqConn == "" {
-		log.Printf("RABBITMQ_CONNECTION_STRING is not set")
+	// Get order queue connection string from environment variable
+	orderQueueConn := os.Getenv("ORDER_QUEUE_CONNECTION_STRING")
+	if orderQueueConn == "" {
+		log.Printf("ORDER_QUEUE_CONNECTION_STRING is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	// Get queue name from environment variable
-	rabbitmqQueueName := os.Getenv("RABBITMQ_QUEUE_NAME")
-	if rabbitmqQueueName == "" {
-		log.Printf("RABBITMQ_QUEUE_NAME is not set")
+	orderQueueName := os.Getenv("ORDER_QUEUE_NAME")
+	if orderQueueName == "" {
+		log.Printf("ORDER_QUEUE_NAME is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	// Connect to RabbitMQ
-	conn, err := amqp.Dial(rabbitmqConn)
+	// Connect to order queue
+	conn, err := amqp.Dial(orderQueueConn)
 	if err != nil {
-		log.Printf("%s: %s", "Failed to connect to RabbitMQ", err)
+		log.Printf("%s: %s", "Failed to connect to order queue", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -76,12 +55,12 @@ func fetchOrders(c *gin.Context) {
 
 	// Peek into the queue to get the number of messages
 	queue, err := ch.QueueDeclarePassive(
-		rabbitmqQueueName, // name
-		false,             // durable
-		false,             // delete when unused
-		false,             // exclusive
-		false,             // no-wait
-		nil,               // arguments
+		orderQueueName, // name
+		false,          // durable
+		false,          // delete when unused
+		false,          // exclusive
+		false,          // no-wait
+		nil,            // arguments
 	)
 	if err != nil {
 		log.Printf("Failed to inspect queue: %s", err)
@@ -106,7 +85,7 @@ func fetchOrders(c *gin.Context) {
 
 	// Consume the specified number of messages from the queue
 	for i := 0; i < numMessages; i++ {
-		msg, ok, err := ch.Get(rabbitmqQueueName, false)
+		msg, ok, err := ch.Get(orderQueueName, false)
 		if err != nil {
 			log.Printf("Failed to consume message: %s", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
@@ -162,39 +141,39 @@ func fetchOrders(c *gin.Context) {
 		return
 	}
 
-	// Save orders to MongoDB
+	// Save orders to database
 	var ctx = context.TODO()
 
-	// Get MongoDB connection string from environment variable
-	mongoConn := os.Getenv("MONGO_CONNECTION_STRING")
-	if mongoConn == "" {
-		log.Printf("MONGO_CONNECTION_STRING is not set")
+	// Get database connection string from environment variable
+	orderDBConn := os.Getenv("ORDER_DB_CONNECTION_STRING")
+	if orderDBConn == "" {
+		log.Printf("ORDER_DB_CONNECTION_STRING is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	// get MongoDB name from environment variable
-	mongoDb := os.Getenv("MONGO_DATABASE_NAME")
-	if mongoDb == "" {
-		log.Printf("MONGO_DATABASE_NAME is not set")
+	// get database name from environment variable
+	orderDBName := os.Getenv("ORDER_DB_NAME")
+	if orderDBName == "" {
+		log.Printf("ORDER_DB_NAME is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	// get MongoDB collection from environment variable
-	mongoCollection := os.Getenv("MONGO_COLLECTION_NAME")
-	if mongoCollection == "" {
-		log.Printf("MONGO_COLLECTION_NAME is not set")
+	// get database collection from environment variable
+	orderDBCollection := os.Getenv("ORDER_DB_COLLECTION_NAME")
+	if orderDBCollection == "" {
+		log.Printf("ORDER_DB_COLLECTION_NAME is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	clientOptions := options.Client().ApplyURI(mongoConn)
+	clientOptions := options.Client().ApplyURI(orderDBConn)
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Printf("Failed to connect to MongoDB: %s", err)
+		log.Printf("Failed to connect to database: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
 	// Get a handle for the orders collection
-	collection := mongoClient.Database(mongoDb).Collection(mongoCollection)
+	collection := mongoClient.Database(orderDBName).Collection(orderDBCollection)
 
 	// Convert []order to []interface{}
 	var ordersInterface []interface{}
@@ -209,45 +188,45 @@ func fetchOrders(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	log.Printf("Inserted %v documents into MongoDB\n", len(insertResult.InsertedIDs))
+	log.Printf("Inserted %v documents into database\n", len(insertResult.InsertedIDs))
 
 	// Return the orders
 	c.IndentedJSON(http.StatusOK, orders)
 }
 
-// Get order from MongoDB
+// Get order from database
 func getOrder(c *gin.Context) {
 	// TODO: Validate order ID
 	orderId := c.Param("id")
 
-	// Read order from MongoDB
+	// Read order from database
 	var ctx = context.TODO()
 
-	// Get MongoDB connection string from environment variable
-	mongoConn := os.Getenv("MONGO_CONNECTION_STRING")
+	// Get database connection string from environment variable
+	mongoConn := os.Getenv("ORDER_DB_CONNECTION_STRING")
 	if mongoConn == "" {
-		log.Printf("MONGO_CONNECTION_STRING is not set")
+		log.Printf("ORDER_DB_CONNECTION_STRING is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	// get MongoDB name from environment variable
-	mongoDb := os.Getenv("MONGO_DATABASE_NAME")
+	// get database name from environment variable
+	mongoDb := os.Getenv("ORDER_DB_NAME")
 	if mongoDb == "" {
-		log.Printf("MONGO_DATABASE_NAME is not set")
+		log.Printf("ORDER_DB_NAME is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	// get MongoDB collection from environment variable
-	mongoCollection := os.Getenv("MONGO_COLLECTION_NAME")
+	// get database collection from environment variable
+	mongoCollection := os.Getenv("ORDER_DB_COLLECTION_NAME")
 	if mongoCollection == "" {
-		log.Printf("MONGO_COLLECTION_NAME is not set")
+		log.Printf("ORDER_DB_COLLECTION_NAME is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
 	clientOptions := options.Client().ApplyURI(mongoConn)
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Printf("Failed to connect to MongoDB: %s", err)
+		log.Printf("Failed to connect to database: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
@@ -276,34 +255,34 @@ func updateOrder(c *gin.Context) {
 		return
 	}
 
-	// Read order from MongoDB
+	// Read order from database
 	var ctx = context.TODO()
 
-	// Get MongoDB connection string from environment variable
-	mongoConn := os.Getenv("MONGO_CONNECTION_STRING")
+	// Get database connection string from environment variable
+	mongoConn := os.Getenv("ORDER_DB_CONNECTION_STRING")
 	if mongoConn == "" {
-		log.Printf("MONGO_CONNECTION_STRING is not set")
+		log.Printf("ORDER_DB_CONNECTION_STRING is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	// get MongoDB name from environment variable
-	mongoDb := os.Getenv("MONGO_DATABASE_NAME")
+	// get database name from environment variable
+	mongoDb := os.Getenv("ORDER_DB_NAME")
 	if mongoDb == "" {
-		log.Printf("MONGO_DATABASE_NAME is not set")
+		log.Printf("ORDER_DB_NAME is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	// get MongoDB collection from environment variable
-	mongoCollection := os.Getenv("MONGO_COLLECTION_NAME")
+	// get database collection from environment variable
+	mongoCollection := os.Getenv("ORDER_DB_COLLECTION_NAME")
 	if mongoCollection == "" {
-		log.Printf("MONGO_COLLECTION_NAME is not set")
+		log.Printf("ORDER_DB_COLLECTION_NAME is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
 	clientOptions := options.Client().ApplyURI(mongoConn)
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Printf("Failed to connect to MongoDB: %s", err)
+		log.Printf("Failed to connect to database: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 
@@ -340,4 +319,25 @@ func main() {
 		})
 	})
 	router.Run(":3001")
+}
+
+type order struct {
+	OrderID    string `json:"orderId"`
+	CustomerID string `json:"customerId"`
+	Items      []item `json:"items"`
+	Status     status `json:"status"`
+}
+
+type status int
+
+const (
+	Pending status = iota
+	Processing
+	Complete
+)
+
+type item struct {
+	Product  int     `json:"productId"`
+	Quantity int     `json:"quantity"`
+	Price    float64 `json:"price"`
 }
