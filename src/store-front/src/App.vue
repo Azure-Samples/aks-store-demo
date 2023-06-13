@@ -54,18 +54,18 @@ export default {
       const orderServiceUrl = process.env.ORDER_SERVICE_URL || 'http://localhost:3000/';
  
       // create an order object
-      const orderObject = {
+      const order = {
         customerId: Math.floor(Math.random() * 10000000000).toString(),
         items: this.cartItems.map(item => {
           return {
-            product: item.product.id,
+            productId: item.product.id,
             quantity: item.quantity,
             price: item.product.price
           }
         })
       }
 
-      console.log(JSON.stringify(orderObject));
+      console.log(JSON.stringify(order));
 
       // call the order-service using fetch
       fetch(`${orderServiceUrl}`, {
@@ -73,7 +73,7 @@ export default {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(orderObject)
+        body: JSON.stringify(order)
       })
         .then(response => {
           console.log(response)

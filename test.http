@@ -1,3 +1,7 @@
+### Get order service health
+GET  /health
+Host: localhost:3000
+
 ### Send order to order service
 POST /
 Host: localhost:3000
@@ -19,12 +23,16 @@ Content-Type: application/json
     ]
 }
 
+### Get makeline service health
+GET /health
+Host: localhost:3001
+
 ### Fetch orders from rabbitmq and put into mongodb
-GET /fetch
+GET /order/fetch
 Host: localhost:3001
 
 ### Get order for processing
-GET /order/97087
+GET /order/44821
 Host: localhost:3001
 
 ### Update the order
@@ -33,7 +41,7 @@ Host: localhost:3001
 Content-Type: application/json
 
 {
-    "orderId": "97087",
+    "orderId": "65982",
     "customerId": "1022466235",
     "items": [
         {

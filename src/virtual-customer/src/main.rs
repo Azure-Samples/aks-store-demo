@@ -8,21 +8,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let order_service_url =
         env::var("ORDER_SERVICE_URL").unwrap_or_else(|_| "http://localhost:3000".to_string());
 
-    let orders_per_minute: u32 = env::var("ORDERS_PER_MINUTE")
-        .unwrap_or_else(|_| "0".to_string())
+    let orders_per_hour: u64 = env::var("ORDERS_PER_HOUR")
+        .unwrap_or_else(|_| "1".to_string())
         .parse()
-        .unwrap_or(0);
+        .unwrap_or(1);
 
-    if orders_per_minute == 0 {
-        println!("Please set the ORDERS_PER_MINUTE environment variable");
+    if orders_per_hour == 0 {
+        println!("Please set the ORDERS_PER_HOUR environment variable");
         std::process::exit(1);
     }
 
-    // orders per second we need to generate
-    let orders_per_second = orders_per_minute / 60;
+    println!("Orders to submit per hour: {}", orders_per_hour);
+
+    let minutes: f64 = 60.0;
+    let seconds: f64 = 60.0;
+
+    // calculate the time between orders in seconds
+    let order_submission_interval: f64 = (minutes / (orders_per_hour as f64)) * seconds;
+    println!(
+        "Order submission interval: {} seconds",
+        order_submission_interval
+    );
 
     // time to sleep between orders
-    let sleep_duration = Duration::from_secs(1) / orders_per_second;
+    let sleep_duration = Duration::from_secs_f64(order_submission_interval);
+    println!("Sleep duration between orders: {:?}", sleep_duration);
 
     // order counter
     let mut order_counter = 0;
