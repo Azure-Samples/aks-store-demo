@@ -62,3 +62,17 @@ Content-Type: application/json
     ],
     "status": 1
 }
+
+### Get ai service health
+GET /health
+Host: localhost:5001
+
+### Generate product description
+POST /generate/description 
+Host: localhost:5001
+Content-Type: application/json
+
+{
+    "name": "Seafarer's Tug Rope",
+    "tags": ["toy","dog"]
+}

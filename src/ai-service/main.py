@@ -9,7 +9,7 @@ app.include_router(description)
 app.add_middleware(CORSMiddleware, allow_origins=["*"])
 
 
-@app.get("/generate/health", summary="check if server is healthy", operation_id="health")
+@app.get("/health", summary="check if server is healthy", operation_id="health")
 async def get_products():
     """
     Returns status code 200

@@ -17,6 +17,7 @@
     "ghcr.io/devcontainers/features/node:1": {
       "version": "latest"
     },
+    "ghcr.io/devcontainers/features/python:1": {},
     "ghcr.io/devcontainers/features/rust:1": {}
   },
   "overrideFeatureInstallOrder": [
@@ -41,7 +42,8 @@
         "esbenp.prettier-vscode",
         "golang.go",
         "Vue.volar",
-        "rust-lang.rust-analyzer"
+        "rust-lang.rust-analyzer",
+        "ms-python.python"
       ]
     }
   }
