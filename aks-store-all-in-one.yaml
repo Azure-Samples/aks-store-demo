@@ -83,6 +83,49 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: ai-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: order-service
+        image: ghcr.io/azure-samples/aks-store-demo/ai-service:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: AZURE_OPENAI_DEPLOYMENT_NAME
+          value: ""
+        - name: AZURE_OPENAI_API_KEY
+          value: ""
+        - name: AZURE_OPENAI_ENDPOINT
+          value: ""
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-service
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 5001
+    targetPort: 5001
+  selector:
+    app: ai-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: order-service
 spec:
   replicas: 1
@@ -98,7 +141,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: order-service
-        image: myacr.azurecr.io/aks-store-demo/order-service:0.20
+        image: ghcr.io/azure-samples/aks-store-demo/order-service:latest
         ports:
         - containerPort: 3000
         env:
@@ -147,7 +190,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: makeline-service
-        image: myacr.azurecr.io/aks-store-demo/makeline-service:0.20
+        image: ghcr.io/azure-samples/aks-store-demo/makeline-service:latest
         ports:
         - containerPort: 3001
         env:
@@ -194,7 +237,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: store-front
-        image: myacr.azurecr.io/aks-store-demo/store-front:0.20
+        image: ghcr.io/azure-samples/aks-store-demo/store-front:latest
         ports:
         - containerPort: 8080
           name: store-front
@@ -217,6 +260,44 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: store-back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: store-back
+  template:
+    metadata:
+      labels:
+        app: store-back
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: store-front
+        image: ghcr.io/azure-samples/aks-store-demo/store-front:latest
+        ports:
+        - containerPort: 8080
+          name: store-front
+        env:
+        - name: ORDER_SERVICE_URL
+          value: "http://order-service:3000"
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-front
+spec:
+  ports:
+  - port: 8080
+  selector:
+    app: store-front
+  type: LoadBalancer  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: virtual-customer
 spec:
   replicas: 1
@@ -232,7 +313,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: virtual-worker
-        image: myacr.azurecr.io/aks-store-demo/virtual-customer:0.20
+        image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:latest
         env:
         - name: ORDER_SERVICE_URL
           value: http://order-service:3000/
@@ -258,7 +339,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: virtual-worker
-        image: myacr.azurecr.io/aks-store-demo/virtual-worker:0.20
+        image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest
         env:
         - name: MAKELINE_SERVICE_URL
           value: http://makeline-service:3001
