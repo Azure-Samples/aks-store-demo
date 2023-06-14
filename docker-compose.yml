@@ -100,6 +100,18 @@ services:
       - backend_services
     depends_on:
       - makelineservice
+  aiservice:
+    build: src/ai-service
+    container_name: 'aiservice'
+    restart: always
+    ports:
+      - 5001:5001
+    environment:
+      - AZURE_OPENAI_DEPLOYMENT_NAME=anotherone
+      - AZURE_OPENAI_ENDPOINT=https://awesomesemantic.openai.azure.com
+      - AZURE_OPENAI_API_KEY=d374d055d34b42769f71551ea5350ef2
+    networks:
+      - backend_services
 networks:
   backend_services:
     driver: bridge
