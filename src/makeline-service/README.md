@@ -25,7 +25,7 @@ go run .
 Run the following command to pull orders from the RabbitMQ and dump into MongoDB
 
 ```bash
-curl http://localhost:3001/fetch
+curl http://localhost:3001/order/fetch
 ```
 
 Run the following command to get an order for processing

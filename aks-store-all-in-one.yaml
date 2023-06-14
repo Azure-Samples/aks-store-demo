@@ -236,8 +236,8 @@ spec:
         env:
         - name: ORDER_SERVICE_URL
           value: http://order-service:3000/
-        - name: ORDERS_PER_MINUTE
-          value: "90"
+        - name: ORDERS_PER_HOUR
+          value: "1"
         resources: {}
 ---
 apiVersion: apps/v1
@@ -263,5 +263,5 @@ spec:
         - name: MAKELINE_SERVICE_URL
           value: http://makeline-service:3001
         - name: ORDERS_PER_HOUR
-          value: "3000"
+          value: "1"
         resources: {}

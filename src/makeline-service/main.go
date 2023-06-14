@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.mongodb.org/mongo-driver/bson"
@@ -63,7 +64,7 @@ func fetchOrders(c *gin.Context) {
 		nil,            // arguments
 	)
 	if err != nil {
-		log.Printf("Failed to inspect queue: %s", err)
+		log.Printf("Failed to declare queue: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -175,22 +176,52 @@ func fetchOrders(c *gin.Context) {
 	// Get a handle for the orders collection
 	collection := mongoClient.Database(orderDBName).Collection(orderDBCollection)
 
-	// Convert []order to []interface{}
 	var ordersInterface []interface{}
 	for _, o := range orders {
 		ordersInterface = append(ordersInterface, interface{}(o))
 	}
 
-	// Insert orders
-	insertResult, err := collection.InsertMany(ctx, ordersInterface)
-	if err != nil {
-		log.Printf("Failed to insert order: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+	if len(ordersInterface) == 0 {
+		log.Printf("No orders to insert into database")
+	} else {
+		// Insert orders
+		insertResult, err := collection.InsertMany(ctx, ordersInterface)
+		if err != nil {
+			log.Printf("Failed to insert order: %s", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+		}
+
+		log.Printf("Inserted %v documents into database\n", len(insertResult.InsertedIDs))
 	}
 
-	log.Printf("Inserted %v documents into database\n", len(insertResult.InsertedIDs))
+	// Return all pending orders
+	orders = nil
+	cursor, err := collection.Find(ctx, bson.M{"status": Pending})
+	if err != nil {
+		log.Printf("Failed to find records: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+	}
+	defer cursor.Close(ctx)
 
-	// Return the orders
+	// Iterate over the cursor and decode each document
+	for cursor.Next(ctx) {
+		var pendingOrder order
+		if err := cursor.Decode(&pendingOrder); err != nil {
+			log.Printf("Failed to decode order: %s", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		orders = append(orders, pendingOrder)
+	}
+
+	// Check if there was an error during iteration
+	if err := cursor.Err(); err != nil {
+		log.Printf("Failed to iterate cursor: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// Return the pending orders
 	c.IndentedJSON(http.StatusOK, orders)
 }
 
@@ -289,8 +320,10 @@ func updateOrder(c *gin.Context) {
 	// Get a handle for the orders collection
 	collection := mongoClient.Database(mongoDb).Collection(mongoCollection)
 
+	log.Printf("Updating order: %v", order)
+
 	// Update the order
-	updateResult, err := collection.UpdateOne(
+	updateResult, err := collection.UpdateMany(
 		ctx,
 		bson.M{"orderid": order.OrderID},
 		bson.D{
@@ -310,7 +343,8 @@ func updateOrder(c *gin.Context) {
 
 func main() {
 	router := gin.Default()
-	router.GET("/fetch", fetchOrders)
+	router.Use(cors.Default())
+	router.GET("/order/fetch", fetchOrders)
 	router.GET("/order/:id", getOrder)
 	router.PUT("/order", updateOrder)
 	router.GET("/health", func(c *gin.Context) {

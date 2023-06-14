@@ -11,9 +11,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         env::var("MAKELINE_SERVICE_URL").unwrap_or_else(|_| "http://localhost:3001".to_string());
 
     let orders_per_hour: u64 = env::var("ORDERS_PER_HOUR")
-        .unwrap_or_else(|_| "0".to_string())
+        .unwrap_or_else(|_| "1".to_string())
         .parse()
-        .unwrap_or(0);
+        .unwrap_or(1);
 
     if orders_per_hour == 0 {
         println!("Please set the ORDERS_PER_HOUR environment variable");
@@ -45,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         // fetch the orders
         let client = reqwest::blocking::Client::new();
-        let response = client.get(format!("{}/fetch", order_service_url)).send()?;
+        let response = client.get(format!("{}/order/fetch", order_service_url)).send()?;
 
         // parse the text into json
         let json = response.text()?;
@@ -62,7 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let serialized_order = serde_json::to_string(&order)?;
             let client = reqwest::blocking::Client::new();
             let response = client
-                .put(format!("{}", order_service_url))
+                .put(format!("{}/order", order_service_url))
                 .header("Content-Type", "application/json")
                 .body(serialized_order.clone())
                 .send()?;

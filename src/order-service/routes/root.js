@@ -14,4 +14,8 @@ module.exports = async function (fastify, opts) {
     channel.sendToQueue(queue, Buffer.from(JSON.stringify(msg)))
     reply.code(201)
   })
+
+  fastify.get('/health', async function (request, reply) {
+    return { status: 'ok' }
+  })
 }
