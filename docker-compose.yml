@@ -36,11 +36,6 @@ services:
     restart: always
     ports:
       - 3000:3000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://orderservice:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     environment:
       - ORDER_QUEUE_PROTOCOL=amqp
       - ORDER_QUEUE_HOSTNAME=rabbitmq
@@ -58,11 +53,6 @@ services:
     restart: always
     ports:
       - 3001:3001
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://makelineservice:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     environment:
       - ORDER_QUEUE_CONNECTION_STRING=amqp://username:password@rabbitmq:5672/
       - ORDER_QUEUE_NAME=orders
@@ -87,45 +77,42 @@ services:
     networks:
       - backend_services
     depends_on:
-      orderservice:
-        condition: service_healthy
-  storeback:
-    build: src/store-back
-    container_name: 'storeback'
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      - ORDER_SERVICE_URL=http://makelineservice:3001/
-    networks:
-      - backend_services
-    depends_on:
-      makelineservice:
-        condition: service_healthy
+      - orderservice
   virtualcustomer:
     build: src/virtual-customer
     container_name: 'virtualcustomer'
     restart: always
     environment:
       - ORDER_SERVICE_URL=http://orderservice:3000/
-      - ORDERS_PER_HOUR=500
+      - ORDERS_PER_MINUTE=90
     networks:
       - backend_services
     depends_on:
-      orderservice:
-        condition: service_healthy
+      - orderservice
   virtualworker:
     build: src/virtual-worker
     container_name: 'virtualworker'
     restart: always
     environment:
       - MAKELINE_SERVICE_URL=http://makelineservice:3001
-      - ORDERS_PER_HOUR=400
+      - ORDERS_PER_HOUR=3600
     networks:
       - backend_services
     depends_on:
       makelineservice:
-        condition: service_healthy
+          condition: service_healthy
+  aiservice:
+    build: src/ai-service
+    container_name: 'aiservice'
+    restart: always
+    ports:
+      - 5001:5001
+    environment:
+      - AZURE_OPENAI_DEPLOYMENT_NAME=""
+      - AZURE_OPENAI_ENDPOINT=""
+      - AZURE_OPENAI_API_KEY=""
+    networks:
+      - backend_services
 networks:
   backend_services:
     driver: bridge
