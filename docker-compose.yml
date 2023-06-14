@@ -96,6 +96,7 @@ services:
     ports:
       - 8080:8080
     environment:
+      - PRODUCT_SERVICE_URL=http://productservice:3002/
       - ORDER_SERVICE_URL=http://orderservice:3000/
     networks:
       - backend_services

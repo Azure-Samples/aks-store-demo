@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{error, middleware, web, App, Error, HttpResponse, HttpServer};
 use env_logger::Env;
@@ -185,7 +186,10 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     HttpServer::new(move || {
+        let cors = Cors::default().allow_any_origin().send_wildcard();
+
         App::new()
+            .wrap(cors)
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .wrap(middleware::DefaultHeaders::new().add(("X-Version", "0.2")))
