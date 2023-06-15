@@ -1,5 +1,9 @@
 <template>
   <div class="order-detail" v-if="orderExists">
+    <div class="action-button">
+      <button @click="completeOrder" class="button">Complete Order</button>
+    </div>
+    <br/>
     <p><b>Order ID:</b> {{ order.orderId }}</p>
     <p><b>Customer ID:</b> {{ order.customerId }}</p>
     <p><b>Status:</b> {{ order.status }}</p>
@@ -19,7 +23,6 @@
         </tr>
       </table>
     </p>
-    <button @click="completeOrder" class="button">Complete Order</button>
   </div>
   <div class="order-detail" v-else>
     <h3>Opps! That order was not found...</h3>

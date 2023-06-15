@@ -88,7 +88,7 @@ async fn update_product(
     let index = products.iter().position(|p| p.id == product.id).unwrap();
     products[index] = product.clone();
 
-    Ok(HttpResponse::Ok().body(""))
+    Ok(HttpResponse::Ok().json(product))
 }
 
 async fn delete_product(
@@ -186,7 +186,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
     HttpServer::new(move || {
-        let cors = Cors::default().allow_any_origin().send_wildcard();
+        let cors = Cors::permissive();
 
         App::new()
             .wrap(cors)

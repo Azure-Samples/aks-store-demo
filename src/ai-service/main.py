@@ -6,7 +6,7 @@ import json
 
 app = FastAPI()
 app.include_router(description)
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
 @app.get("/health", summary="check if server is healthy", operation_id="health")

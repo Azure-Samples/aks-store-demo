@@ -103,14 +103,15 @@ services:
     depends_on:
       - productservice
       - orderservice
-  storeback:
-    build: src/store-back
-    container_name: 'storeback'
+  storeadmin:
+    build: src/store-admin
+    container_name: 'storeadmin'
     restart: always
     ports:
       - 8081:8081
     environment:
-      - ORDER_SERVICE_URL=http://makelineservice:3001/
+      - PRODUCT_SERVICE_URL=http://productservice:3002/
+      - MAKELINE_SERVICE_URL=http://makelineservice:3001/
     networks:
       - backend_services
     depends_on:

@@ -17,7 +17,7 @@ The application has the following services:
 | `makeline-service` | This service handles processing orders from the queue and completing them (Golang) |
 | `order-service` | This service is used for placing orders (Javascript) |
 | `store-front` | Web app for customers to place and manage orders (Javascript) |
-| `store-back` | Web app used by store employees to view orders in queue and manage products (Javascript) | 
+| `store-admin` | Web app used by store employees to view orders in queue and manage products (Javascript) | 
 | `virtual-customer` | Simulates order creation on a scheduled basis (Javascript) |
 | `virtual-worker` | Simulates order completion on a scheduled basis (Javascript) |
 | `ai-service` | Optional service for adding generative text and graphics creation |

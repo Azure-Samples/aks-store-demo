@@ -131,7 +131,6 @@ Content-Type: application/json
     "image": "https://via.placeholder.com/400x400?text=Placeholder"
 }
 
-
 ### Get product by id
 GET /11
 Host: localhost:3002

@@ -1,10 +1,16 @@
 <template>
   <div class="product-detail" v-if="productExists">
+    <div class="action-button">
+      <router-link :to="`/product/${this.$route.params.id}/edit`">
+        <button class="button">Edit Product</button>
+      </router-link>
+    </div>
+    <br/>
     <p>Product ID: {{ product.id }}</p>
     <h3>{{ product.name }}</h3>
+    <p><img :src="product.image" alt="Product Image"></p>
     <p>{{ product.description }}</p>
     <p>{{ product.price }}</p>
-    <button @click="updateProduct" class="button">Update Product</button>
   </div>
   <div class="product-detail" v-else>
     <h3>Product not found</h3>
@@ -15,7 +21,6 @@
   export default {
     name: 'ProductDetail',
     props: ['products'],
-    emits: ['updateProduct'],
     computed: {
       product() {
         return this.products.find(product => product.id == this.$route.params.id)
@@ -24,11 +29,6 @@
         return !!this.product
       }
     },
-    methods: {
-      updateProduct() {
-        this.$emit('updateProduct', this.product)
-      }
-    }
   }
 </script>
 
@@ -37,10 +37,5 @@
 a {
   color: #0000FF;
   text-decoration: underline;
-}
-
-.product-detail {
-  margin: 2rem auto;
-  text-align: left;
 }
 </style>
