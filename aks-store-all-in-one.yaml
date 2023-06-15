@@ -31,7 +31,7 @@ spec:
   - port: 27017
   selector:
     app: mongodb
-  type: LoadBalancer    
+  type: ClusterIP    
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -78,7 +78,7 @@ spec:
     - name: rabbitmq-http
       port: 15672
       targetPort: 15672
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -119,7 +119,7 @@ kind: Service
 metadata:
   name: ai-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - name: http
     port: 5001
@@ -168,7 +168,7 @@ kind: Service
 metadata:
   name: order-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - name: http
     port: 3000
@@ -215,7 +215,7 @@ kind: Service
 metadata:
   name: makeline-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - name: http
     port: 3001
@@ -247,7 +247,9 @@ spec:
           name: store-front
         env:
         - name: ORDER_SERVICE_URL
-          value: "http://order-service:3000"
+          value: "http://order-service:3000/"
+        - name: PRODUCT_SERVICE_URL
+          value: "http://product-service:3000/"          
         resources: {}
 ---
 apiVersion: v1
@@ -278,25 +280,27 @@ spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-      - name: store-front
-        image: ghcr.io/azure-samples/aks-store-demo/store-front:latest
+      - name: store-admin
+        image: ghcr.io/azure-samples/aks-store-demo/store-admin:latest
         ports:
         - containerPort: 8080
-          name: store-front
+          name: store-admin
         env:
-        - name: ORDER_SERVICE_URL
-          value: "http://order-service:3000"
+        - name: PRODUCT_SERVICE_URL
+          value: "http://productservice:3002/"
+        - name: MAKELINE_SERVICE_URL
+          value: "http://makelineservice:3001/"
         resources: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: store-front
+  name: store-admin
 spec:
   ports:
   - port: 8080
   selector:
-    app: store-front
+    app: store-admin
   type: LoadBalancer  
 ---
 apiVersion: apps/v1
@@ -322,7 +326,7 @@ spec:
         - name: ORDER_SERVICE_URL
           value: http://order-service:3000/
         - name: ORDERS_PER_HOUR
-          value: "1"
+          value: "100"
         resources: {}
 ---
 apiVersion: apps/v1
@@ -348,5 +352,5 @@ spec:
         - name: MAKELINE_SERVICE_URL
           value: http://makeline-service:3001
         - name: ORDERS_PER_HOUR
-          value: "1"
+          value: "100"
         resources: {}
