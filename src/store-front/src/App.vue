@@ -11,7 +11,6 @@
 
 <script>
 import TopNav from './components/TopNav.vue'
-import products from './products'
 
 export default {
   name: 'App',
@@ -21,7 +20,7 @@ export default {
   data() {
     return {
       cartItems: [],
-      products,
+      products: [],
     }
   },
   computed: {
@@ -31,7 +30,25 @@ export default {
       }, 0)
     }
   },
+  mounted() {
+    this.getProducts()
+  },
   methods: {
+    getProducts() {
+      // get the product-service URL from an environment variable
+      const productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002/';
+
+      // call the product-service using fetch
+      fetch(`${productServiceUrl}`)
+        .then(response => response.json())
+        .then(products => {
+          this.products = products
+        })
+        .catch(error => {
+          console.log(error)
+          alert('Error occurred while fetching products')
+        })
+    },
     addToCart({ productId, quantity }) {
       // check if the product is already in the cart
       const existingCartItem = this.cartItems.find(
@@ -42,7 +59,7 @@ export default {
         existingCartItem.quantity += quantity
       } else {
         // if not, find the product, and add it with quantity to the cart
-        const product = products.find(product => product.id == productId)
+        const product = this.products.find(product => product.id == productId)
         this.cartItems.push({ product, quantity })
       }
     },
@@ -52,7 +69,7 @@ export default {
     submitOrder() {
       // get the order-service URL from an environment variable
       const orderServiceUrl = process.env.ORDER_SERVICE_URL || 'http://localhost:3000/';
- 
+
       // create an order object
       const order = {
         customerId: Math.floor(Math.random() * 10000000000).toString(),
@@ -89,7 +106,7 @@ export default {
           alert('Error occurred while submitting order')
         })
     }
-  }
+  },
 }
 </script>
 

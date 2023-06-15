@@ -1,4 +1,9 @@
 <template>
+  <div class="action-button">
+    <router-link to="/product/add">
+      <button class="button">Add Product</button>
+    </router-link>
+  </div>
   <div class="product-list">
     <table>
       <thead>
@@ -21,6 +26,9 @@
   export default {
     name: 'ProductList',
     props: ['products'],
+    mounted() {
+      this.$emit('getProducts')
+    }
   }
 </script>
 

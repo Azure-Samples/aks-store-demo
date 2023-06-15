@@ -1,4 +1,4 @@
-# store-back
+# store-admin
 
 ## Setup environment variables
 

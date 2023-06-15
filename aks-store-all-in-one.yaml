@@ -260,16 +260,16 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: store-back
+  name: store-admin
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: store-back
+      app: store-admin
   template:
     metadata:
       labels:
-        app: store-back
+        app: store-admin
     spec:
       nodeSelector:
         "kubernetes.io/os": linux

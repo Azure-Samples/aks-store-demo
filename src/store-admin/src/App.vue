@@ -5,13 +5,15 @@
     :products="products"
     @fetchOrders="fetchOrders"
     @completeOrder="completeOrder"
-    @updateProduct="updateProduct"
+    @addProductsToList="addProductsToList"
+    @updateProductInList="updateProductInList"
+    @getProduct="getProduct"
+    @getProducts="getProducts"
   ></router-view>
 </template>
 
 <script>
 import TopNav from './components/TopNav.vue';
-import products from './products'
 
 export default {
   name: 'App',
@@ -21,10 +23,55 @@ export default {
   data() {
     return {
       orders: [],
-      products,
+      products: [],
+      product: {}
     }
   },
+  mounted() {
+    this.getProducts();
+  },
   methods: {
+    async addProductsToList(newProduct) {
+      this.products.push(newProduct);
+    },
+    async updateProductInList(updatedProduct) {
+      const index = this.products.findIndex(product => product.id === updatedProduct.id);
+      this.products[index] = updatedProduct;
+    },
+    async getProduct(id) {
+      // get the product-service URL from an environment variable
+      const productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002/';
+
+      // call the product-service using fetch
+      fetch(`${productServiceUrl}${id}`)
+        .then(response => response.json())
+        .then(product => {
+          this.product.id = product.id
+          this.product.name = product.name
+          this.product.image = product.image
+          this.product.description = product.description
+          this.product.price = product.price
+        })
+        .catch(error => {
+          console.log(error)
+          alert('Error occurred while fetching product')
+        })
+    },
+    async getProducts() {
+      // get the product-service URL from an environment variable
+      const productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002/';
+
+      // call the product-service using fetch
+      fetch(`${productServiceUrl}`)
+        .then(response => response.json())
+        .then(products => {
+          this.products = products
+        })
+        .catch(error => {
+          console.log(error)
+          alert('Error occurred while fetching products')
+        })
+    },
     async fetchOrders() {
       const makelineServiceUrl = process.env.MAKELINE_SERVICE_URL || 'http://localhost:3001/';
 
@@ -79,10 +126,6 @@ export default {
           console.log(error)
           alert('Error occurred while processing order')
         })
-    },
-    async updateProduct(product) {
-      console.log(product);
-      alert('Not wired up yet');
     }
   },
 }
@@ -161,8 +204,9 @@ td {
 }
 
 .button {
-  margin-top: 20px;
-  padding: 10px 20px;
+  padding: 10px 10px;
+  border-radius: 5px;
+  border: none;
   background-color: #007acc;
   color: #fff;
   border: none;
@@ -172,5 +216,66 @@ td {
 
 .button:hover {
   background-color: #005f8b;
+}
+
+.action-button {
+  float: right;
+}
+
+.product-detail {
+  margin: 2rem auto;
+  text-align: left;
+}
+
+.product-form {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: center;
+  margin: 2rem auto;
+  width: 50%;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.ai-button {
+  margin-left: 10px;
+  padding: 10px 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: #007acc;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ai-button:hover {
+  background-color: #005f8b;
+}
+
+textarea {
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+label {
+  text-align: right;
+  margin-right: 10px;
+  width: 100px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 </style>

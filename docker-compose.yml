@@ -76,6 +76,19 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
+  productservice:
+    build: src/product-service
+    container_name: 'productservice'
+    restart: always
+    ports:
+      - 3002:3002
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://productservice:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - backend_services
   storefront:
     build: src/store-front
     container_name: 'storefront'
@@ -83,25 +96,27 @@ services:
     ports:
       - 8080:8080
     environment:
+      - PRODUCT_SERVICE_URL=http://productservice:3002/
       - ORDER_SERVICE_URL=http://orderservice:3000/
     networks:
       - backend_services
     depends_on:
-      orderservice:
-        condition: service_healthy
-  storeback:
-    build: src/store-back
-    container_name: 'storeback'
+      - productservice
+      - orderservice
+  storeadmin:
+    build: src/store-admin
+    container_name: 'storeadmin'
     restart: always
     ports:
       - 8081:8081
     environment:
-      - ORDER_SERVICE_URL=http://makelineservice:3001/
+      - PRODUCT_SERVICE_URL=http://productservice:3002/
+      - MAKELINE_SERVICE_URL=http://makelineservice:3001/
     networks:
       - backend_services
     depends_on:
-      makelineservice:
-        condition: service_healthy
+      - productservice
+      - makelineservice
   virtualcustomer:
     build: src/virtual-customer
     container_name: 'virtualcustomer'
