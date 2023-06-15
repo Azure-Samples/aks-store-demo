@@ -1,4 +1,4 @@
-name: package-order-service
+name: package-store-front
 
 on:
   workflow_dispatch:
@@ -18,8 +18,8 @@ jobs:
         run: |
           echo ::set-output name=version::$(echo ${GITHUB_SHA} | cut -c1-7)
           echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          echo ::set-output name=project::order-service
-          echo ::set-output name=image::order-service
+          echo ::set-output name=project::store-front
+          echo ::set-output name=image::store-front
           echo ::set-output name=repository::ghcr.io/azure-samples/aks-store-demo
 
   package-service:
@@ -40,8 +40,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: src/order-service
-          file: src/order-service/Dockerfile
+          context: src/store-front
+          file: src/store-front/Dockerfile
           push: true
           tags: |
             ${{ needs.set-env.outputs.repository }}/${{ needs.set-env.outputs.image }}:latest
