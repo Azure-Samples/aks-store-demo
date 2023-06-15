@@ -37,7 +37,7 @@ services:
     ports:
       - 3000:3000
     healthcheck:
-      test: ["CMD", "wget", "-q", "http://orderservice:3000/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://orderservice:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -59,7 +59,7 @@ services:
     ports:
       - 3001:3001
     healthcheck:
-      test: ["CMD", "wget", "-q", "http://makelineservice:3001/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://makelineservice:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -83,7 +83,7 @@ services:
     ports:
       - 3002:3002
     healthcheck:
-      test: ["CMD", "wget", "-q", "http://productservice:3002/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://productservice:3002/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -95,6 +95,11 @@ services:
     restart: always
     ports:
       - 8080:80
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://storefront:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     environment:
       - PRODUCT_SERVICE_URL=http://productservice:3002/
       - ORDER_SERVICE_URL=http://orderservice:3000/
@@ -109,9 +114,15 @@ services:
     restart: always
     ports:
       - 8081:80
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://storeadmin:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     environment:
       - PRODUCT_SERVICE_URL=http://productservice:3002/
       - MAKELINE_SERVICE_URL=http://makelineservice:3001/
+      - AI_SERVICE_URL=http://aiservice:5001/
     networks:
       - backend_services
     depends_on:
@@ -148,7 +159,7 @@ services:
     ports:
       - 5001:5001
     healthcheck:
-      test: ["CMD", "wget", "-q", "http://aiservice:5001/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://aiservice:5001/health"]
       interval: 30s
       timeout: 10s
       retries: 5

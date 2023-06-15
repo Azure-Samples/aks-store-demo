@@ -27,6 +27,9 @@ RUN cargo build --release
 FROM debian:bullseye-slim as runner
 WORKDIR /app
 
+# Not ideal but needed to execute health checks in docker-compose
+RUN apt-get update && apt-get install -y wget
+
 # Copy the binary from the builder stage
 COPY --from=builder /product-service/target/release/product-service /app
 
