@@ -102,11 +102,15 @@ spec:
         ports:
         - containerPort: 5001
         env:
+        - name: USE_AZURE_OPENAI
+          value: ""
         - name: AZURE_OPENAI_DEPLOYMENT_NAME
           value: ""
-        - name: AZURE_OPENAI_API_KEY
-          value: ""
         - name: AZURE_OPENAI_ENDPOINT
+          value: ""
+        - name: OPENAI_API_KEY
+          value: ""
+        - name: OPENAI_ORG_ID
           value: ""
         resources: {}
 ---

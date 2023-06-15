@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, status
 from fastapi.responses import Response, JSONResponse
 import semantic_kernel as sk
-from semantic_kernel.connectors.ai.open_ai import AzureTextCompletion
+from semantic_kernel.connectors.ai.open_ai import AzureTextCompletion, OpenAITextCompletion
 from dotenv import load_dotenv
 from typing import Any, List, Dict
 import os
@@ -13,13 +13,22 @@ load_dotenv()
 # Initialize the semantic kernel
 kernel: sk.Kernel = sk.Kernel()
 
-# Get the Azure OpenAI deployment name, API key, and endpoint from environment variables
-deployment: str = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NAME")
-api_key: str = os.environ.get("AZURE_OPENAI_API_KEY")
-endpoint: str = os.environ.get("AZURE_OPENAI_ENDPOINT")
+kernel = sk.Kernel()
 
-# Add the Azure OpenAI text completion service to the kernel
-kernel.add_text_completion_service("dv", AzureTextCompletion(deployment, endpoint, api_key))
+# Get the Azure OpenAI deployment name, API key, and endpoint or OpenAI org id from environment variables
+useAzureOpenAI: str = os.environ.get("USE_AZURE_OPENAI")
+api_key: str = os.environ.get("OPENAI_API_KEY")
+
+if useAzureOpenAI.lower() == "false":
+    org_id = os.environ.get("OPENAI_ORG_ID")
+    # Add the OpenAI text completion service to the kernel
+    kernel.add_text_completion_service("dv", OpenAITextCompletion("text-davinci-003", api_key, org_id))
+
+else:
+    deployment: str = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NAME")
+    endpoint: str = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    # Add the Azure OpenAI text completion service to the kernel
+    kernel.add_text_completion_service("dv", AzureTextCompletion(deployment, endpoint, api_key))
 
 # Import semantic skills from the "skills" directory
 skills_directory: str = "skills"
