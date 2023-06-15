@@ -179,6 +179,42 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: product-service
+        image: ghcr.io/azure-samples/aks-store-demo/product-service:latest
+        ports:
+        - containerPort: 3002
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 3002
+    targetPort: 3002
+  selector:
+    app: product-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: store-front
 spec:
   replicas: 1
@@ -202,7 +238,7 @@ spec:
         - name: ORDER_SERVICE_URL
           value: "http://order-service:3000/"
         - name: PRODUCT_SERVICE_URL
-          value: "http://product-service:3000/"          
+          value: "http://product-service:3002/"
         resources: {}
 ---
 apiVersion: v1
