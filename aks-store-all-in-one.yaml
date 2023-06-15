@@ -272,7 +272,7 @@ spec:
       - name: store-admin
         image: ghcr.io/azure-samples/aks-store-demo/store-admin:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
           name: store-admin
         env:
         - name: PRODUCT_SERVICE_URL
@@ -287,7 +287,7 @@ metadata:
   name: store-admin
 spec:
   ports:
-  - port: 8080
+  - port: 8081
   selector:
     app: store-admin
   type: LoadBalancer  
