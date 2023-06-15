@@ -19,7 +19,7 @@ kernel = sk.Kernel()
 useAzureOpenAI: str = os.environ.get("USE_AZURE_OPENAI")
 api_key: str = os.environ.get("OPENAI_API_KEY")
 
-if useAzureOpenAI == "False":
+if useAzureOpenAI.lower() == "false":
     org_id = os.environ.get("OPENAI_ORG_ID")
     # Add the OpenAI text completion service to the kernel
     kernel.add_text_completion_service("dv", OpenAITextCompletion("text-davinci-003", api_key, org_id))
