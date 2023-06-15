@@ -37,7 +37,7 @@ services:
     ports:
       - 3000:3000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://orderservice:3000/health"]
+      test: ["CMD", "wget", "-q", "http://orderservice:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -59,7 +59,7 @@ services:
     ports:
       - 3001:3001
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://makelineservice:3001/health"]
+      test: ["CMD", "wget", "-q", "http://makelineservice:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -83,7 +83,7 @@ services:
     ports:
       - 3002:3002
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://productservice:3002/health"]
+      test: ["CMD", "wget", "-q", "http://productservice:3002/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -94,7 +94,7 @@ services:
     container_name: 'storefront'
     restart: always
     ports:
-      - 8080:8080
+      - 8080:80
     environment:
       - PRODUCT_SERVICE_URL=http://productservice:3002/
       - ORDER_SERVICE_URL=http://orderservice:3000/
@@ -108,7 +108,7 @@ services:
     container_name: 'storeadmin'
     restart: always
     ports:
-      - 8081:8081
+      - 8081:80
     environment:
       - PRODUCT_SERVICE_URL=http://productservice:3002/
       - MAKELINE_SERVICE_URL=http://makelineservice:3001/
@@ -148,7 +148,7 @@ services:
     ports:
       - 5001:5001
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://aiservice:5001/health"]
+      test: ["CMD", "wget", "-q", "http://aiservice:5001/health"]
       interval: 30s
       timeout: 10s
       retries: 5

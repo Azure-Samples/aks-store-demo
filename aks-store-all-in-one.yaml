@@ -196,7 +196,7 @@ spec:
       - name: store-front
         image: ghcr.io/azure-samples/aks-store-demo/store-front:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 80
           name: store-front
         env:
         - name: ORDER_SERVICE_URL
@@ -211,7 +211,7 @@ metadata:
   name: store-front
 spec:
   ports:
-  - port: 8080
+  - port: 80
   selector:
     app: store-front
   type: LoadBalancer
@@ -236,7 +236,7 @@ spec:
       - name: store-admin
         image: ghcr.io/azure-samples/aks-store-demo/store-admin:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 80
           name: store-admin
         env:
         - name: PRODUCT_SERVICE_URL
@@ -251,7 +251,7 @@ metadata:
   name: store-admin
 spec:
   ports:
-  - port: 8080
+  - port: 80
   selector:
     app: store-admin
   type: LoadBalancer  

@@ -24,7 +24,7 @@ RUN rm ./target/release/deps/virtual_worker*
 RUN cargo build --release
 
 # Create a new stage and copy the binary from the builder stage
-FROM rust:1.70-slim-buster
+FROM debian:bullseye-slim as runner
 WORKDIR /app
 
 # Copy the binary from the builder stage

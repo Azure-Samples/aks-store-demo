@@ -1,5 +1,6 @@
 # Use an official Node.js runtime as a parent image
-FROM node:18
+FROM node:18.16.0-alpine as builder
+WORKDIR /app
 
 # Copy package.json and package-lock.json to the container
 COPY package*.json ./
@@ -13,8 +14,12 @@ COPY . .
 # Build the app
 RUN npm run build
 
-# Expose the port the app listens on
-EXPOSE 8080
+# Run the app on nginx
+FROM nginx:stable-alpine as runner
+WORKDIR /app
 
-# Start the app
-CMD [ "npm", "run", "serve" ]
+# Copy the build output to replace the default nginx contents
+COPY --from=builder /app/dist /app
+
+# Copy the nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
