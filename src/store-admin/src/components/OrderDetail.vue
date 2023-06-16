@@ -56,7 +56,7 @@
         if (!this.order) {          
           // return this.orders.find(order => order.orderId === this.$route.params.id);
           // get the order from the makeline service
-          const makelineServiceUrl = process.env.MAKELINE_SERVICE_URL || 'http://localhost:3001/';
+          const makelineServiceUrl = process.env.VUE_APP_MAKELINE_SERVICE_URL;
 
           fetch(`${makelineServiceUrl}order/${this.$route.params.id}`)
             .then(response => {

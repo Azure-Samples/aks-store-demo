@@ -11,15 +11,21 @@ RUN npm install
 # Copy the rest of the app source code to the container
 COPY . .
 
-# Build the app
-RUN npm run build
+# Expose the port the app listens on
+EXPOSE 80
 
-# Run the app on nginx
-FROM nginx:stable-alpine as runner
-WORKDIR /app
+# Start the app
+CMD [ "npm", "run", "serve" ]
 
-# Copy the build output to replace the default nginx contents
-COPY --from=builder /app/dist /app
+# # Build the app
+# RUN npm run build --mode production
 
-# Copy the nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# # Run the app on nginx
+# FROM nginx:stable-alpine as runner
+# WORKDIR /app
+
+# # Copy the build output to replace the default nginx contents
+# COPY --from=builder /app/dist /app
+
+# # Copy the nginx configuration
+# COPY nginx.conf /etc/nginx/nginx.conf

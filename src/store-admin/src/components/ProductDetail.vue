@@ -7,10 +7,9 @@
     </div>
     <br/>
     <p>Product ID: {{ product.id }}</p>
-    <h3>{{ product.name }}</h3>
+    <h3>{{ product.name }} - {{ product.price }}</h3>
     <p><img :src="product.image" alt="Product Image"></p>
     <p>{{ product.description }}</p>
-    <p>{{ product.price }}</p>
   </div>
   <div class="product-detail" v-else>
     <h3>Product not found</h3>

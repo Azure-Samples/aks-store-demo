@@ -65,6 +65,23 @@
         // disable the product id textbox
         document.getElementById('product-id').disabled = true;
       }
+
+      // if the AI service is not responding, hide the button
+      const aiServiceUrl = process.env.VUE_APP_AI_SERVICE_URL;
+      fetch(`${aiServiceUrl}health`)
+        .then(response => {
+          if (response.ok) {
+            console.log('AI service is healthy');
+          } else {
+            console.log('AI service is not healthy');
+            document.getElementsByClassName('ai-button')[0].style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.log('Error calling the AI service');
+          console.log(error)
+          document.getElementsByClassName('ai-button')[0].style.display = 'none';
+        })
     },
     methods: {
       generateDescription() {
@@ -77,7 +94,7 @@
         const intervalId = this.waitForAI();
 
         // get the ai-service URL from an environment variable
-        const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:5001/';
+        const aiServiceUrl = process.env.VUE_APP_AI_SERVICE_URL;
 
         let requestBody = {
           name: this.product.name,
@@ -117,7 +134,7 @@
       },
       saveProduct() {
         // get the product-service URL from an environment variable
-        const productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002/';
+        const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
 
         // default to updates
         let method = 'PUT';

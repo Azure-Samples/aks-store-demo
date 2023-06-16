@@ -3,7 +3,7 @@
 ## Setup environment variables
 
 ```
-export MAKELINE_SERVICE_URL=http://localhost:3001/
+export VUE_APP_MAKELINE_SERVICE_URL=http://localhost:3001/
 ```
 
 ## Project setup
