@@ -3,6 +3,12 @@
     <button @click="saveProduct" class="button">Save Product</button>
   </div>
   <br/>
+  <div v-if="showValidationErrors" class="error">
+    <br/>
+    <ul v-for="error in validationErrors" :key="error">
+      <li>{{ error }}</li>
+    </ul>
+  </div>
   <div class="product-form">
     <div class="form-row">
       <label for="product-id">ID</label>
@@ -16,7 +22,7 @@
 
     <div class="form-row">
       <label for="product-price">Price</label>
-      <input id="product-price" placeholder="Product Price" v-model="product.price" />
+      <input id="product-price" placeholder="Product Price" v-model="product.price" type="number" step="0.01" />
     </div>
 
     <div class="form-row">
@@ -51,7 +57,8 @@
           description: '',
           price: 0.00,
           tags: []
-        }
+        },
+        showValidationErrors: false
       }
     },
     mounted() {
@@ -82,6 +89,24 @@
           console.log(error)
           document.getElementsByClassName('ai-button')[0].style.display = 'none';
         })
+    },
+    computed: {
+      validationErrors() {
+        let errors = [];
+        if (this.product.name.length === 0) {
+          errors.push('Please enter a value for the name field');
+        }
+
+        if (this.product.description.length === 0) {
+          errors.push('Please enter a value for the description field');
+        }
+
+        if (this.product.price <= 0) {
+          errors.push('Please enter a value greater than 0 for the price field');
+        }
+
+        return errors;
+      }
     },
     methods: {
       generateDescription() {
@@ -133,6 +158,11 @@
         return intervalId;
       },
       saveProduct() {
+        if (this.validationErrors.length > 0) {
+          this.showValidationErrors = true;
+          return;
+        }
+
         // get the product-service URL from an environment variable
         const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
 
@@ -176,3 +206,14 @@
     }
   }
 </script>
+
+<style scoped>
+ul {
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  color: #ff0000;
+}
+</style>
