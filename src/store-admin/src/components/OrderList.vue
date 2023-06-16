@@ -6,12 +6,14 @@
           <th>Order ID</th>
           <th>Customer ID</th>
           <th>Status</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tr v-for="order in orders" :key="order.orderId">
         <td><router-link :to="`/order/${order.orderId}`">{{ order.orderId }}</router-link></td>
         <td>{{ order.customerId }}</td>
         <td>{{ order.status }}</td>
+        <td>{{ orderTotal(order) }}</td>
       </tr>
     </table>
   </div>
@@ -28,11 +30,18 @@
     computed: {
       hasOrders() {
         return this.orders.length > 0
-      },
+      }
     },
     methods: {
       fetchOrders() {
         this.$emit('fetchOrders')
+      },
+      orderTotal(order) {
+        let total = 0;
+        order.items.forEach(item => {
+          total += item.price * item.quantity;
+        });
+        return total.toFixed(2);
       }
     },
     beforeMount() {
@@ -42,7 +51,6 @@
 </script>
 
 <style scoped>
-/* a tag styles */
 a {
   color: #0000FF;
   text-decoration: underline;

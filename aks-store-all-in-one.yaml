@@ -235,7 +235,7 @@ spec:
         - containerPort: 8080
           name: store-front
         env:
-        - name: ORDER_SERVICE_URL
+        - name: VUE_APP_ORDER_SERVICE_URL
           value: "http://order-service:3000/"
         - name: PRODUCT_SERVICE_URL
           value: "http://product-service:3002/"
@@ -275,10 +275,10 @@ spec:
         - containerPort: 8081
           name: store-admin
         env:
-        - name: PRODUCT_SERVICE_URL
-          value: "http://productservice:3002/"
-        - name: MAKELINE_SERVICE_URL
-          value: "http://makelineservice:3001/"
+        - name: VUE_APP_PRODUCT_SERVICE_URL
+          value: "http://product-service:3002/"
+        - name: VUE_APP_MAKELINE_SERVICE_URL
+          value: "http://makeline-service:3001/"
         resources: {}
 ---
 apiVersion: v1

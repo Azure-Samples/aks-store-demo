@@ -24,8 +24,11 @@ RUN rm ./target/release/deps/product_service*
 RUN cargo build --release
 
 # Create a new stage and copy the binary from the builder stage
-FROM rust:1.70-slim-buster
+FROM debian:bullseye-slim as runner
 WORKDIR /app
+
+# Not ideal but needed to execute health checks in docker-compose
+RUN apt-get update && apt-get install -y wget
 
 # Copy the binary from the builder stage
 COPY --from=builder /product-service/target/release/product-service /app

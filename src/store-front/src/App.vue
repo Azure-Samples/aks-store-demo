@@ -36,7 +36,7 @@ export default {
   methods: {
     getProducts() {
       // get the product-service URL from an environment variable
-      const productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002/';
+      const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
 
       // call the product-service using fetch
       fetch(`${productServiceUrl}`)
@@ -68,7 +68,7 @@ export default {
     },
     submitOrder() {
       // get the order-service URL from an environment variable
-      const orderServiceUrl = process.env.ORDER_SERVICE_URL || 'http://localhost:3000/';
+      const orderServiceUrl = process.env.VUE_APP_ORDER_SERVICE_URL;
 
       // create an order object
       const order = {

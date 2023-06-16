@@ -40,7 +40,7 @@ export default {
     },
     async getProduct(id) {
       // get the product-service URL from an environment variable
-      const productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002/';
+      const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
 
       // call the product-service using fetch
       fetch(`${productServiceUrl}${id}`)
@@ -59,7 +59,7 @@ export default {
     },
     async getProducts() {
       // get the product-service URL from an environment variable
-      const productServiceUrl = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002/';
+      const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
 
       // call the product-service using fetch
       fetch(`${productServiceUrl}`)
@@ -73,7 +73,7 @@ export default {
         })
     },
     async fetchOrders() {
-      const makelineServiceUrl = process.env.MAKELINE_SERVICE_URL || 'http://localhost:3001/';
+      const makelineServiceUrl = process.env.VUE_APP_MAKELINE_SERVICE_URL;
 
       await fetch(`${makelineServiceUrl}order/fetch`)
         .then(response => {
@@ -96,7 +96,7 @@ export default {
         .catch(error => console.error(error));
     },
     async completeOrder(orderId) {
-      const makelineServiceUrl = process.env.MAKELINE_SERVICE_URL || 'http://localhost:3001/';
+      const makelineServiceUrl = process.env.VUE_APP_MAKELINE_SERVICE_URL;
       
       // get the order and update the status
       let order = this.orders.find(order => order.orderId === orderId);
