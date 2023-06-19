@@ -7,7 +7,6 @@ on:
     paths:
       - 'makeline-service/**'
 
-on:
   workflow_dispatch:
 
 jobs:

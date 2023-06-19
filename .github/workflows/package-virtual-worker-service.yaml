@@ -7,7 +7,6 @@ on:
     paths:
       - 'virtual-worker/**'
 
-on:
   workflow_dispatch:
 
 jobs:

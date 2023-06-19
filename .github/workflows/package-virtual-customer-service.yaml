@@ -7,7 +7,6 @@ on:
     paths:
       - 'virtual-customer/**'
 
-on:
   workflow_dispatch:
 
 jobs:

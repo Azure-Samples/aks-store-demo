@@ -7,7 +7,6 @@ on:
     paths:
       - 'store-front/**'
 
-on:
   workflow_dispatch:
 
 jobs:
