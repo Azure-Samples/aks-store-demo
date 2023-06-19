@@ -22,15 +22,16 @@ jobs:
     steps:
       - id: main
         run: |
-          echo "version={$(echo ${GITHUB_SHA} | cut -c1-7)}" >> $GITHUB_STATE
-          echo "{created}={$(date -u +'%Y-%m-%dT%H:%M:%SZ')}" >> $GITHUB_STATE
-          echo "project=ai-service" >> $GITHUB_STATE
-          echo "{image}={ai-service}" >> $GITHUB_STATE
-          echo "{repository}={ghcr.io/azure-samples/aks-store-demo}" >> $GITHUB_STATE
-          echo "${{ env.version }}"
-          echo "${{ env.project }}"
-          echo "action_state=yellow" >> "$GITHUB_ENV"
-          echo "${{ env.action_state }}" 
+          echo ::set-output name=version::$(echo ${GITHUB_SHA} | cut -c1-7)
+          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=project::ai-service
+          echo ::set-output name=image::ai-service
+          echo ::set-output name=repository::ghcr.io/azure-samples/aks-store-demo        
+          #echo "version=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_STATE
+          #echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_STATE
+          #echo "project=ai-service" >> $GITHUB_STATE
+          #echo "image=ai-service" >> $GITHUB_STATE
+          #echo "repository=ghcr.io/azure-samples/aks-store-demo" >> $GITHUB_STATE
 
   package-service:
     name: Package Service
