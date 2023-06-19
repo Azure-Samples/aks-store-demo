@@ -35,13 +35,10 @@ export default {
   },
   methods: {
     getProducts() {
-      // get the product-service URL from an environment variable
-      const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
-
-      // call the product-service using fetch
-      fetch(`${productServiceUrl}`)
+      fetch('/products')
         .then(response => response.json())
         .then(products => {
+          console.log('success getting proxy products')
           this.products = products
         })
         .catch(error => {
@@ -68,7 +65,7 @@ export default {
     },
     submitOrder() {
       // get the order-service URL from an environment variable
-      const orderServiceUrl = process.env.VUE_APP_ORDER_SERVICE_URL;
+      // const orderServiceUrl = process.env.VUE_APP_ORDER_SERVICE_URL;
 
       // create an order object
       const order = {
@@ -85,7 +82,7 @@ export default {
       console.log(JSON.stringify(order));
 
       // call the order-service using fetch
-      fetch(`${orderServiceUrl}`, {
+      fetch(`/order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -101,8 +101,8 @@ services:
       timeout: 10s
       retries: 5
     environment:
-      - VUE_APP_PRODUCT_SERVICE_URL=http://localhost:3002/
-      - VUE_APP_ORDER_SERVICE_URL=http://localhost:3000/
+      - VUE_APP_PRODUCT_SERVICE_URL=http://productservice:3002/
+      - VUE_APP_ORDER_SERVICE_URL=http://orderservice:3000/
     networks:
       - backend_services
     depends_on:
