@@ -1,6 +1,13 @@
 name: package-order-service
 
 on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'order-service/**'
+
+on:
   workflow_dispatch:
 
 jobs:

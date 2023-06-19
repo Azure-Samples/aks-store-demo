@@ -1,6 +1,13 @@
 name: package-store-admin
 
 on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'store-admin/**'
+
+on:
   workflow_dispatch:
 
 jobs:
