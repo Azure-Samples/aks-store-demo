@@ -1,6 +1,12 @@
 name: package-ai-service
 
 on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'ai-service/**'
+
   workflow_dispatch:
 
 jobs:
@@ -21,6 +27,7 @@ jobs:
           echo ::set-output name=project::ai-service
           echo ::set-output name=image::ai-service
           echo ::set-output name=repository::ghcr.io/azure-samples/aks-store-demo
+          echo "{project}={ai-service}" >> $GITHUB_STATE
 
   package-service:
     name: Package Service

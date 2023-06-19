@@ -115,6 +115,10 @@ spec:
         - name: FASTIFY_ADDRESS
           value: "0.0.0.0"
         resources: {}
+      initContainers:
+      - name: wait-for-rabbitmq
+        image: busybox
+        command: ['sh', '-c', 'until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;']        
 ---
 apiVersion: v1
 kind: Service
@@ -234,10 +238,10 @@ spec:
         ports:
         - containerPort: 8080
           name: store-front
-        env:
+        env:aks-store-all-in-one.yaml
         - name: VUE_APP_ORDER_SERVICE_URL
           value: "http://order-service:3000/"
-        - name: PRODUCT_SERVICE_URL
+        - name: VUE_APP_PRODUCT_SERVICE_URL
           value: "http://product-service:3002/"
         resources: {}
 ---

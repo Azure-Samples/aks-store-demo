@@ -1,6 +1,12 @@
 name: package-virtual-worker
 
 on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'virtual-worker/**'
+
   workflow_dispatch:
 
 jobs:

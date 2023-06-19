@@ -1,6 +1,12 @@
 name: package-store-front
 
 on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'store-front/**'
+
   workflow_dispatch:
 
 jobs:

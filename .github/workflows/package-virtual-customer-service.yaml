@@ -1,6 +1,12 @@
 name: package-virtual-customer
 
 on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'virtual-customer/**'
+
   workflow_dispatch:
 
 jobs:
