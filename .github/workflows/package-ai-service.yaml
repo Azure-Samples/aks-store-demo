@@ -22,13 +22,15 @@ jobs:
     steps:
       - id: main
         run: |
-          echo "{version}={$(echo ${GITHUB_SHA} | cut -c1-7)}" >> $GITHUB_STATE
+          echo "version={$(echo ${GITHUB_SHA} | cut -c1-7)}" >> $GITHUB_STATE
           echo "{created}={$(date -u +'%Y-%m-%dT%H:%M:%SZ')}" >> $GITHUB_STATE
-          echo "{project}={ai-service}" >> $GITHUB_STATE
+          echo "project=ai-service" >> $GITHUB_STATE
           echo "{image}={ai-service}" >> $GITHUB_STATE
           echo "{repository}={ghcr.io/azure-samples/aks-store-demo}" >> $GITHUB_STATE
           echo "${{ env.version }}"
-          echo "${{ env.repository }}"
+          echo "${{ env.project }}"
+          echo "action_state=yellow" >> "$GITHUB_ENV"
+          echo "${{ env.action_state }}" 
 
   package-service:
     name: Package Service
