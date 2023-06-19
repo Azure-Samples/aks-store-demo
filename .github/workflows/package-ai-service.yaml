@@ -27,6 +27,8 @@ jobs:
           echo "{project}={ai-service}" >> $GITHUB_STATE
           echo "{image}={ai-service}" >> $GITHUB_STATE
           echo "{repository}={ghcr.io/azure-samples/aks-store-demo}" >> $GITHUB_STATE
+          echo "${{ env.version }}"
+          echo "${{ env.repository }}"
 
   package-service:
     name: Package Service
