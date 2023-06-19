@@ -18,7 +18,14 @@ module.exports = async function (fastify, opts) {
     hostname: ORDER_QUEUE_HOSTNAME,
     port: ORDER_QUEUE_PORT,
     username: ORDER_QUEUE_USERNAME,
-    password: ORDER_QUEUE_PASSWORD
+    password: ORDER_QUEUE_PASSWORD,
+    retry: {
+      retries: 10,
+      interval: 2000,
+      factor: 2,
+      minTimeout: 1000,
+      maxTimeout: 5000
+    }
   })
 
   fastify.register(require('@fastify/cors'), {

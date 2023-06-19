@@ -10,12 +10,14 @@
         <tr>
           <th>Product ID</th>
           <th>Product Name</th>
+          <th>Product Description</th>
           <th>Price</th>
         </tr>
       </thead>
       <tr v-for="product in products" :key="product.productId">
         <td><router-link :to="`/product/${product.id}`">{{ product.id }}</router-link></td>
         <td>{{ product.name }}</td>
+        <td>{{ product.description }}</td>
         <td>{{ product.price }}</td>
       </tr>
     </table>
@@ -33,7 +35,6 @@
 </script>
 
 <style scoped>
-/* a tag styles */
 a {
   color: #0000FF;
   text-decoration: underline;
