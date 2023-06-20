@@ -45,9 +45,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Testing variables
-        id: test-variables   
-        run: echo ${{ steps.main.outputs.PROJECT }}
-        run: echo "${{ env.action_state }}"
+        id: test-variables
+        run: |
+          echo ${{ steps.main.outputs.PROJECT }}
+          echo "${{ env.action_state }}"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to GitHub Container Registry
