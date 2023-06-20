@@ -3,6 +3,8 @@
 #### Deploy AKS (Azure CLI)
 
 ```bash
+
+
 RG='aks-quickstart'
 LOCATION='eastus'
 AKS_CLUSTER='briar-aks'
