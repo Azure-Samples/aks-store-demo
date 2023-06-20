@@ -28,7 +28,7 @@ jobs:
           echo ::set-output name=image::ai-service
           echo ::set-output name=repository::ghcr.io/azure-samples/aks-store-demo   
           echo "project=ai-service" >> $GITHUB_OUTPUT
-          echo "The project is: ${{ steps.stepid.outputs.project }}"
+          echo "The project is: ${{ steps.main.outputs.project }}"
           #echo "version=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_STATE
           #echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_STATE
           #echo "project=ai-service" >> $GITHUB_STATE
