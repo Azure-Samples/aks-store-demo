@@ -4,11 +4,6 @@
 
 ```bash
 
-          #echo "version=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_STATE
-          #echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_STATE
-          #echo "project=ai-service" >> $GITHUB_STATE
-          #echo "image=ai-service" >> $GITHUB_STATE
-          #echo "repository=ghcr.io/azure-samples/aks-store-demo" >> $GITHUB_STATE
 
 RG='aks-quickstart'
 LOCATION='eastus'
