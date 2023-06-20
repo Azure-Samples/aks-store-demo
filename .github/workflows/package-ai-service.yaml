@@ -28,7 +28,7 @@ jobs:
           echo ::set-output name=image::ai-service
           echo ::set-output name=repository::ghcr.io/azure-samples/aks-store-demo   
           echo "PROJECT=ai-service" >> $GITHUB_OUTPUT
-          echo "The project is ${{ steps.main.outputs.PROJECT }}" 
+          echo ${{ steps.main.outputs.PROJECT }}
           #echo "version=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_STATE
           #echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_STATE
           #echo "project=ai-service" >> $GITHUB_STATE
@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Testing variables
         id: test-variables   
-        run: echo "The project is ${{ steps.main.outputs.PROJECT }}" 
+        run: echo ${{ steps.main.outputs.PROJECT }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to GitHub Container Registry
