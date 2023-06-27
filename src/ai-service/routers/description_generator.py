@@ -19,14 +19,24 @@ kernel = sk.Kernel()
 useAzureOpenAI: str = os.environ.get("USE_AZURE_OPENAI")
 api_key: str = os.environ.get("OPENAI_API_KEY")
 
+if isinstance(api_key, str) == False or api_key == "":
+    raise Exception("OPENAI_API_KEY environment variable must be set")
+if isinstance(useAzureOpenAI, str) == False or (useAzureOpenAI.lower() != "true" and useAzureOpenAI.lower() != "false"):
+    raise Exception("USE_AZURE_OPENAI environment variable must be set to 'True' or 'False' string not boolean")
+
+
 if useAzureOpenAI.lower() == "false":
     org_id = os.environ.get("OPENAI_ORG_ID")
+    if isinstance(org_id, str) == False or org_id == "":
+        raise Exception("OPENAI_ORG_ID environment variable must be set when USE_AZURE_OPENAI is set to False")
     # Add the OpenAI text completion service to the kernel
     kernel.add_text_completion_service("dv", OpenAITextCompletion("text-davinci-003", api_key, org_id))
 
 else:
     deployment: str = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NAME")
     endpoint: str = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    if isinstance(deployment, str) == False or isinstance(endpoint, str) == False or deployment == "" or endpoint == "":
+        raise Exception("AZURE_OPENAI_DEPLOYMENT_NAME and AZURE_OPENAI_ENDPOINT environment variables must be set when USE_AZURE_OPENAI is set to true")
     # Add the Azure OpenAI text completion service to the kernel
     kernel.add_text_completion_service("dv", AzureTextCompletion(deployment, endpoint, api_key))
 
@@ -43,7 +53,7 @@ class Product:
     def __init__(self, product: Dict[str, List]) -> None:
         self.name: str = product["name"]
         self.tags: List[str] = product["tags"]
-
+ 
 # Define the post_description endpoint
 @description.post("/description", summary="Get description for a product", operation_id="getDescription")
 async def post_description(request: Request) -> JSONResponse:
@@ -59,6 +69,9 @@ async def post_description(request: Request) -> JSONResponse:
         context["name"] = name
         context["tags"] = tags
         result: str = await descriptionFunction.invoke_async(context=context)
+        if "error" in str(result).lower():
+            return Response(content=str(result), status_code=status.HTTP_401_UNAUTHORIZED)
+        print(result)
         result = str(result).replace("\n", "")
 
         # Return the description as a JSON response
