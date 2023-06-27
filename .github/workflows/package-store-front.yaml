@@ -1,11 +1,11 @@
-name: package-makeline-service
+name: package-store-front
 
 on:
   push:
     branches:
       - 'main'
     paths:
-      - 'makeline-service/**'
+      - 'store-front/**'
 
   workflow_dispatch:
 
@@ -19,7 +19,7 @@ jobs:
         id: set-variables
         run: |
           echo "REPOSITORY=ghcr.io/azure-samples/aks-store-demo" >> "$GITHUB_OUTPUT"
-          echo "IMAGE=makeline-service" >> "$GITHUB_OUTPUT"
+          echo "IMAGE=store-front" >> "$GITHUB_OUTPUT"
           echo "VERSION=$(echo ${GITHUB_SHA} | cut -c1-7)" >> "$GITHUB_OUTPUT"
           echo "CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
 
@@ -47,8 +47,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: src/makeline-service
-          file: src/makeline-service/Dockerfile
+          context: src/store-front
+          file: src/store-front/Dockerfile
           push: true
           tags: |
             ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:latest

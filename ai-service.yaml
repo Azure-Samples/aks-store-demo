@@ -20,15 +20,15 @@ spec:
         ports:
         - containerPort: 5001
         env:
-        - name: USE_AZURE_OPENAI
+        - name: USE_AZURE_OPENAI # set to False if you are not using Azure OpenAI
           value: ""
-        - name: AZURE_OPENAI_DEPLOYMENT_NAME
+        - name: AZURE_OPENAI_DEPLOYMENT_NAME # required if using Azure OpenAI
           value: ""
-        - name: AZURE_OPENAI_ENDPOINT
+        - name: AZURE_OPENAI_ENDPOINT # required if using Azure OpenAI
           value: ""
-        - name: OPENAI_API_KEY
+        - name: OPENAI_API_KEY # always required
           value: ""
-        - name: OPENAI_ORG_ID
+        - name: OPENAI_ORG_ID # required if using OpenAI
           value: ""
         resources: {}
 ---
