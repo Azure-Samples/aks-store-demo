@@ -15,6 +15,10 @@
 <script>
 import TopNav from './components/TopNav.vue';
 
+const productServiceUrl = "/products/";
+const singleProductServiceUrl = "/product/";
+const makelineServiceUrl = "/makeline/";
+
 export default {
   name: 'App',
   components: {
@@ -39,11 +43,9 @@ export default {
       this.products[index] = updatedProduct;
     },
     async getProduct(id) {
-      // get the product-service URL from an environment variable
-      const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
 
       // call the product-service using fetch
-      fetch(`${productServiceUrl}${id}`)
+      fetch(`${singleProductServiceUrl}${id}`)
         .then(response => response.json())
         .then(product => {
           this.product.id = product.id
@@ -58,8 +60,6 @@ export default {
         })
     },
     async getProducts() {
-      // get the product-service URL from an environment variable
-      const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
 
       // call the product-service using fetch
       fetch(`${productServiceUrl}`)
@@ -73,20 +73,11 @@ export default {
         })
     },
     async fetchOrders() {
-      const makelineServiceUrl = process.env.VUE_APP_MAKELINE_SERVICE_URL;
-
+    
       await fetch(`${makelineServiceUrl}order/fetch`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          // check if the response is empty
-          if (response.status === 204) {
-            return null;
-          }
-          return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
+          console.log(data)
           if (data) {
             this.orders = data;
           } else {
@@ -95,9 +86,7 @@ export default {
         })
         .catch(error => console.error(error));
     },
-    async completeOrder(orderId) {
-      const makelineServiceUrl = process.env.VUE_APP_MAKELINE_SERVICE_URL;
-      
+    async completeOrder(orderId) {      
       // get the order and update the status
       let order = this.orders.find(order => order.orderId === orderId);
       order.status = 1;

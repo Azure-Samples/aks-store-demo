@@ -120,9 +120,10 @@ services:
       timeout: 10s
       retries: 5
     environment:
-      - VUE_APP_PRODUCT_SERVICE_URL=http://localhost:3002/
-      - VUE_APP_MAKELINE_SERVICE_URL=http://localhost:3001/
-      - VUE_APP_AI_SERVICE_URL=http://localhost:5001/
+      - VUE_APP_PRODUCT_SERVICE_URL=http://productservice:3002/
+      - VUE_APP_MAKELINE_SERVICE_URL=http://makelineservice:3001/
+      - VUE_APP_ORDER_SERVICE_URL=http://orderservice:3000/
+      - VUE_APP_AI_SERVICE_URL=http://aiservice:5001/
     networks:
       - backend_services
     depends_on:
@@ -152,25 +153,25 @@ services:
     depends_on:
       makelineservice:
         condition: service_healthy
-  aiservice:
-    build: src/ai-service
-    container_name: 'aiservice'
-    restart: always
-    ports:
-      - 5001:5001
-    healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://aiservice:5001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    environment:
-      - USE_AZURE_OPENAI=True
-      - AZURE_OPENAI_DEPLOYMENT_NAME=
-      - AZURE_OPENAI_ENDPOINT=
-      - OPENAI_API_KEY=
-      - OPENAI_ORG_ID=
-    networks:
-      - backend_services
+  # aiservice:
+  #   build: src/ai-service
+  #   container_name: 'aiservice'
+  #   restart: always
+  #   ports:
+  #     - 5001:5001
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://aiservice:5001/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #   environment:
+  #     - USE_AZURE_OPENAI=True
+  #     - AZURE_OPENAI_DEPLOYMENT_NAME=
+  #     - AZURE_OPENAI_ENDPOINT=
+  #     - OPENAI_API_KEY=
+  #     - OPENAI_ORG_ID=
+  #   networks:
+  #     - backend_services
 networks:
   backend_services:
     driver: bridge
