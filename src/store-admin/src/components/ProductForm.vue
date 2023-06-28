@@ -44,6 +44,9 @@
 </template>
 
 <script>
+  const aiServiceUrl = '/ai/';
+  const productServiceUrl = '/product/';
+  
   export default {
     name: 'ProductForm',
     props: ['products'],
@@ -74,7 +77,6 @@
       }
 
       // if the AI service is not responding, hide the button
-      const aiServiceUrl = process.env.VUE_APP_AI_SERVICE_URL;
       fetch(`${aiServiceUrl}health`)
         .then(response => {
           if (response.ok) {
@@ -118,9 +120,6 @@
 
         const intervalId = this.waitForAI();
 
-        // get the ai-service URL from an environment variable
-        const aiServiceUrl = process.env.VUE_APP_AI_SERVICE_URL;
-
         let requestBody = {
           name: this.product.name,
           tags: this.product.tags.split(',').map(tag => tag.trim())
@@ -129,7 +128,6 @@
         console.log(requestBody);
         this.product.description = "";
 
-        // call the ai-service using fetch
         fetch(`${aiServiceUrl}generate/description`, {
           method: 'POST',
           headers: {
@@ -162,9 +160,6 @@
           this.showValidationErrors = true;
           return;
         }
-
-        // get the product-service URL from an environment variable
-        const productServiceUrl = process.env.VUE_APP_PRODUCT_SERVICE_URL;
 
         // default to updates
         let method = 'PUT';
