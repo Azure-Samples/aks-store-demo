@@ -251,7 +251,8 @@ metadata:
   name: store-front
 spec:
   ports:
-  - port: 8080
+  - port: 80
+    targetPort: 8080
   selector:
     app: store-front
   type: LoadBalancer
@@ -283,6 +284,8 @@ spec:
           value: "http://product-service:3002/"
         - name: VUE_APP_MAKELINE_SERVICE_URL
           value: "http://makeline-service:3001/"
+        - name: VUE_APP_AI_SERVICE_URL
+          value: "http://ai-service:5001/"
         resources: {}
 ---
 apiVersion: v1
@@ -291,7 +294,8 @@ metadata:
   name: store-admin
 spec:
   ports:
-  - port: 8081
+  - port: 80
+    targetPort: 8081
   selector:
     app: store-admin
   type: LoadBalancer  
