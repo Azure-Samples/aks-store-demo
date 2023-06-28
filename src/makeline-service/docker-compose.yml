@@ -1,0 +1,69 @@
+version: "3.7"
+services:
+  mongodb:
+    image: mongo:6.0.6
+    container_name: 'mongo'
+    restart: always
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - backend_services
+  rabbitmq:
+    image: rabbitmq:3.11.17-management-alpine
+    container_name: 'rabbitmq'
+    restart: always
+    environment:
+      - "RABBITMQ_DEFAULT_USER=username"
+      - "RABBITMQ_DEFAULT_PASS=password"
+    ports:
+      - 15672:15672
+      - 5672:5672
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - backend_services
+  orderservice:
+    build: ../order-service
+    container_name: 'orderservice'
+    restart: always
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://orderservice:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - ORDER_QUEUE_PROTOCOL=amqp
+      - ORDER_QUEUE_HOSTNAME=rabbitmq
+      - ORDER_QUEUE_PORT=5672
+      - ORDER_QUEUE_USERNAME=username
+      - ORDER_QUEUE_PASSWORD=password
+    networks:
+      - backend_services
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+  virtualcustomer:
+    build: ../virtual-customer
+    container_name: 'virtualcustomer'
+    restart: always
+    environment:
+      - ORDER_SERVICE_URL=http://orderservice:3000/
+      - ORDERS_PER_HOUR=3600
+    networks:
+      - backend_services
+    depends_on:
+      orderservice:
+        condition: service_healthy
+networks:
+  backend_services:
+    driver: bridge

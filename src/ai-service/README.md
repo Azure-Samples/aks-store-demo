@@ -1,0 +1,42 @@
+# ai-service
+
+This is a FastAPI app that provides an API for interacting with OpenAI models using [Semantic Kernel SDK](https://github.com/microsoft/semantic-kernel). It is meant to be used in conjunction with the [store-admin](../store-admin) app.
+
+## Running the app locally
+
+The app does not rely on any other services other than OpenAI or Azure OpenAI endpoints, so you can run it locally without any other services running.
+
+### Prerequisites
+
+- [Python3](https://www.python.org/downloads/)
+- [pip](https://pip.pypa.io/en/stable/installation/)
+- [OpenAI API Key](https://beta.openai.com/docs/developer-quickstart/your-api-keys)
+- [Azure OpenAI API Key](https://azure.microsoft.com/products/cognitive-services/openai-service/)
+
+### Running the app
+
+To run the app, clone the repo, open a terminal, and navigate to the `ai-service` directory. Then run the following commands:
+
+```bash
+export USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
+export AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
+export AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
+export OPENAI_API_KEY= # always required
+export OPENAI_ORG_ID= # required if using OpenAI
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --host 127.0.0.1 --port 5001
+```
+
+When the app is running, you should see output similar to the following:
+
+```text
+INFO:     Started server process [134031]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:5001 (Press CTRL+C to quit)
+```
+
+Using the [`test.http`](../../test.http) file in the root of the repo, you can test the API. However, you will need to use VS Code and have the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension installed.
