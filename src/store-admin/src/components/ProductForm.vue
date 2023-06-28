@@ -67,6 +67,10 @@
         const product = this.products.find(product => product.id == this.$route.params.id)
         // copy the product details into the product object
         this.product = Object.assign({}, product);
+        // add empty tags if the product doesn't have any
+        if (!this.product.tags) {
+          this.product.tags = [];
+        }
       }
 
       // if the AI service is not responding, hide the button

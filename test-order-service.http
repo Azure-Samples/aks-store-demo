@@ -1,0 +1,28 @@
+####################################
+### ORDER SERVICE
+####################################
+
+### Get order service health
+GET  /health
+Host: localhost:3000
+
+### Send order to order service
+POST /
+Host: localhost:3000
+Content-Type: application/json
+
+{
+    "customerId": "1234567890",
+    "items": [
+        {
+            "productId": 1,
+            "quantity": 1,
+            "price": 10
+        },
+        {
+            "productId": 2,
+            "quantity": 2,
+            "price": 20
+        }
+    ]
+}

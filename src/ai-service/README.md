@@ -39,4 +39,4 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:5001 (Press CTRL+C to quit)
 ```
 
-Using the [`test.http`](../../test.http) file in the root of the repo, you can test the API. However, you will need to use VS Code and have the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension installed.
+Using the [`test-ai-service.http`](../../test-ai-service.http) file in the root of the repo, you can test the API. However, you will need to use VS Code and have the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension installed.

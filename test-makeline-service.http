@@ -1,0 +1,39 @@
+### Get makeline service health
+GET /health
+Host: localhost:3001
+
+### Fetch orders from rabbitmq and put into mongodb
+GET /order/fetch
+Host: localhost:3001
+
+### Get order for processing
+GET /order/44821
+Host: localhost:3001
+
+### Update the order
+PUT /order
+Host: localhost:3001
+Content-Type: application/json
+
+{
+    "orderId": "65982",
+    "customerId": "1022466235",
+    "items": [
+        {
+            "productId": 0,
+            "quantity": 2,
+            "price": 22.428429
+        },
+        {
+            "productId": 0,
+            "quantity": 1,
+            "price": 99.63117
+        },
+        {
+            "productId": 0,
+            "quantity": 2,
+            "price": 93.84932
+        }
+    ],
+    "status": 1
+}
