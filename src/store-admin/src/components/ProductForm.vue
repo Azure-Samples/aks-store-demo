@@ -11,11 +11,6 @@
   </div>
   <div class="product-form">
     <div class="form-row">
-      <label for="product-id">ID</label>
-      <input id="product-id" placeholder="Product ID" v-model="product.id" />
-    </div>
-
-    <div class="form-row">
       <label for="product-name">Name</label>
       <input id="product-name" placeholder="Product Name" v-model="product.name" />
     </div>
@@ -34,7 +29,8 @@
       <label for="product-description">Description</label>
       <textarea id="product-description" placeholder="Product Description" v-model="product.description" />
       <button @click="generateDescription" class="ai-button">Ask OpenAI</button>
-    </div>  
+      <input type="hidden" id="product-id" placeholder="Product ID" v-model="product.id" />
+    </div>
 
     <div class="form-row">
       <label for="product-image">Image</label>
@@ -71,9 +67,6 @@
         const product = this.products.find(product => product.id == this.$route.params.id)
         // copy the product details into the product object
         this.product = Object.assign({}, product);
-      } else {
-        // disable the product id textbox
-        document.getElementById('product-id').disabled = true;
       }
 
       // if the AI service is not responding, hide the button

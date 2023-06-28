@@ -81,8 +81,17 @@ module.exports = defineConfig({
       // Get AI service health
       devServer.app.get('/ai/health', (_, res) => {
         fetch(`${AI_SERVICE_URL}health`)
-          .then(response => res.send(response.json()))
-          .catch(error => console.error(error));
+          .then(response => {
+            if (response.status === 200) {
+              res.send(response.json());
+            } else {
+              res.status(500).send('Health check failed');
+            }
+          })
+          .catch(error => {
+            console.error(error);
+            res.status(500).send('Health check failed');
+          });
       })
 
       // Generate product description
