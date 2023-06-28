@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'virtual-customer/**'
+      - 'src/virtual-customer/**'
 
   workflow_dispatch:
 

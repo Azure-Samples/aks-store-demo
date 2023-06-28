@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'store-admin/**'
+      - 'src/store-admin/**'
 
   workflow_dispatch:
 

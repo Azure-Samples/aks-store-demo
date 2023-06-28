@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'ai-service/**'
+      - 'src/ai-service/**'
 
   workflow_dispatch:
 
