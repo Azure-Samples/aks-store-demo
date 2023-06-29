@@ -52,7 +52,7 @@
         product: {
           id: 0,
           name: '',
-          image: 'https://via.placeholder.com/400x400?text=Placeholder',
+          image: '/placeholder.png',
           description: '',
           price: 0.00,
           tags: []

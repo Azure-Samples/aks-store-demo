@@ -69,11 +69,8 @@
         this.order = this.orders.find(order => order.orderId === this.$route.params.id);  
         
         if (!this.order) {          
-          // return this.orders.find(order => order.orderId === this.$route.params.id);
           // get the order from the makeline service
-          const makelineServiceUrl = process.env.VUE_APP_MAKELINE_SERVICE_URL;
-
-          fetch(`${makelineServiceUrl}order/${this.$route.params.id}`)
+          fetch(`/makeline/order/${this.$route.params.id}`)
             .then(response => {
               if (!response.ok) {
                 throw new Error('Network response was not ok');
