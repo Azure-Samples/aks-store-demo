@@ -43,8 +43,6 @@ export default {
       this.products[index] = updatedProduct;
     },
     async getProduct(id) {
-
-      // call the product-service using fetch
       fetch(`${singleProductServiceUrl}${id}`)
         .then(response => response.json())
         .then(product => {
@@ -60,8 +58,6 @@ export default {
         })
     },
     async getProducts() {
-
-      // call the product-service using fetch
       fetch(`${productServiceUrl}`)
         .then(response => response.json())
         .then(products => {
@@ -73,7 +69,6 @@ export default {
         })
     },
     async fetchOrders() {
-    
       await fetch(`${makelineServiceUrl}order/fetch`)
         .then(response => response.json())
         .then(data => {

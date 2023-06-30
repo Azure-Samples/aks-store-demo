@@ -16,7 +16,7 @@ Content-Type: application/json
     "name": "Where My Dogs At Collar Tag",
     "price": 5.99,
     "description": "Ensure your furry friend always finds their way home with this Where My Dogs At Collar Tag. This tag is made of durable metal and features a fun design that will make your dog the talk of the town. It also includes a metal ring that makes it easy to attach to your dog's collar.",
-    "image": "https://via.placeholder.com/400x400?text=Placeholder"
+    "image": "/placeholder.png"
 }
 
 ### Update product
@@ -29,7 +29,7 @@ Content-Type: application/json
     "name": "Where My Dogs At Digital Collar Tag",
     "price": 5.99,
     "description": "Ensure your furry friend always finds their way home with this Where My Dogs At Digital Collar Tag. This digital tag uses low energy bluetooth to connect to your phone and features a fun design that will make your dog the talk of the town. It also includes a metal ring that makes it easy to attach to your dog's collar.",
-    "image": "https://via.placeholder.com/400x400?text=Placeholder"
+    "image": "/placeholder.png"
 }
 
 ### Get product by id
