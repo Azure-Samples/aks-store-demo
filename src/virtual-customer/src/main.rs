@@ -72,23 +72,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let order = Order { customer_id, items };
         let serialized_order = serde_json::to_string(&order)?;
         let client = reqwest::blocking::Client::new();
+
         let response = client
             .post(order_service_url.clone())
             .header("Content-Type", "application/json")
             .body(serialized_order.clone())
-            .send()?;
+            .send();
 
-        // track the time it takes to generate an order
-        let elapsed_time = start_time.elapsed();
+        match response {
+            Ok(res) => {
+                // Handle successful response
+                let elapsed_time = start_time.elapsed();
 
-        // print the order details
-        println!(
-            "Order {} sent at {:.2?} with status of {}. {}",
-            order_counter,
-            elapsed_time,
-            response.status(),
-            serialized_order
-        );
+                // print the order details
+                println!(
+                    "Order {} sent at {:.2?} with status of {}. {}",
+                    order_counter,
+                    elapsed_time,
+                    res.status(),
+                    serialized_order
+                );
+            }
+            Err(err) => {
+                // Handle error
+                println!("Failed to submit order: {}", err);
+            }
+        }
 
         thread::sleep(sleep_duration);
     }
