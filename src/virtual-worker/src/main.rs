@@ -1,7 +1,4 @@
-use rand::Rng;
-use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::from_str;
 use std::env;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -36,47 +33,62 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sleep_duration = Duration::from_secs_f64(order_processing_interval);
     println!("Sleep duration between orders: {:?}", sleep_duration);
 
-    // order counter
-    let mut order_counter = 0;
-
     // keep track of how long we've been running
     let start_time = Instant::now();
 
     loop {
         // fetch the orders
         let client = reqwest::blocking::Client::new();
-        let response = client.get(format!("{}/order/fetch", order_service_url)).send()?;
 
-        // parse the text into json
-        let json = response.text()?;
-        let orders: Vec<Order> = serde_json::from_str(&json)?;
+        let response = client
+            .get(format!("{}/order/fetch", order_service_url))
+            .send();
 
-        // loop through the orders
-        for mut order in orders {
-            order_counter += 1;
+        match response {
+            Ok(res) => {
+                // parse the text into json
+                let json = res.text()?;
 
-            // update order status
-            order.status = OrderStatus::Processing as u32;
+                let orders: Vec<Order> = serde_json::from_str(&json)?;
 
-            // send the order to the order service
-            let serialized_order = serde_json::to_string(&order)?;
-            let client = reqwest::blocking::Client::new();
-            let response = client
-                .put(format!("{}/order", order_service_url))
-                .header("Content-Type", "application/json")
-                .body(serialized_order.clone())
-                .send()?;
+                // loop through the orders
+                for mut order in orders {
+                    // update order status
+                    order.status = OrderStatus::Processing as u32;
 
-            // track the time it takes to generate an order
-            let elapsed_time = start_time.elapsed();
+                    // send the order to the order service
+                    let serialized_order = serde_json::to_string(&order)?;
+                    let client = reqwest::blocking::Client::new();
 
-            // print the order details
-            println!(
-                "Order {} processed at {:.2?} with status of {}. {}",
-                order.order_id, elapsed_time, order.status, serialized_order
-            );
+                    let response = client
+                        .put(format!("{}/order", order_service_url))
+                        .header("Content-Type", "application/json")
+                        .body(serialized_order.clone())
+                        .send();
 
-            thread::sleep(sleep_duration);
+                    match response {
+                        Ok(_res) => {
+                            // track the time it takes to generate an order
+                            let elapsed_time = start_time.elapsed();
+
+                            // print the order details
+                            println!(
+                                "Order {} processed at {:.2?} with status of {}. {}",
+                                order.order_id, elapsed_time, order.status, serialized_order
+                            );
+                        }
+                        Err(err) => {
+                            println!("Error completing the order: {}", err);
+                        }
+                    }
+
+                    thread::sleep(sleep_duration);
+                }
+            }
+            Err(e) => {
+                println!("Failed to fetch orders: {}", e);
+                thread::sleep(sleep_duration);
+            }
         }
     }
 }
