@@ -30,7 +30,13 @@ spec:
           value: ""
         - name: OPENAI_ORG_ID # required if using Public OpenAI
           value: ""
-        resources: {}
+        resources:
+          requests:
+            cpu: 20m
+            memory: 46Mi
+          limits:
+            cpu: 30m
+            memory: 50Mi
 ---
 apiVersion: v1
 kind: Service

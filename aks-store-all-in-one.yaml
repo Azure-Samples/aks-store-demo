@@ -20,7 +20,13 @@ spec:
         ports:
         - containerPort: 27017
           name: mongodb
-        resources: {}
+        resources:
+          requests:
+            cpu: 5m
+            memory: 75Mi
+          limits:
+            cpu: 25m
+            memory: 1024Mi
 ---
 apiVersion: v1
 kind: Service
@@ -62,7 +68,13 @@ spec:
           value: "username"
         - name: RABBITMQ_DEFAULT_PASS
           value: "password"
-        resources: {}
+        resources:
+          requests:
+            cpu: 10m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
@@ -114,11 +126,24 @@ spec:
           value: "password"
         - name: FASTIFY_ADDRESS
           value: "0.0.0.0"
-        resources: {}
+        resources:
+          requests:
+            cpu: 1m
+            memory: 50Mi
+          limits:
+            cpu: 75m
+            memory: 128Mi
       initContainers:
       - name: wait-for-rabbitmq
         image: busybox
-        command: ['sh', '-c', 'until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;']        
+        command: ['sh', '-c', 'until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;']
+        resources:
+          requests:
+            cpu: 1m
+            memory: 50Mi
+          limits:
+            cpu: 75m
+            memory: 128Mi    
 ---
 apiVersion: v1
 kind: Service
@@ -165,7 +190,13 @@ spec:
           value: "orderdb"
         - name: ORDER_DB_COLLECTION_NAME
           value: "orders"
-        resources: {}
+        resources:
+          requests:
+            cpu: 1m
+            memory: 6Mi
+          limits:
+            cpu: 5m
+            memory: 20Mi
 ---
 apiVersion: v1
 kind: Service
@@ -201,7 +232,13 @@ spec:
         image: ghcr.io/azure-samples/aks-store-demo/product-service:latest
         ports:
         - containerPort: 3002
-        resources: {}
+        resources:
+          requests:
+            cpu: 1m
+            memory: 1Mi
+          limits:
+            cpu: 1m
+            memory: 5Mi
 ---
 apiVersion: v1
 kind: Service
@@ -243,7 +280,13 @@ spec:
           value: "http://order-service:3000/"
         - name: VUE_APP_PRODUCT_SERVICE_URL
           value: "http://product-service:3002/"
-        resources: {}
+        resources:
+          requests:
+            cpu: 1m
+            memory: 200Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
 ---
 apiVersion: v1
 kind: Service
@@ -286,7 +329,13 @@ spec:
           value: "http://makeline-service:3001/"
         - name: VUE_APP_AI_SERVICE_URL
           value: "http://ai-service:5001/"
-        resources: {}
+        resources:
+          requests:
+            cpu: 1m
+            memory: 200Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
 ---
 apiVersion: v1
 kind: Service
@@ -324,7 +373,13 @@ spec:
           value: http://order-service:3000/
         - name: ORDERS_PER_HOUR
           value: "100"
-        resources: {}
+        resources:
+          requests:
+            cpu: 1m
+            memory: 1Mi
+          limits:
+            cpu: 1m
+            memory: 5Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -350,4 +405,10 @@ spec:
           value: http://makeline-service:3001
         - name: ORDERS_PER_HOUR
           value: "100"
-        resources: {}
+        resources:
+          requests:
+            cpu: 1m
+            memory: 1Mi
+          limits:
+            cpu: 1m
+            memory: 5Mi
