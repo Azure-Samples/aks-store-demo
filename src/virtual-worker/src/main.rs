@@ -46,43 +46,57 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         match response {
             Ok(res) => {
-                // parse the text into json
-                let json = res.text()?;
+                let json = res.text().unwrap();
 
-                let orders: Vec<Order> = serde_json::from_str(&json)?;
+                if json == "null" {
+                    println!("No orders to process");
+                } else {
+                    println!("Processing orders");
 
-                // loop through the orders
-                for mut order in orders {
-                    // update order status
-                    order.status = OrderStatus::Processing as u32;
+                    let orders: Vec<Order> = serde_json::from_str(&json).unwrap();
 
-                    // send the order to the order service
-                    let serialized_order = serde_json::to_string(&order)?;
-                    let client = reqwest::blocking::Client::new();
+                    if orders.len() == 0 {
+                        println!("No orders to process");
+                    } else {
+                        println!("Processing {} orders", orders.len());
 
-                    let response = client
-                        .put(format!("{}/order", order_service_url))
-                        .header("Content-Type", "application/json")
-                        .body(serialized_order.clone())
-                        .send();
+                        // loop through the orders
+                        for mut order in orders {
+                            // update order status
+                            order.status = OrderStatus::Processing as u32;
 
-                    match response {
-                        Ok(_res) => {
-                            // track the time it takes to generate an order
-                            let elapsed_time = start_time.elapsed();
+                            // send the order to the order service
+                            let serialized_order = serde_json::to_string(&order)?;
+                            let client = reqwest::blocking::Client::new();
 
-                            // print the order details
-                            println!(
-                                "Order {} processed at {:.2?} with status of {}. {}",
-                                order.order_id, elapsed_time, order.status, serialized_order
-                            );
-                        }
-                        Err(err) => {
-                            println!("Error completing the order: {}", err);
+                            let response = client
+                                .put(format!("{}/order", order_service_url))
+                                .header("Content-Type", "application/json")
+                                .body(serialized_order.clone())
+                                .send();
+
+                            match response {
+                                Ok(_res) => {
+                                    // track the time it takes to generate an order
+                                    let elapsed_time = start_time.elapsed();
+
+                                    // print the order details
+                                    println!(
+                                        "Order {} processed at {:.2?} with status of {}. {}",
+                                        order.order_id,
+                                        elapsed_time,
+                                        order.status,
+                                        serialized_order
+                                    );
+                                }
+                                Err(err) => {
+                                    println!("Error completing the order: {}", err);
+                                }
+                            }
+
+                            thread::sleep(sleep_duration);
                         }
                     }
-
-                    thread::sleep(sleep_duration);
                 }
             }
             Err(e) => {
