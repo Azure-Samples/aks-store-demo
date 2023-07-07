@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, status
 from fastapi.responses import Response, JSONResponse
 import semantic_kernel as sk
-from semantic_kernel.connectors.ai.open_ai import AzureTextCompletion, OpenAITextCompletion
+from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatCompletion
 from dotenv import load_dotenv
 from typing import Any, List, Dict
 import os
@@ -30,7 +30,7 @@ if useAzureOpenAI.lower() == "false":
     if isinstance(org_id, str) == False or org_id == "":
         raise Exception("OPENAI_ORG_ID environment variable must be set when USE_AZURE_OPENAI is set to False")
     # Add the OpenAI text completion service to the kernel
-    kernel.add_text_completion_service("dv", OpenAITextCompletion("text-davinci-003", api_key, org_id))
+    kernel.add_chat_service("dv", OpenAIChatCompletion("gpt-3.5-turbo", api_key, org_id))
 
 else:
     deployment: str = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NAME")
@@ -38,7 +38,7 @@ else:
     if isinstance(deployment, str) == False or isinstance(endpoint, str) == False or deployment == "" or endpoint == "":
         raise Exception("AZURE_OPENAI_DEPLOYMENT_NAME and AZURE_OPENAI_ENDPOINT environment variables must be set when USE_AZURE_OPENAI is set to true")
     # Add the Azure OpenAI text completion service to the kernel
-    kernel.add_text_completion_service("dv", AzureTextCompletion(deployment, endpoint, api_key))
+    kernel.add_chat_service("dv", AzureChatCompletion(deployment, endpoint, api_key))
 
 # Import semantic skills from the "skills" directory
 skills_directory: str = "skills"

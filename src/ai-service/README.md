@@ -18,15 +18,16 @@ The app does not rely on any other services other than OpenAI or Azure OpenAI en
 To run the app, clone the repo, open a terminal, and navigate to the `ai-service` directory. Then run the following commands:
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
 export USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
 export AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
 export AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
 export OPENAI_API_KEY= # always required
 export OPENAI_ORG_ID= # required if using OpenAI
 
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 uvicorn main:app --host 127.0.0.1 --port 5001
 ```
 
