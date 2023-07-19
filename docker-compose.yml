@@ -122,7 +122,6 @@ services:
     environment:
       - VUE_APP_PRODUCT_SERVICE_URL=http://productservice:3002/
       - VUE_APP_MAKELINE_SERVICE_URL=http://makelineservice:3001/
-      - VUE_APP_ORDER_SERVICE_URL=http://orderservice:3000/
       - VUE_APP_AI_SERVICE_URL=http://aiservice:5001/
     networks:
       - backend_services
