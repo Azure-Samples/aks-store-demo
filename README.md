@@ -32,26 +32,53 @@ The application has the following services:
 
 ![Logical Application Architecture Diagram](assets/demo-arch-with-openai.png)
 
+## Run the app on AKS
+
+To learn how to deploy this app to AKS with Azure OpenAI, see [Deploy an application that uses OpenAI on Azure Kubernetes Service (AKS)](https://learn.microsoft.com/azure/aks/open-ai-quickstart?tabs=aoai).
+
 ## Run the app locally
 
 The application is designed to be [run in an AKS cluster](#run-the-app-on-aks), but can also be run locally using Docker Compose.
 
-To run this app locally, fork and clone this repo to your machine. If you don't have Docker Desktop installed, visit [this page](https://www.docker.com/products/docker-desktop) to install the app.
+> **IMPORTANT**: You must have [Docker Desktop](https://www.docker.com/products/docker-desktop) installed to run this app locally.
 
-If you do not have access to Azure OpenAI or OpenAI API keys, you can run the app without the `ai-service`. Simply open the [`docker-compose.yml`](./docker-compose.yml) file and comment out the `aiservice` section.
+To run this app locally:
 
-If you do have access to Azure OpenAI or OpenAI API keys, open the [`docker-compose.yml`](./docker-compose.yml) file, and set the environment variables in the `aiservice` section.
+Clone the repo to your development computer and navigate to the directory:
 
-```yaml
-environment:
-  - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
-  - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
-  - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
-  - OPENAI_API_KEY= # always required
-  - OPENAI_ORG_ID= # required if using OpenAI
+```console
+git clone https://github.com/Azure-Samples/aks-store-demo.git
+cd aks-store-demo
 ```
 
-When ready, run the following command to start the app:
+Configure your Azure OpenAI or OpenAI API keys in [`docker-compose.yml`](./docker-compose.yml) using the environment variables in the `aiservice` section:
+
+```yaml
+  aiservice:
+    build: src/ai-service
+    container_name: 'aiservice'
+    ...
+    environment:
+      - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
+      - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
+      - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
+      - OPENAI_API_KEY= # always required
+      - OPENAI_ORG_ID= # required if using OpenAI
+    ...
+```
+
+Alternatively, if you do not have access to Azure OpenAI or OpenAI API keys, you can run the app without the `ai-service` by commenting out the `aiservice` section in [`docker-compose.yml`](./docker-compose.yml). For example:
+
+```yaml
+#  aiservice:
+#    build: src/ai-service
+#    container_name: 'aiservice'
+...
+#    networks:
+#      - backend_services
+```
+
+Start the app using `docker compose`. For example:
 
 ```bash
 docker compose up
@@ -62,10 +89,6 @@ To stop the app, you can hit the `CTRL+C` key combination in the terminal window
 ## Run the app with GitHub Codespaces
 
 This repo also includes [DevContainer configuration](./.devcontainer/devcontainer.json), so you can open the repo using [GitHub Codespaces](https://docs.github.com/en/codespaces/overview). This will allow you to run the app in a container in the cloud, without having to install Docker on your local machine. When the Codespace is created, you can run the app using the same instructions as above.
-
-## Run the app on AKS
-
-To learn how to deploy this app to AKS with Azure OpenAI, see [Deploy an application that uses OpenAI on Azure Kubernetes Service (AKS)](https://learn.microsoft.com/azure/aks/open-ai-quickstart?tabs=aoai).
 
 ## Additional Resources
 
