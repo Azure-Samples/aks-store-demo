@@ -39,6 +39,14 @@ spec:
     app: mongodb
   type: ClusterIP    
 ---
+apiVersion: v1
+data:
+  rabbitmq_enabled_plugins: |
+    [rabbitmq_management,rabbitmq_prometheus,rabbitmq_amqp1_0].
+kind: ConfigMap
+metadata:
+  name: rabbitmq-enabled-plugins
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -75,6 +83,17 @@ spec:
           limits:
             cpu: 250m
             memory: 256Mi
+        volumeMounts:
+        - name: rabbitmq-enabled-plugins
+          mountPath: /etc/rabbitmq/enabled_plugins
+          subPath: enabled_plugins
+      volumes:
+      - name: rabbitmq-enabled-plugins
+        configMap:
+          name: rabbitmq-enabled-plugins
+          items:
+          - key: rabbitmq_enabled_plugins
+            path: enabled_plugins
 ---
 apiVersion: v1
 kind: Service
@@ -114,8 +133,6 @@ spec:
         ports:
         - containerPort: 3000
         env:
-        - name: ORDER_QUEUE_PROTOCOL
-          value: "amqp"
         - name: ORDER_QUEUE_HOSTNAME
           value: "rabbitmq"
         - name: ORDER_QUEUE_PORT
@@ -124,6 +141,8 @@ spec:
           value: "username"
         - name: ORDER_QUEUE_PASSWORD
           value: "password"
+        - name: ORDER_QUEUE_NAME
+          value: "orders"
         - name: FASTIFY_ADDRESS
           value: "0.0.0.0"
         resources:
