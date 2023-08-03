@@ -13,8 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Fetch orders from the order queue and store them in database
@@ -145,36 +143,17 @@ func fetchOrders(c *gin.Context) {
 	// Save orders to database
 	var ctx = context.TODO()
 
-	// Get database connection string from environment variable
-	orderDBConn := os.Getenv("ORDER_DB_CONNECTION_STRING")
-	if orderDBConn == "" {
-		log.Printf("ORDER_DB_CONNECTION_STRING is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	// get database name from environment variable
-	orderDBName := os.Getenv("ORDER_DB_NAME")
-	if orderDBName == "" {
-		log.Printf("ORDER_DB_NAME is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	// get database collection from environment variable
-	orderDBCollection := os.Getenv("ORDER_DB_COLLECTION_NAME")
-	if orderDBCollection == "" {
-		log.Printf("ORDER_DB_COLLECTION_NAME is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	clientOptions := options.Client().ApplyURI(orderDBConn)
-	mongoClient, err := mongo.Connect(ctx, clientOptions)
+	// Connect to MongoDB
+	collection, err := connectToMongoDB()
 	if err != nil {
-		log.Printf("Failed to connect to database: %s", err)
+		log.Printf("Failed to connect to MongoDB: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	} else {
+		log.Printf("Connected to MongoDB")
 	}
 
-	// Get a handle for the orders collection
-	collection := mongoClient.Database(orderDBName).Collection(orderDBCollection)
+	defer collection.Database().Client().Disconnect(context.Background())
 
 	var ordersInterface []interface{}
 	for _, o := range orders {
@@ -189,6 +168,7 @@ func fetchOrders(c *gin.Context) {
 		if err != nil {
 			log.Printf("Failed to insert order: %s", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
+			return
 		}
 
 		log.Printf("Inserted %v documents into database\n", len(insertResult.InsertedIDs))
@@ -200,8 +180,16 @@ func fetchOrders(c *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to find records: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 	defer cursor.Close(ctx)
+
+	// Check if there was an error during iteration
+	if err := cursor.Err(); err != nil {
+		log.Printf("Failed to find records: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	// Iterate over the cursor and decode each document
 	for cursor.Next(ctx) {
@@ -212,13 +200,6 @@ func fetchOrders(c *gin.Context) {
 			return
 		}
 		orders = append(orders, pendingOrder)
-	}
-
-	// Check if there was an error during iteration
-	if err := cursor.Err(); err != nil {
-		log.Printf("Failed to iterate cursor: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
 	}
 
 	// Return the pending orders
@@ -233,36 +214,17 @@ func getOrder(c *gin.Context) {
 	// Read order from database
 	var ctx = context.TODO()
 
-	// Get database connection string from environment variable
-	mongoConn := os.Getenv("ORDER_DB_CONNECTION_STRING")
-	if mongoConn == "" {
-		log.Printf("ORDER_DB_CONNECTION_STRING is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	// get database name from environment variable
-	mongoDb := os.Getenv("ORDER_DB_NAME")
-	if mongoDb == "" {
-		log.Printf("ORDER_DB_NAME is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	// get database collection from environment variable
-	mongoCollection := os.Getenv("ORDER_DB_COLLECTION_NAME")
-	if mongoCollection == "" {
-		log.Printf("ORDER_DB_COLLECTION_NAME is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	clientOptions := options.Client().ApplyURI(mongoConn)
-	mongoClient, err := mongo.Connect(ctx, clientOptions)
+	// Connect to MongoDB
+	collection, err := connectToMongoDB()
 	if err != nil {
-		log.Printf("Failed to connect to database: %s", err)
+		log.Printf("Failed to connect to MongoDB: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	} else {
+		log.Printf("Connected to MongoDB")
 	}
 
-	// Get a handle for the orders collection
-	collection := mongoClient.Database(mongoDb).Collection(mongoCollection)
+	defer collection.Database().Client().Disconnect(context.Background())
 
 	// Find the order by orderId
 	singleResult := collection.FindOne(ctx, bson.M{"orderid": orderId})
@@ -289,36 +251,17 @@ func updateOrder(c *gin.Context) {
 	// Read order from database
 	var ctx = context.TODO()
 
-	// Get database connection string from environment variable
-	mongoConn := os.Getenv("ORDER_DB_CONNECTION_STRING")
-	if mongoConn == "" {
-		log.Printf("ORDER_DB_CONNECTION_STRING is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	// get database name from environment variable
-	mongoDb := os.Getenv("ORDER_DB_NAME")
-	if mongoDb == "" {
-		log.Printf("ORDER_DB_NAME is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	// get database collection from environment variable
-	mongoCollection := os.Getenv("ORDER_DB_COLLECTION_NAME")
-	if mongoCollection == "" {
-		log.Printf("ORDER_DB_COLLECTION_NAME is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}
-
-	clientOptions := options.Client().ApplyURI(mongoConn)
-	mongoClient, err := mongo.Connect(ctx, clientOptions)
+	// Connect to MongoDB
+	collection, err := connectToMongoDB()
 	if err != nil {
-		log.Printf("Failed to connect to database: %s", err)
+		log.Printf("Failed to connect to MongoDB: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	} else {
+		log.Printf("Connected to MongoDB")
 	}
 
-	// Get a handle for the orders collection
-	collection := mongoClient.Database(mongoDb).Collection(mongoCollection)
+	defer collection.Database().Client().Disconnect(context.Background())
 
 	log.Printf("Updating order: %v", order)
 

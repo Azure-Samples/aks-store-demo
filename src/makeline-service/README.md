@@ -23,15 +23,38 @@ To run the necessary services, clone the repo, open a terminal, and navigate to 
 docker compose up
 ```
 
-With the services running, open a new terminal and navigate to the `makeline-service` directory. Then run the following commands:
+With the services running, open a new terminal and navigate to the `makeline-service` directory. 
+
+Set the connection information for the RabbitMQ queue by running the following commands:
 
 ```bash
 export ORDER_QUEUE_CONNECTION_STRING=amqp://username:password@localhost:5672/
 export ORDER_QUEUE_NAME=orders
-export ORDER_DB_CONNECTION_STRING=mongodb://localhost:27017
+```
+
+If you are using a local MongoDB container, run the following commands:
+
+```bash
+export ORDER_DB_URI=mongodb://localhost:27017
 export ORDER_DB_NAME=orderdb
 export ORDER_DB_COLLECTION_NAME=orders
+```
 
+If you are using Azure Cosmos DB, run the following commands:
+
+```bash
+export ORDER_DB_URI=mongodb://<YOUR_AZURE_COSMOSDB_HOST>:<YOUR_AZURE_COSMOSDB_PORT>/?retryWrites=false
+export ORDER_DB_NAME=orderdb
+export ORDER_DB_COLLECTION_NAME=orders
+export ORDER_DB_USERNAME=<YOUR_AZURE_COSMOSDB_USERNAME>
+export ORDER_DB_PASSWORD=<YOUR_AZURE_COSMOSDB_PASSWORD>
+```
+
+> NOTE: With Azure CosmosDB, you must ensure the orderdb database and an unsharded orders collection exist before running the app. Otherwise you will get a "server selection error".
+
+Now you can run the following commands to start the application:
+
+```bash
 go get .
 go run .
 ```

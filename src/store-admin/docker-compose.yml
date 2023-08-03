@@ -69,7 +69,7 @@ services:
     environment:
       - ORDER_QUEUE_CONNECTION_STRING=amqp://username:password@rabbitmq:5672/
       - ORDER_QUEUE_NAME=orders
-      - ORDER_DB_CONNECTION_STRING=mongodb://mongodb:27017
+      - ORDER_DB_URI=mongodb://mongodb:27017
       - ORDER_DB_NAME=orderdb
       - ORDER_DB_COLLECTION_NAME=orders
     networks:

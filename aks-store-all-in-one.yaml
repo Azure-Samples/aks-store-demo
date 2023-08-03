@@ -203,7 +203,7 @@ spec:
           value: "amqp://username:password@rabbitmq:5672/"
         - name: ORDER_QUEUE_NAME
           value: "orders"
-        - name: ORDER_DB_CONNECTION_STRING
+        - name: ORDER_DB_URI
           value: "mongodb://mongodb:27017"
         - name: ORDER_DB_NAME
           value: "orderdb"
