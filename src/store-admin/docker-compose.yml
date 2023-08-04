@@ -67,7 +67,9 @@ services:
       timeout: 10s
       retries: 5
     environment:
-      - ORDER_QUEUE_CONNECTION_STRING=amqp://username:password@rabbitmq:5672/
+      - ORDER_QUEUE_URI=amqp://rabbitmq:5672
+      - ORDER_QUEUE_USERNAME=username
+      - ORDER_QUEUE_PASSWORD=password
       - ORDER_QUEUE_NAME=orders
       - ORDER_DB_URI=mongodb://mongodb:27017
       - ORDER_DB_NAME=orderdb

@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
+	amqp "github.com/Azure/go-amqp"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	amqp "github.com/rabbitmq/amqp091-go"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -20,9 +21,9 @@ func fetchOrders(c *gin.Context) {
 	var orders []order
 
 	// Get order queue connection string from environment variable
-	orderQueueConn := os.Getenv("ORDER_QUEUE_CONNECTION_STRING")
-	if orderQueueConn == "" {
-		log.Printf("ORDER_QUEUE_CONNECTION_STRING is not set")
+	orderQueueUri := os.Getenv("ORDER_QUEUE_URI")
+	if orderQueueUri == "" {
+		log.Printf("ORDER_QUEUE_URI is not set")
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -35,8 +36,28 @@ func fetchOrders(c *gin.Context) {
 		return
 	}
 
+	// Get queue username from environment variable
+	orderQueueUsername := os.Getenv("ORDER_QUEUE_USERNAME")
+	if orderQueueName == "" {
+		log.Printf("ORDER_QUEUE_USERNAME is not set")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// Get queue password from environment variable
+	orderQueuePassword := os.Getenv("ORDER_QUEUE_PASSWORD")
+	if orderQueuePassword == "" {
+		log.Printf("ORDER_QUEUE_PASSWORD is not set")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx := context.Background()
+
 	// Connect to order queue
-	conn, err := amqp.Dial(orderQueueConn)
+	conn, err := amqp.Dial(ctx, orderQueueUri, &amqp.ConnOptions{
+		SASLType: amqp.SASLTypePlain(orderQueueUsername, orderQueuePassword),
+	})
 	if err != nil {
 		log.Printf("%s: %s", "Failed to connect to order queue", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -44,63 +65,52 @@ func fetchOrders(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	ch, err := conn.Channel()
+	session, err := conn.NewSession(ctx, nil)
 	if err != nil {
-		log.Printf("%s: %s", "Failed to open a channel", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	defer ch.Close()
-
-	// Peek into the queue to get the number of messages
-	queue, err := ch.QueueDeclarePassive(
-		orderQueueName, // name
-		false,          // durable
-		false,          // delete when unused
-		false,          // exclusive
-		false,          // no-wait
-		nil,            // arguments
-	)
-	if err != nil {
-		log.Printf("Failed to declare queue: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+		log.Printf("Unable to create a new session")
 	}
 
-	numMessages := queue.Messages
-	log.Printf("Number of messages in the queue: %d\n", numMessages)
-
-	// Get the number of messages to consume from an environment variable
-	numMessagesStr := os.Getenv("NUM_MESSAGES")
-	numMessagesEnv, err := strconv.Atoi(numMessagesStr)
-	if err != nil {
-		log.Printf("NUM_MESSAGES is not set. Will read all messages from the queue\n")
-	}
-
-	// If the numMessageEnv is set, use it, otherwise use the number of messages in the queue
-	if numMessagesEnv > 0 {
-		numMessages = numMessagesEnv
-	}
-
-	// Consume the specified number of messages from the queue
-	for i := 0; i < numMessages; i++ {
-		msg, ok, err := ch.Get(orderQueueName, false)
+	{
+		// create a receiver
+		receiver, err := session.NewReceiver(ctx, orderQueueName, nil)
 		if err != nil {
-			log.Printf("Failed to consume message: %s", err)
+			log.Printf("Creating receiver link: %s", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
-		if !ok {
-			log.Println("No message received")
-		} else {
-			log.Printf("Received: %s\n", msg.Body)
+		defer func() {
+			ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+			receiver.Close(ctx)
+			cancel()
+		}()
+
+		for {
+			log.Printf("getting orders")
+
+			ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+			defer cancel()
+
+			// receive next message
+			msg, err := receiver.Receive(ctx, nil)
+			if err != nil {
+				if err.Error() == "context deadline exceeded" {
+					log.Printf("No more orders for you: %v", err.Error())
+					break
+				} else {
+					c.AbortWithStatus(http.StatusInternalServerError)
+					return
+				}
+			}
+
+			messageBody := string(msg.GetData())
+			log.Printf("Message received: %s\n", messageBody)
 
 			// Create a random string to use as the order key
 			orderKey := strconv.Itoa(rand.Intn(100000))
 
-			// Deserialize msg.Body to order and add to []order slice
+			// Deserialize msg data to order and add to []order slice
 			var order order
-			err = json.Unmarshal(msg.Body, &order)
+			err = json.Unmarshal(msg.GetData(), &order)
 
 			if err != nil {
 				log.Printf("Failed to deserialize message: %s", err)
@@ -117,31 +127,17 @@ func fetchOrders(c *gin.Context) {
 			// Add order to []order slice
 			orders = append(orders, order)
 
-			// Send an acknowledgement to remove the message from the queue
-			if err := msg.Ack(false); err != nil {
-				log.Printf("Failed to send acknowledgement: %s", err)
-				c.AbortWithStatus(http.StatusInternalServerError)
-				return
+			// accept message
+			if err = receiver.AcceptMessage(context.TODO(), msg); err != nil {
+				log.Printf("Failure accepting message: %s", err)
+				// remove the order from the slice so that we pick it up on the next run
+				orders = orders[:len(orders)-1]
 			}
 		}
 	}
 
-	// Close the channel
-	if err := ch.Close(); err != nil {
-		log.Printf("Failed to close channel: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Close the connection
-	if err := conn.Close(); err != nil {
-		log.Printf("Failed to close connection: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
 	// Save orders to database
-	var ctx = context.TODO()
+	ctx = context.TODO()
 
 	// Connect to MongoDB
 	collection, err := connectToMongoDB()
