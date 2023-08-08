@@ -4,16 +4,113 @@ This is a Golang app that provides an API for processing orders. It is meant to 
 
 It is a simple REST API written with the Gin framework that allows you to process orders from a RabbitMQ queue and send them to a MongoDB database.
 
-## Running the app locally
-
-### Prerequisites
+## Prerequisites
 
 - [Go](https://golang.org/doc/install)
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [MongoSH](https://docs.mongodb.com/mongodb-shell/install/)
 
-### Running the app
+## Message queue options
+
+This app can connect to either RabbitMQ or Azure Service Bus using AMQP 1.0. To connect to either of these services, you will need to provide appropriate environment variables for connecting to the message queue.
+
+### Option 1: RabbitMQ
+
+To run this against RabbitMQ. A docker-compose file is provided to make this easy. This will run RabbitMQ, the RabbitMQ Management UI, and enable the `rabbitmq_amqp1_0` plugin. The plugin is necessary to connect to RabbitMQ using AMQP 1.0.
+
+With the services running, open a new terminal and navigate to the `makeline-service` directory.
+
+Set the connection information for the RabbitMQ queue by running the following commands to set the environment variables:
+
+```bash
+export ORDER_QUEUE_URI=amqp://localhost
+export ORDER_QUEUE_USERNAME=username
+export ORDER_QUEUE_PASSWORD=password
+export ORDER_QUEUE_NAME=orders
+```
+
+### Option 2: Azure Service Bus
+
+To run this against Azure Service Bus, you will need to create a Service Bus namespace and a queue. You can do this using the Azure CLI. 
+
+```bash
+az group create --name <resource-group-name> --location <location>
+az servicebus namespace create --name <namespace-name> --resource-group <resource-group-name>
+az servicebus queue create --name orders --namespace-name <namespace-name> --resource-group <resource-group-name>
+```
+
+Once you have created the Service Bus namespace and queue, you will need to create a shared access policy with the **Listen** permission for the namespace.
+
+```bash
+az servicebus namespace authorization-rule create --name listener --namespace-name <namespace-name> --resource-group <resource-group-name> --queue-name orders --rights Listen
+```
+
+Next, get the connection information for the Azure Service Bus queue and save the values to environment variables.
+
+```bash
+HOSTNAME=$(az servicebus namespace show --name <namespace-name> --resource-group <resource-group-name> --query serviceBusEndpoint -o tsv | sed 's/https:\/\///;s/:443\///')
+
+PASSWORD=$(az servicebus namespace authorization-rule keys list --namespace-name <namespace-name> --resource-group <resource-group-name> --queue-name orders --name listener --query primaryKey -o tsv)
+```
+
+Finally, set the environment variables.
+
+```bash
+export ORDER_QUEUE_URI=$HOSTNAME
+export ORDER_QUEUE_USERNAME=listener
+export ORDER_QUEUE_PASSWORD=$PASSWORD
+export ORDER_QUEUE_NAME=orders
+```
+
+> NOTE: If you are using Azure Service Bus, you will want your `order-service` to write orders to it instead of RabbitMQ. If that is the case, then you'll need to update the [`docker-compose.yml`](./docker-compose.yml) and modify the environment variables for the `orderservice` to include the proper connection info to connect to Azure Service Bus. Also you will need to add the `ORDER_QUEUE_TRANSPORT=tls` configuration to connect over TLS.
+
+## Database options
+
+You also have the option to write orders to either MongoDB or Azure CosmosDB. 
+
+### Option 1: MongoDB
+
+If you are using a local MongoDB container, run the following commands:
+
+```bash
+export ORDER_DB_URI=mongodb://localhost:27017
+export ORDER_DB_NAME=orderdb
+export ORDER_DB_COLLECTION_NAME=orders
+```
+
+### Option 2: Azure CosmosDB
+
+To run this against Azure CosmosDB, you will need to create the CosmosDB account, the database, and collection. You can do this using the Azure CLI.
+
+```bash
+az group create --name <resource-group-name> --location <location>
+az cosmosdb create --name <cosmosdb-account-name> --resource-group <resource-group-name> --kind MongoDB
+az cosmosdb mongodb database create --account-name <cosmosdb-account-name> --name orderdb --resource-group <resource-group-name> 
+az cosmosdb mongodb collection create --account-name <cosmosdb-account-name> --database-name orderdb --name orders --resource-group <resource-group-name>
+```
+
+Next, get the connection information for the Azure Service Bus queue and save the values to environment variables.
+
+```bash
+COSMOSDBNAME=<cosmosdb-account-name>
+USERNAME=<cosmosdb-account-name>
+PASSWORD=$(az cosmosdb keys list --name <cosmosdb-account-name> --resource-group <resource-group-name> --query primaryMasterKey -o tsv)
+```
+
+Finally, set the environment variables.
+
+```bash
+export ORDER_DB_URI=mongodb://$COSMOSDBNAME.mongo.cosmos.azure.com:10255/?retryWrites=false
+export ORDER_DB_NAME=orderdb
+export ORDER_DB_COLLECTION_NAME=orders
+export ORDER_DB_USERNAME=$USERNAME
+export ORDER_DB_PASSWORD=$PASSWORD
+```
+
+> NOTE: With Azure CosmosDB, you must ensure the orderdb database and an unsharded orders collection exist before running the app. Otherwise you will get a "server selection error".
+
+## Running the app locally
 
 The app relies on RabbitMQ and MongoDB. Additionally, to simulate orders, you will need to run the [order-service](../order-service) with the [virtual-customer](../virtual-customer) app. A docker-compose file is provided to make this easy.
 
@@ -23,15 +120,9 @@ To run the necessary services, clone the repo, open a terminal, and navigate to 
 docker compose up
 ```
 
-With the services running, open a new terminal and navigate to the `makeline-service` directory. Then run the following commands:
+Now you can run the following commands to start the application:
 
 ```bash
-export ORDER_QUEUE_CONNECTION_STRING=amqp://username:password@localhost:5672/
-export ORDER_QUEUE_NAME=orders
-export ORDER_DB_CONNECTION_STRING=mongodb://localhost:27017
-export ORDER_DB_NAME=orderdb
-export ORDER_DB_COLLECTION_NAME=orders
-
 go get .
 go run .
 ```
@@ -67,6 +158,22 @@ show dbs
 
 # use orderdb
 use orderdb
+
+# show collections and confirm orders exists
+show collections
+
+# get the orders
+db.orders.find()
+
+# get completed orders
+db.orders.findOne({status: 1})
+```
+
+To view the orders in Azure CosmosDB using `mongosh`, open a terminal an run the following command:
+
+```bash
+# connect to cosmosdb
+mongosh -u $USERNAME -p $PASSWORD --tls --retryWrites=false mongodb://$COSMOSDBNAME.mongo.cosmos.azure.com:10255/orderdb
 
 # show collections and confirm orders exists
 show collections

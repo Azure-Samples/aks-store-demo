@@ -28,6 +28,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    volumes:
+      - ./rabbitmq_enabled_plugins:/etc/rabbitmq/enabled_plugins
     networks:
       - backend_services
   orderservice:
@@ -42,11 +44,12 @@ services:
       timeout: 10s
       retries: 5
     environment:
-      - ORDER_QUEUE_PROTOCOL=amqp
       - ORDER_QUEUE_HOSTNAME=rabbitmq
       - ORDER_QUEUE_PORT=5672
       - ORDER_QUEUE_USERNAME=username
       - ORDER_QUEUE_PASSWORD=password
+      - ORDER_QUEUE_NAME=orders
+      - ORDER_QUEUE_RECONNECT_LIMIT=3
     networks:
       - backend_services
     depends_on:
@@ -64,9 +67,11 @@ services:
       timeout: 10s
       retries: 5
     environment:
-      - ORDER_QUEUE_CONNECTION_STRING=amqp://username:password@rabbitmq:5672/
+      - ORDER_QUEUE_URI=amqp://rabbitmq:5672
+      - ORDER_QUEUE_USERNAME=username
+      - ORDER_QUEUE_PASSWORD=password
       - ORDER_QUEUE_NAME=orders
-      - ORDER_DB_CONNECTION_STRING=mongodb://mongodb:27017
+      - ORDER_DB_URI=mongodb://mongodb:27017
       - ORDER_DB_NAME=orderdb
       - ORDER_DB_COLLECTION_NAME=orders
     networks:
