@@ -43,21 +43,20 @@ az servicebus queue create --name orders --namespace-name <namespace-name> --res
 Once you have created the Service Bus namespace and queue, you will need to create a shared access policy with the **Listen** permission for the namespace.
 
 ```bash
-az servicebus namespace authorization-rule create --name listener --namespace-name <namespace-name> --resource-group <resource-group-name> --queue-name orders --rights Listen
+az servicebus namespace authorization-rule create --name listener --namespace-name <namespace-name> --resource-group <resource-group-name> --rights Listen
 ```
 
 Next, get the connection information for the Azure Service Bus queue and save the values to environment variables.
 
 ```bash
 HOSTNAME=$(az servicebus namespace show --name <namespace-name> --resource-group <resource-group-name> --query serviceBusEndpoint -o tsv | sed 's/https:\/\///;s/:443\///')
-
-PASSWORD=$(az servicebus namespace authorization-rule keys list --namespace-name <namespace-name> --resource-group <resource-group-name> --queue-name orders --name listener --query primaryKey -o tsv)
+PASSWORD=$(az servicebus namespace authorization-rule keys list --namespace-name <namespace-name> --resource-group <resource-group-name> --name listener --query primaryKey -o tsv)
 ```
 
 Finally, set the environment variables.
 
 ```bash
-export ORDER_QUEUE_URI=$HOSTNAME
+export ORDER_QUEUE_URI=amqps://$HOSTNAME
 export ORDER_QUEUE_USERNAME=listener
 export ORDER_QUEUE_PASSWORD=$PASSWORD
 export ORDER_QUEUE_NAME=orders
