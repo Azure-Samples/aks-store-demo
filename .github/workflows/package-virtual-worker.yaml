@@ -9,13 +9,12 @@ on:
 
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
   publish-container-image:
-    
+    permissions:
+      contents: read
+      packages: write
+
     runs-on: ubuntu-latest
 
     steps:
