@@ -9,11 +9,12 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+      
 jobs:
   publish-container-image:
-    permissions:
-      contents: read
-      packages: write
 
     runs-on: ubuntu-latest
 
@@ -54,7 +55,6 @@ jobs:
           file: src/virtual-worker/Dockerfile
           push: true
           tags: |
-            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:latest
             ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:${{ steps.set-variables.outputs.VERSION }}
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
