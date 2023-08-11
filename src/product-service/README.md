@@ -22,6 +22,7 @@ To run the app, clone the repo, open a terminal, and navigate to the `product-se
 
 ```bash
 ./mvnw spring-boot:run
+```
 
 When the app is running, you should see output similar to the following:
 
