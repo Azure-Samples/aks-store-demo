@@ -31,7 +31,7 @@ class ProductServiceApplicationTests {
     private ProductService productService;
 
     private Product sampleProduct;
-    private ObjectMapper objectMapper = new ObjectMapper(); // Reuse the ObjectMapper
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     public void setup() {
