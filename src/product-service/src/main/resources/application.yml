@@ -1,0 +1,11 @@
+server:
+  port: 3002
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+      base-path: /
+      path-mapping:
+        health: /health
