@@ -1,3 +1,4 @@
+from azure.identity import DefaultAzureCredential
 from fastapi import APIRouter, Request, status
 from fastapi.responses import Response, JSONResponse
 import semantic_kernel as sk
@@ -18,8 +19,9 @@ kernel = sk.Kernel()
 # Get the Azure OpenAI deployment name, API key, and endpoint or OpenAI org id from environment variables
 useAzureOpenAI: str = os.environ.get("USE_AZURE_OPENAI")
 api_key: str = os.environ.get("OPENAI_API_KEY")
+useAzureAD: str = os.environ.get("USE_AZURE_AD")
 
-if isinstance(api_key, str) == False or api_key == "":
+if (isinstance(api_key, str) == False or api_key == "") and (isinstance(useAzureAD, str) == False or useAzureAD == ""):
     raise Exception("OPENAI_API_KEY environment variable must be set")
 if isinstance(useAzureOpenAI, str) == False or (useAzureOpenAI.lower() != "true" and useAzureOpenAI.lower() != "false"):
     raise Exception("USE_AZURE_OPENAI environment variable must be set to 'True' or 'False' string not boolean")
@@ -38,7 +40,14 @@ else:
     if isinstance(deployment, str) == False or isinstance(endpoint, str) == False or deployment == "" or endpoint == "":
         raise Exception("AZURE_OPENAI_DEPLOYMENT_NAME and AZURE_OPENAI_ENDPOINT environment variables must be set when USE_AZURE_OPENAI is set to true")
     # Add the Azure OpenAI text completion service to the kernel
-    kernel.add_chat_service("dv", AzureChatCompletion(deployment, endpoint, api_key))
+    if isinstance(useAzureAD, str) == True and useAzureAD.lower() == "true":
+        print("Authenticating to Azure OpenAI with Azure AD Workload Identity")
+        credential = DefaultAzureCredential()
+        access_token = credential.get_token("https://cognitiveservices.azure.com/.default")
+        kernel.add_chat_service("dv", AzureChatCompletion(deployment_name=deployment, endpoint=endpoint, api_key=access_token.token, ad_auth=True))
+    else:
+        print("Authenticating to Azure OpenAI with OpenAI API key")
+        kernel.add_chat_service("dv", AzureChatCompletion(deployment, endpoint, api_key))
 
 # Import semantic skills from the "skills" directory
 skills_directory: str = "skills"

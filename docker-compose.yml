@@ -172,7 +172,7 @@ services:
       - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
       - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
       - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
-      - OPENAI_API_KEY= # always required
+      - OPENAI_API_KEY= # required if using OpenAI and not required if using Azure OpenAI with Azure AD 
       - OPENAI_ORG_ID= # required if using OpenAI
     networks:
       - backend_services
