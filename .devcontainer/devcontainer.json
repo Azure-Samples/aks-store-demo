@@ -18,12 +18,13 @@
       "version": "latest"
     },
     "ghcr.io/devcontainers/features/python:1": {},
-    "ghcr.io/devcontainers/features/rust:1": {}
+    "ghcr.io/devcontainers/features/rust:1": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {}
   },
   "overrideFeatureInstallOrder": [
     "ghcr.io/devcontainers/features/common-utils"
   ],
-  "postCreateCommand": "/bin/sh .devcontainer/installMoreTools.sh",
+  "postCreateCommand": "bash .devcontainer/installMoreTools.sh",
   "customizations": {
     "vscode": {
       "vscode": {
