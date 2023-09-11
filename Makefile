@@ -5,6 +5,15 @@ RG_NAME ?= rg-store-demo-$(RANDOM)
 ACR_NAME ?= acrstoredemo$(RANDOM)
 AKS_NAME ?= aks-store-demo-$(RANDOM)
 AOAI_NAME ?= aoai-store-demo-$(RANDOM)
+GPT_35_TURBO_VERSION ?= 0613
+BUILD_ORDER_SERVICE ?= false
+BUILD_MAKELINE_SERVICE ?= false
+BUILD_PRODUCT_SERVICE ?= false
+BUILD_STORE_FRONT ?= false
+BUILD_STORE_ADMIN ?= false
+BUILD_VIRTUAL_CUSTOMER ?= false
+BUILD_VIRTUAL_WORKER ?= false
+BUILD_AI_SERVICE ?= false
 
 .PHONY: help
 help: ## Display this help.
@@ -49,15 +58,55 @@ provision-azure: ## Provision Azure Resources
 	@az aks create -n $(AKS_NAME) -g $(RG_NAME) --attach-acr $(ACR_NAME)
 	@az aks get-credentials -n $(AKS_NAME) -g $(RG_NAME)
 	@az cognitiveservices account create --name $(AOAI_NAME) -g $(RG_NAME) -l $(LOC_NAME) --kind OpenAI --sku S0 --custom-domain $(AOAI_NAME)
-	@az cognitiveservices account deployment create -n $(AOAI_NAME) -g $(RG_NAME) --deployment-name gpt-35-turbo --model-format OpenAI --model-name gpt-35-turbo --model-version 0613 --sku Standard --capacity 60
-	@az acr build -r $(ACR_NAME) -t order-service:$(IMAGE_VERSION) ./src/order-service
-	@az acr build -r $(ACR_NAME) -t makeline-service:$(IMAGE_VERSION) ./src/makeline-service
-	@az acr build -r $(ACR_NAME) -t product-service:$(IMAGE_VERSION) ./src/product-service
-	@az acr build -r $(ACR_NAME) -t store-front:$(IMAGE_VERSION) ./src/store-front
-	@az acr build -r $(ACR_NAME) -t store-admin:$(IMAGE_VERSION) ./src/store-admin
-	@az acr build -r $(ACR_NAME) -t virtual-customer:$(IMAGE_VERSION) ./src/virtual-customer
-	@az acr build -r $(ACR_NAME) -t virtual-worker:$(IMAGE_VERSION) ./src/virtual-worker
-	@az acr build -r $(ACR_NAME) -t ai-service:$(IMAGE_VERSION) ./src/ai-service
+	@az cognitiveservices account deployment create -n $(AOAI_NAME) -g $(RG_NAME) --deployment-name gpt-35-turbo --model-format OpenAI --model-name gpt-35-turbo --model-version $(GPT_35_TURBO_VERSION) --sku Standard --capacity 60
+
+	@if [ "$(BUILD_ORDER_SERVICE)" = true ]; then \
+		az acr build -r $(ACR_NAME) -t order-service:$(IMAGE_VERSION) ./src/order-service; \
+	else \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/order-service:latest --image order-service:$(IMAGE_VERSION); \
+	fi
+
+	@if [ "$(BUILD_MAKELINE_SERVICE)" = true ]; then \
+		az acr build -r $(ACR_NAME) -t makeline-service:$(IMAGE_VERSION) ./src/makeline-service; \
+	else \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/makeline-service:latest --image makeline-service:$(IMAGE_VERSION); \
+	fi
+
+	@if [ "$(BUILD_PRODUCT_SERVICE)" = true ]; then \
+		az acr build -r $(ACR_NAME) -t product-service:$(IMAGE_VERSION) ./src/product-service; \
+	else \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/product-service:latest --image product-service:$(IMAGE_VERSION); \
+	fi
+
+	@if [ "$(BUILD_STORE_FRONT)" = true ]; then \
+		az acr build -r $(ACR_NAME) -t store-front:$(IMAGE_VERSION) ./src/store-front; \
+	else \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/store-front:latest --image store-front:$(IMAGE_VERSION); \
+	fi
+
+	@if [ "$(BUILD_STORE_ADMIN)" = true ]; then \
+		az acr build -r $(ACR_NAME) -t store-admin:$(IMAGE_VERSION) ./src/store-admin; \
+	else \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/store-admin:latest --image store-admin:$(IMAGE_VERSION); \
+	fi
+
+	@if [ "$(BUILD_VIRTUAL_CUSTOMER)" = true ]; then \
+		az acr build -r $(ACR_NAME) -t virtual-customer:$(IMAGE_VERSION) ./src/virtual-customer; \
+	else \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/virtual-customer:latest --image virtual-customer:$(IMAGE_VERSION); \
+	fi
+
+	@if [ "$(BUILD_VIRTUAL_WORKER)" = true ]; then \
+		az acr build -r $(ACR_NAME) -t virtual-worker:$(IMAGE_VERSION) ./src/virtual-worker; \
+	else \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest --image virtual-worker:$(IMAGE_VERSION); \
+	fi
+
+	@if [ "$(BUILD_AI_SERVICE)" = true ]; then \
+		az acr build -r $(ACR_NAME) -t ai-service:$(IMAGE_VERSION) ./src/ai-service; \
+	else \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/ai-service:latest --image ai-service:$(IMAGE_VERSION); \
+	fi
 
 .PHONY: deploy-azure
 deploy-azure: kustomize aks-store-all-in-one.yaml ## Deploy to AKS cluster
