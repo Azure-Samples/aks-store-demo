@@ -6,6 +6,7 @@ ACR_NAME ?= acrstoredemo$(RANDOM)
 AKS_NAME ?= aks-store-demo-$(RANDOM)
 AOAI_NAME ?= aoai-store-demo-$(RANDOM)
 GPT_35_TURBO_VERSION ?= 0613
+GPT_35_TURBO_CAPACITY ?= 60
 BUILD_ORDER_SERVICE ?= false
 BUILD_MAKELINE_SERVICE ?= false
 BUILD_PRODUCT_SERVICE ?= false
@@ -58,7 +59,7 @@ provision-azure: ## Provision Azure Resources
 	@az aks create -n $(AKS_NAME) -g $(RG_NAME) --attach-acr $(ACR_NAME)
 	@az aks get-credentials -n $(AKS_NAME) -g $(RG_NAME)
 	@az cognitiveservices account create --name $(AOAI_NAME) -g $(RG_NAME) -l $(LOC_NAME) --kind OpenAI --sku S0 --custom-domain $(AOAI_NAME)
-	@az cognitiveservices account deployment create -n $(AOAI_NAME) -g $(RG_NAME) --deployment-name gpt-35-turbo --model-format OpenAI --model-name gpt-35-turbo --model-version $(GPT_35_TURBO_VERSION) --sku Standard --capacity 60
+	@az cognitiveservices account deployment create -n $(AOAI_NAME) -g $(RG_NAME) --deployment-name gpt-35-turbo --model-format OpenAI --model-name gpt-35-turbo --model-version $(GPT_35_TURBO_VERSION) --sku Standard --capacity $(GPT_35_TURBO_CAPACITY)
 
 	@if [ "$(BUILD_ORDER_SERVICE)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t order-service:$(IMAGE_VERSION) ./src/order-service; \
