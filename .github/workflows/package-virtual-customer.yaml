@@ -53,6 +53,7 @@ jobs:
         with:
           context: src/virtual-customer
           file: src/virtual-customer/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:latest

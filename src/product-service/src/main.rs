@@ -10,7 +10,8 @@ use std::sync::Mutex;
 const MAX_SIZE: usize = 262_144; // max payload size is 256k
 
 async fn health() -> Result<HttpResponse, Error> {
-    let health = json!({"status": "ok"});
+    let version = std::env::var("APP_VERSION").unwrap_or_else(|_| "0.1.0".to_string());
+    let health = json!({"status": "ok", "version": version});
     Ok(HttpResponse::Ok().json(health))
 }
 

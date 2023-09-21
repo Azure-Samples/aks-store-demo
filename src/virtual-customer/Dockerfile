@@ -5,6 +5,9 @@ RUN USER=root cargo new --bin virtual-customer
 # Create a new directory for our application
 WORKDIR /virtual-customer
 
+# Set the build argument for the app version number
+ARG APP_VERSION=0.1.0
+
 # Copy the Cargo.toml and Cargo.lock files to the container
 COPY Cargo.toml Cargo.lock ./
 
@@ -29,6 +32,9 @@ WORKDIR /app
 
 # Copy the binary from the builder stage
 COPY --from=builder /virtual-customer/target/release/virtual-customer /app
+
+# Set the environment variable for the app version number
+ENV APP_VERSION=$APP_VERSION
 
 # Run the application
 CMD ["./virtual-customer"]
