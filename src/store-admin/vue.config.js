@@ -12,6 +12,8 @@ module.exports = defineConfig({
     port: 8081,
     host: '0.0.0.0',
     allowedHosts: 'all',
+    client: false,
+    webSocketServer: false,
     setupMiddlewares: (middlewares, devServer) => {
       
       if (!devServer) {
