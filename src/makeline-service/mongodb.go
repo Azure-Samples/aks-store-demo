@@ -48,6 +48,7 @@ func connectToMongoDB() (*mongo.Collection, error) {
 	} else {
 		clientOptions = options.Client().ApplyURI(mongoUri).
 			SetAuth(options.Credential{
+				AuthSource: mongoDb,
 				Username: mongoUser,
 				Password: mongoPassword,
 			})
