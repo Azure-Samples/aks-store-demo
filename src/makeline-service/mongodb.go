@@ -51,8 +51,7 @@ func connectToMongoDB() (*mongo.Collection, error) {
 			SetAuth(options.Credential{
 				Username: mongoUser,
 				Password: mongoPassword,
-			}).
-			SetTLSConfig(&tls.Config{InsecureSkipVerify: true})
+			})
 	}
 
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
