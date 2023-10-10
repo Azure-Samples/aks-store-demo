@@ -261,7 +261,7 @@ spec:
             memory: 1Mi
           limits:
             cpu: 1m
-            memory: 5Mi
+            memory: 7Mi
 ---
 apiVersion: v1
 kind: Service
@@ -402,7 +402,7 @@ spec:
             memory: 1Mi
           limits:
             cpu: 1m
-            memory: 5Mi
+            memory: 7Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -434,4 +434,4 @@ spec:
             memory: 1Mi
           limits:
             cpu: 1m
-            memory: 5Mi
+            memory: 7Mi
