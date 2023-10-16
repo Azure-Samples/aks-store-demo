@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: order-service
+        image: ghcr.io/azure-samples/aks-store-demo/ai-service:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: USE_AZURE_OPENAI # set to True for Azure OpenAI, False for Public OpenAI
+          value: ""
+        - name: AZURE_OPENAI_DEPLOYMENT_NAME # required if using Azure OpenAI
+          value: ""
+        - name: AZURE_OPENAI_ENDPOINT # required if using Azure OpenAI
+          value: ""
+        - name: OPENAI_API_KEY # always required
+          value: ""
+        - name: OPENAI_ORG_ID # required if using Public OpenAI
+          value: ""
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 30m
+            memory: 65Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-service
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 5001
+    targetPort: 5001
+  selector:
+    app: ai-service
