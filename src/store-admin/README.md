@@ -16,10 +16,9 @@ This is a Vue.js app that simulates a store admin portal where users can manuall
 
 The app relies on the [product-service](../product-service), [makeline-service](../order-service), and optionally the [ai-service](../ai-service) along with mongodb and rabbitmq instances running. A docker-compose file is provided to make this easy.
 
-To run the necessary services, clone the repo, open a terminal, and navigate to the `store-admin` directory. 
+To run the necessary services, clone the repo, open a terminal, and navigate to the `store-admin` directory.
 
-
-If you have access to OpenAI or Azure OpenAI, open the `docker-compose.yml` file, uncomment the `aiservices` block, and add your OpenAI or Azure OpenAI credentials. 
+If you have access to OpenAI or Azure OpenAI, open the `docker-compose.yml` file, uncomment the `aiservices` block, and add your OpenAI or Azure OpenAI credentials.
 
 > IMPORTANT: When filling in the values, do not put the value in double-quotes.
 
@@ -38,7 +37,7 @@ Then run the following command:
 docker compose up
 ```
 
-With the services running, open a new terminal and navigate to the `store-front` directory. Then run the following commands:
+With the services running, open a new terminal and navigate to the `store-admin` directory. Then run the following commands:
 
 ```bash
 export VUE_APP_PRODUCT_SERVICE_URL=http://localhost:3002/
