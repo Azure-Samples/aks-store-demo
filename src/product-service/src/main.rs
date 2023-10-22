@@ -39,7 +39,7 @@ async fn add_product(
     mut payload: web::Payload,
 ) -> Result<HttpResponse, Error> {
     let mut products = data.products.lock().unwrap();
-    let new_id = products.len() as i32 + 2;
+    let new_id = products.len() as i32 + 1;
 
     // payload is a stream of Bytes objects
     let mut body = web::BytesMut::new();
@@ -114,9 +114,9 @@ async fn main() -> std::io::Result<()> {
     let products = vec![
         Product {
             id: 1,
-            name: "Captain Catnip's Fisherman's Friend".to_string(),
+            name: "Contoso Catnip's Friend".to_string(),
             price: 9.99,
-            description: "Watch your feline friend embark on a fishing adventure with Captain Catnip's Fisherman's Friend toy. Packed with irresistible catnip and dangling fish lure.".to_string(),
+            description: "Watch your feline friend embark on a fishing adventure with Contoso Catnip's Friend toy. Packed with irresistible catnip and dangling fish lure.".to_string(),
             image: "/placeholder.png".to_string()
         },
         Product {
@@ -170,9 +170,9 @@ async fn main() -> std::io::Result<()> {
         },
         Product {
             id: 9,
-            name: "Captain Claw's Crab Cat Toy".to_string(),
+            name: "Contoso Claw's Crabby Cat Toy".to_string(),
             price: 3.99,
-            description: "Watch your cat go crazy for Captain Claw's Crab Cat Toy. This crinkly and catnip-filled toy will awaken their hunting instincts and provide endless entertainment.".to_string(),
+            description: "Watch your cat go crazy for Contoso Claw's Crabby Cat Toy. This crinkly and catnip-filled toy will awaken their hunting instincts and provide endless entertainment.".to_string(),
             image: "/placeholder.png".to_string()
         },
         Product {
