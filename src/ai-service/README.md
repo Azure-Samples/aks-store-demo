@@ -23,6 +23,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 export USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
+export USE_AZURE_AD=False # set to True if you are using Azure OpenAI with Azure AD authentication
 export AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
 export AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
 export OPENAI_API_KEY= # always required

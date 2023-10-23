@@ -1,6 +1,10 @@
 # Use an official Node.js runtime as a parent image
 FROM node:18.16.0-alpine as builder
+
 WORKDIR /app
+
+# Set the build argument for the app version number
+ARG APP_VERSION=0.1.0
 
 # Copy package.json and package-lock.json to the container
 COPY package*.json ./
@@ -13,6 +17,9 @@ COPY . .
 
 # Expose the port the app listens on
 EXPOSE 80
+
+# Set the environment variable for the app version number
+ENV APP_VERSION=$APP_VERSION
 
 # Start the app
 CMD [ "npm", "run", "serve" ]

@@ -288,7 +288,8 @@ func main() {
 	router.PUT("/order", updateOrder)
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "UP",
+			"status":  "ok",
+			"version": os.Getenv("APP_VERSION"),
 		})
 	})
 	router.Run(":3001")

@@ -20,6 +20,12 @@ module.exports = defineConfig({
 
       devServer.app.use(bodyParser.json())
 
+      // Health check
+      devServer.app.get('/health', (_, res) => {
+        const version = process.env.APP_VERSION || '0.1.0'
+        res.send({ status: 'ok', version: version})
+      })
+      
       devServer.app.get('/products', (_, res) => {
         fetch(`${PRODUCT_SERVICE_URL}`)
           .then(response => response.json())
