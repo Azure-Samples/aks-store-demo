@@ -38,7 +38,7 @@ To learn how to depoy this app on AKS, see [Quickstart: Deploy an Azure Kubernet
 
 > Note: The above article shows a simplified version of the store app with some services removed. For the full application, you can use the `aks-store-all-in-one.yaml` file in this repo.
 
-## Run on most any Kubernetes
+## Run on any Kubernetes
 
 This application uses public images stored in GitHub Container Registry and Microsoft Container Registry (MCR). Once your Kubernetes cluster of choice is setup, you can deploy the full app with the below commands.
 
