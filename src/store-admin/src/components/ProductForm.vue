@@ -28,7 +28,7 @@
     <div class="form-row">
       <label for="product-description">Description</label>
       <textarea id="product-description" placeholder="Product Description" v-model="product.description" />
-      <button @click="generateDescription" class="ai-button">Ask OpenAI</button>
+      <button @click="generateDescription" class="ai-button">Ask AI Assistant</button>
       <input type="hidden" id="product-id" placeholder="Product ID" v-model="product.id" />
     </div>
 

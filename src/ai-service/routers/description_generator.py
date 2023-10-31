@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from typing import Any, List, Dict
 import os
 import requests
+import json
 
 useLocalLLM: bool = False
 if os.environ.get("USE_LOCAL_LLM"):
@@ -99,8 +100,23 @@ async def post_description(request: Request) -> JSONResponse:
             }
             headers = {"Content-Type": "application/json"}
             response = requests.request("POST", url, headers=headers, json=payload)
-            result = response.text
-            result = result.split("description:\\")[1]
+            
+            # convert response.text to json
+            result = json.loads(response.text)
+            result = result["Result"]
+            result = result.split("description:")[1]
+            
+            # remove all double quotes
+            if "\"" in result:
+                result = result.replace("\"", "")
+
+            # # if first character is a double quote, remove it
+            # if result[0] == "\"":
+            #     result = result[1:]
+            # # if last character is a double quote, remove it
+            # if result[-1] == "\"":
+            #     result = result[:-1]
+            
             print(result)
         else:
             print("Calling OpenAI")
