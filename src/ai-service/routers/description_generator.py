@@ -9,20 +9,28 @@ import os
 import requests
 import json
 
+# Set the useLocalLLM and useAzureOpenAI variables based on environment variables
 useLocalLLM: bool = False
+useAzureOpenAI: bool = False
+
 if os.environ.get("USE_LOCAL_LLM"):
     useLocalLLM = os.environ.get("USE_LOCAL_LLM").lower() == "true"
 
-useAzureOpenAI: bool = False
 if os.environ.get("USE_AZURE_OPENAI"):
     useAzureOpenAI = os.environ.get("USE_AZURE_OPENAI").lower() == "true"
 
+# if useLocalLLM and useAzureOpenAI are both set to true, raise an exception
+if useLocalLLM and useAzureOpenAI:
+    raise Exception("USE_LOCAL_LLM and USE_AZURE_OPENAI environment variables cannot both be set to true")
+
+# if useLocalLLM or useAzureOpenAI are set to true, get the endpoint from the environment variables
 if useLocalLLM or useAzureOpenAI:
     endpoint: str = os.environ.get("AI_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT")
     
     if isinstance(endpoint, str) == False or endpoint == "":
         raise Exception("AI_ENDPOINT or AZURE_OPENAI_ENDPOINT environment variable must be set when USE_LOCAL_LLM or USE_AZURE_OPENAI is set to true")
 
+# if not using local LLM, set up the semantic kernel
 if useLocalLLM:
     print("Using Local LLM")
 else:
