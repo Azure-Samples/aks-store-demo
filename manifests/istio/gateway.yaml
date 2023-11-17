@@ -1,0 +1,36 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: store-front-gateway-external
+  namespace: pets
+spec:
+  selector:
+    istio: aks-istio-ingressgateway-external
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: store-front-vs-external
+  namespace: pets
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - store-front-gateway-external
+  http:
+  - match:
+    - uri:
+        prefix: ''
+    route:
+    - destination:
+        host: store-front.pets.svc.cluster.local
+        port:
+          number: 80
+
