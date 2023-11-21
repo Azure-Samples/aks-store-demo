@@ -105,6 +105,28 @@ To stop the app, you can hit the `CTRL+C` key combination in the terminal window
 
 This repo also includes [DevContainer configuration](./.devcontainer/devcontainer.json), so you can open the repo using [GitHub Codespaces](https://docs.github.com/en/codespaces/overview). This will allow you to run the app in a container in the cloud, without having to install Docker on your local machine. When the Codespace is created, you can run the app using the same instructions as above.
 
+## Run the app with Azure Service Bus and Azure Cosmos DB using Azure Developer CLI
+
+This repo also includes an alternate deployment type that uses Azure Service Bus and Azure Cosmos DB instead of RabbitMQ and MongoDB. To deploy this version of the app, you can use the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview) with a GitHub Codespace or DevContainer which has all the tools (e.g., `azure-cli`, `azd`, `terraform`, `kubectl`, and `helm`) pre-installed. This deployment will use Terraform to provision the Azure resources then retrieve output variables and pass them to Helm to deploy the app.
+
+To get started, authenticate to Azure using the Azure Developer CLI and Azure CLI.
+
+```bash
+# authenticate to Azure Developer CLI
+azd auth login
+
+# authenticate to Azure CLI
+az login
+```
+
+Deploy the app with a single command.
+
+```bash
+azd up
+```
+
+> Note: When selecting an Azure region, make sure to choose one that supports all the services used in this app including Azure OpenAI, Azure Kubernetes Service, Azure Service Bus, and Azure Cosmos DB.
+
 ## Additional Resources
 
 - AKS Documentation. https://learn.microsoft.com/azure/aks
