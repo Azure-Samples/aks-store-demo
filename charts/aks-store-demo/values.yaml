@@ -1,0 +1,58 @@
+# Default values for aks-store-demo.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+namespace: "dev"
+
+aiService:
+  # Specifies whether a ai-service deployment and service should be created
+  create: false
+  modelDeploymentName: ""
+  openAiEndpoint: ""
+  openAiKey: ""
+  openAiOrgId: ""
+  managedIdentityClientId: ""
+  useAzureOpenAi: true
+  useAzureAd: true
+
+orderService:
+  useAzureServiceBus: false # when false, local rabbitmq will be used
+  queueHost: "rabbitmq"
+  queuePort: "5672"
+  queueUsername: "username"
+  queuePassword: "password"
+  queueName: "orders"
+  queueTransport: ""
+
+makelineService:
+  useAzureCosmosDB: false # when false, local mongodb will be used
+  orderQueueUri: "amqp://rabbitmq:5672"
+  orderQueueUsername: "username"
+  orderQueuePassword: "password"
+  orderQueueName: "orders"
+  orderDBUri: "mongodb://mongodb:27017"
+  orderDBName: "orderdb"
+  orderDBCollectionName: "orders"
+  orderDBUsername: ""
+  orderDBPassword: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -137,3 +137,4 @@ __pycache__/
 **/.DS_Store
 .vscode
 **/.vscode
+.azure
