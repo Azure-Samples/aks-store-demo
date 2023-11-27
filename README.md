@@ -127,6 +127,16 @@ azd up
 
 > Note: When selecting an Azure region, make sure to choose one that supports all the services used in this app including Azure OpenAI, Azure Kubernetes Service, Azure Service Bus, and Azure Cosmos DB.
 
+Once the deployment is complete, you can verify all the services are running and the app is working by following these steps:
+
+- In the Azure portal, navigate to your Azure Service Bus resource and use Azure Service Bus explorer to check for order messages
+- In the Azure portal, navigate to your Azure Cosmos DB resource and use the database explorer to check for order records
+- Port-forward the store-admin service (using the command below) then open http://localhost:8081 in your browser and ensure you can add product descriptions using the AI service
+
+  ```bash
+  kubectl port-forward svc/store-admin 8081:80
+  ```
+
 ## Additional Resources
 
 - AKS Documentation. https://learn.microsoft.com/azure/aks
