@@ -16,7 +16,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: store-front
-        image: ghcr.io/azure-samples/aks-store-demo/store-front:1.0.0
+        image: {{ .Values.storeFront.image.repository }}:{{ .Values.storeFront.image.tag }}
         ports:
         - containerPort: 8080
           name: store-front
@@ -37,7 +37,7 @@ spec:
             path: /health
             port: 8080
           failureThreshold: 3
-          initialDelaySeconds: 15
+          initialDelaySeconds: 5
           periodSeconds: 5
         readinessProbe:
           httpGet:

@@ -16,6 +16,9 @@ aiService:
   managedIdentityClientId: ""
   useAzureOpenAi: true
   useAzureAd: true
+  image:
+    repository: "ghcr.io/azure-samples/aks-store-demo/ai-service"
+    tag: "latest"
 
 orderService:
   useAzureServiceBus: false # when false, local rabbitmq will be used
@@ -25,6 +28,9 @@ orderService:
   queuePassword: "password"
   queueName: "orders"
   queueTransport: ""
+  image:
+    repository: "ghcr.io/azure-samples/aks-store-demo/order-service"
+    tag: "latest"
 
 makelineService:
   useAzureCosmosDB: false # when false, local mongodb will be used
@@ -37,6 +43,34 @@ makelineService:
   orderDBCollectionName: "orders"
   orderDBUsername: ""
   orderDBPassword: ""
+  image:
+    repository: "ghcr.io/azure-samples/aks-store-demo/makeline-service"
+    tag: "latest"
+
+productService:
+  image:
+    repository: "ghcr.io/azure-samples/aks-store-demo/product-service"
+    tag: "latest"
+
+storeAdmin:
+  image:
+    repository: "ghcr.io/azure-samples/aks-store-demo/store-admin"
+    tag: "latest"
+
+storeFront:
+  image:
+    repository: "ghcr.io/azure-samples/aks-store-demo/store-front"
+    tag: "latest"
+
+virtualCustomer:
+  image:
+    repository: "ghcr.io/azure-samples/aks-store-demo/virtual-customer"
+    tag: "latest"
+
+virtualWorker:
+  image:
+    repository: "ghcr.io/azure-samples/aks-store-demo/virtual-worker"
+    tag: "latest"
 
 storeFront:
   serviceType: LoadBalancer

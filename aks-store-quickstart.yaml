@@ -179,6 +179,9 @@ spec:
         image: ghcr.io/azure-samples/aks-store-demo/product-service:latest
         ports:
         - containerPort: 3002
+        env: 
+        - name: AI_SERVICE_URL
+          value: "http://ai-service:5001/"
         resources:
           requests:
             cpu: 1m
@@ -253,7 +256,7 @@ spec:
             path: /health
             port: 8080
           failureThreshold: 3
-          initialDelaySeconds: 15
+          initialDelaySeconds: 5
           periodSeconds: 5
         readinessProbe:
           httpGet:

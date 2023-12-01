@@ -1,3 +1,10 @@
+resource "azurerm_container_registry" "example" {
+  name                = "acr${local.name}"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  sku                 = "Premium"
+}
+
 resource "azurerm_kubernetes_cluster" "example" {
   name                = "aks-${local.name}"
   location            = azurerm_resource_group.example.location
@@ -24,4 +31,11 @@ resource "azurerm_kubernetes_cluster" "example" {
       microsoft_defender
     ]
   }
+}
+
+resource "azurerm_role_assignment" "example" {
+  principal_id                     = azurerm_kubernetes_cluster.example.kubelet_identity[0].object_id
+  role_definition_name             = "AcrPull"
+  scope                            = azurerm_container_registry.example.id
+  skip_service_principal_aad_check = true
 }

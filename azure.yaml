@@ -2,17 +2,17 @@
 
 name: aks-store-demo
 metadata:
-  template: aks-store-dmeo@1.0.0
+  template: aks-store-demo@1.0.0
 hooks:
   preprovision:
     shell: sh
     continueOnError: false
     interactive: false
     run: infra/azd-hooks/preprovision.sh
-  postprovision:
+  predeploy:
     shell: sh
     continueOnError: false
     interactive: false
-    run: infra/azd-hooks/postprovision.sh
+    run: infra/azd-hooks/predeploy.sh
 infra:
   provider: terraform

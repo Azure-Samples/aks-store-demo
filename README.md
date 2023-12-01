@@ -66,12 +66,12 @@ git clone https://github.com/Azure-Samples/aks-store-demo.git
 cd aks-store-demo
 ```
 
-Configure your Azure OpenAI or OpenAI API keys in [`docker-compose.yml`](./docker-compose.yml) using the environment variables in the `aiservice` section:
+Configure your Azure OpenAI or OpenAI API keys in [`docker-compose.yml`](./docker-compose.yml) using the environment variables in the `ai-service` section:
 
 ```yaml
-  aiservice:
+  ai-service:
     build: src/ai-service
-    container_name: 'aiservice'
+    container_name: 'ai-service'
     ...
     environment:
       - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
@@ -82,12 +82,12 @@ Configure your Azure OpenAI or OpenAI API keys in [`docker-compose.yml`](./docke
     ...
 ```
 
-Alternatively, if you do not have access to Azure OpenAI or OpenAI API keys, you can run the app without the `ai-service` by commenting out the `aiservice` section in [`docker-compose.yml`](./docker-compose.yml). For example:
+Alternatively, if you do not have access to Azure OpenAI or OpenAI API keys, you can run the app without the `ai-service` by commenting out the `ai-service` section in [`docker-compose.yml`](./docker-compose.yml). For example:
 
 ```yaml
-#  aiservice:
+#  ai-service:
 #    build: src/ai-service
-#    container_name: 'aiservice'
+#    container_name: 'ai-service'
 ...
 #    networks:
 #      - backend_services

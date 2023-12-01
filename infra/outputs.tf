@@ -66,3 +66,11 @@ output "db_key" {
 output "k8s_namespace" {
   value = var.k8s_namespace
 }
+
+output "registry_name" {
+  value = azurerm_container_registry.example.name
+}
+
+output "registry_uri" {
+  value = azurerm_container_registry.example.login_server
+}

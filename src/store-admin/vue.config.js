@@ -4,7 +4,6 @@ const bodyParser = require('body-parser')
 
 const PRODUCT_SERVICE_URL = (process.env.VUE_APP_PRODUCT_SERVICE_URL || "http://172.19.0.2:3002/")
 const MAKELINE_SERVICE_URL = (process.env.VUE_APP_MAKELINE_SERVICE_URL || "http://172.19.0.6:3001/")
-const AI_SERVICE_URL = (process.env.VUE_APP_AI_SERVICE_URL || "http://172.19.0.6:5001/")
 
 module.exports = defineConfig({
   transpileDependencies: true,
@@ -141,7 +140,7 @@ module.exports = defineConfig({
 
       // Get AI service health
       devServer.app.get('/ai/health', (_, res) => {
-        fetch(`${AI_SERVICE_URL}health`)
+        fetch(`${PRODUCT_SERVICE_URL}/ai/health`)
           .then(response => {
             if (response.status === 200) {
               res.send(response.json());
@@ -161,7 +160,7 @@ module.exports = defineConfig({
         const product = req.body
         console.log(product)
 
-        fetch(`${AI_SERVICE_URL}generate/description`, {
+        fetch(`${PRODUCT_SERVICE_URL}/ai/generate/description`, {
           method: 'POST',
           body: JSON.stringify(product),
           headers: { 'Content-Type': 'application/json' }

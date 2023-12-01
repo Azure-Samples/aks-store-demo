@@ -19,14 +19,14 @@ services:
       - ./rabbitmq_enabled_plugins:/etc/rabbitmq/enabled_plugins
     networks:
       - backend_services
-  orderservice:
+  order-service:
     build: src/order-service
-    container_name: 'orderservice'
+    container_name: 'order-service'
     restart: always
     ports:
       - 3000:3000
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://orderservice:3000/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://order-service:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -42,38 +42,38 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-  productservice:
+  product-service:
     build: src/product-service
-    container_name: 'productservice'
+    container_name: 'product-service'
     restart: always
     ports:
       - 3002:3002
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://productservice:3002/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://product-service:3002/health"]
       interval: 30s
       timeout: 10s
       retries: 5
     networks:
       - backend_services
-  storefront:
+  store-front:
     build: src/store-front
-    container_name: 'storefront'
+    container_name: 'store-front'
     restart: always
     ports:
       - 8080:8080
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://storefront:80/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://store-front:80/health"]
       interval: 30s
       timeout: 10s
       retries: 5
     environment:
-      - VUE_APP_PRODUCT_SERVICE_URL=http://productservice:3002/
-      - VUE_APP_ORDER_SERVICE_URL=http://orderservice:3000/
+      - VUE_APP_PRODUCT_SERVICE_URL=http://product-service:3002/
+      - VUE_APP_ORDER_SERVICE_URL=http://order-service:3000/
     networks:
       - backend_services
     depends_on:
-      - productservice
-      - orderservice
+      - product-service
+      - order-service
 networks:
   backend_services:
     driver: bridge

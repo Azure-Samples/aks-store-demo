@@ -1,10 +1,14 @@
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
-use actix_web::{error, middleware, web, App, Error, HttpResponse, HttpServer};
+use actix_web::{
+    error, error::ResponseError, middleware, web, App, Error, HttpResponse, HttpServer,
+};
 use env_logger::Env;
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::collections::HashMap;
+use std::fmt;
 use std::sync::Mutex;
 
 const MAX_SIZE: usize = 262_144; // max payload size is 256k
@@ -110,6 +114,73 @@ async fn delete_product(
     Ok(HttpResponse::Ok().body(""))
 }
 
+//////////////////////////
+// Proxy for AI service
+//////////////////////////
+
+#[derive(Debug)]
+struct ProxyError(reqwest::Error);
+
+impl fmt::Display for ProxyError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl ResponseError for ProxyError {
+    fn error_response(&self) -> HttpResponse {
+        HttpResponse::InternalServerError().json(self.0.to_string())
+    }
+}
+
+impl From<reqwest::Error> for ProxyError {
+    fn from(err: reqwest::Error) -> ProxyError {
+        ProxyError(err)
+    }
+}
+
+fn get_ai_service_url() -> String {
+    let ai_service_url = std::env::var("AI_SERVICE_URL").unwrap_or_else(|_| "http://127.0.0.1:5001".to_string());
+    ai_service_url.trim_end_matches('/').to_string()
+}
+
+async fn ai_health() -> Result<HttpResponse, Error> {
+    let client = reqwest::Client::new();
+    let resp = client.get(get_ai_service_url() + "/health").send().await.unwrap();
+    let status = resp.status();
+    if status.is_success() {
+        let body: HashMap<String, String> = resp.json().await.map_err(ProxyError::from)?;
+        let body_json = serde_json::to_string(&body).unwrap();
+        Ok(HttpResponse::Ok().body(body_json))
+    } else {
+        Ok(HttpResponse::build(actix_web::http::StatusCode::NOT_FOUND).body(""))
+    }
+}
+
+async fn ai_generate_description(mut payload: web::Payload) -> Result<HttpResponse, Error> {
+    let mut body = web::BytesMut::new();
+    while let Some(chunk) = payload.next().await {
+        let chunk = chunk?;
+        body.extend_from_slice(&chunk);
+    }
+    let client = reqwest::Client::new();
+    let resp = client
+        .post(get_ai_service_url() + "/generate/description")
+        .body(body.to_vec())
+        .send()
+        .await
+        .unwrap();
+
+    let status = resp.status();
+    let body: HashMap<String, String> = resp.json().await.map_err(ProxyError::from)?;
+    let body_json = serde_json::to_string(&body).unwrap();
+    if status.is_success() {
+        Ok(HttpResponse::Ok().body(body_json))
+    } else {
+        Ok(HttpResponse::build(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR).body(body_json))
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let products = vec![
@@ -209,6 +280,12 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::post().to(add_product))
             .route("/", web::put().to(update_product))
             .route("/{product_id}", web::delete().to(delete_product))
+            .route("/ai/health", web::get().to(ai_health))
+            .route("/ai/health", web::head().to(ai_health))
+            .route(
+                "/ai/generate/description",
+                web::post().to(ai_generate_description),
+            )
     })
     .bind(("0.0.0.0", 3002))?
     .run()
