@@ -49,10 +49,11 @@ func connectToMongoDB() (*mongo.Collection, error) {
 	} else {
 		clientOptions = options.Client().ApplyURI(mongoUri).
 			SetAuth(options.Credential{
-				Username: mongoUser,
-				Password: mongoPassword,
+				AuthSource: mongoDb,
+				Username:   mongoUser,
+				Password:   mongoPassword,
 			}).
-			SetTLSConfig(&tls.Config{InsecureSkipVerify: true})
+			SetTLSConfig(&tls.Config{InsecureSkipVerify: false})
 	}
 
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
