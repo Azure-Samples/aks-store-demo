@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"log"
 	"net/http"
 	"os"
@@ -49,9 +50,10 @@ func connectToMongoDB() (*mongo.Collection, error) {
 		clientOptions = options.Client().ApplyURI(mongoUri).
 			SetAuth(options.Credential{
 				AuthSource: mongoDb,
-				Username: mongoUser,
-				Password: mongoPassword,
-			})
+				Username:   mongoUser,
+				Password:   mongoPassword,
+			}).
+			SetTLSConfig(&tls.Config{InsecureSkipVerify: false})
 	}
 
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
