@@ -9,70 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Fetches orders from the order queue and stores them in database
-func fetchOrders(c *gin.Context) {
-	// Get orders from the queue
-	orders, err := getOrdersFromQueue()
-	if err != nil {
-		log.Printf("Failed to fetch orders from queue: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Save orders to database
-	insertOrdersToDB(orders)
-	if err != nil {
-		log.Printf("Failed to save orders to database: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Return the orders to be processed
-	orders, err = getPendingOrdersFromDB()
-	if err != nil {
-		log.Printf("Failed to get pending orders from database: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, orders)
-}
-
-// Gets a single order from database by order ID
-func getOrder(c *gin.Context) {
-	order, err := getOrderFromDB(c.Param("id"))
-	if err != nil {
-		log.Printf("Failed to get order from database: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, order)
-}
-
-// Updates the status of an order
-func updateOrder(c *gin.Context) {
-	// unmarsal the order from the request body
-	var order order
-	if err := c.BindJSON(&order); err != nil {
-		log.Printf("Failed to unmarshal order: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	err := updateOrderStatus(order)
-	if err != nil {
-		log.Printf("Failed to update order status: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	c.SetAccepted("202")
-}
-
 func main() {
+	var orderService *OrderService
+
+	if os.Getenv("ORDER_DB_API") == "cosmosdbsql" {
+		log.Printf("Using CosmosDB SQL API")
+	} else {
+		log.Printf("Using MongoDB API")
+		orderService = NewOrderService(NewMongoDBOrderRepo())
+	}
+
 	router := gin.Default()
 	router.Use(cors.Default())
+	router.Use(OrderMiddleware(orderService))
 	router.GET("/order/fetch", fetchOrders)
 	router.GET("/order/:id", getOrder)
 	router.PUT("/order", updateOrder)
@@ -85,23 +34,91 @@ func main() {
 	router.Run(":3001")
 }
 
-type order struct {
-	OrderID    string `json:"orderId"`
-	CustomerID string `json:"customerId"`
-	Items      []item `json:"items"`
-	Status     status `json:"status"`
+func OrderMiddleware(orderService *OrderService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("orderService", orderService)
+		c.Next()
+	}
 }
 
-type status int
+// Fetches orders from the order queue and stores them in database
+func fetchOrders(c *gin.Context) {
+	client, ok := c.MustGet("orderService").(*OrderService)
+	if !ok {
+		log.Printf("Failed to get order service")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-const (
-	Pending status = iota
-	Processing
-	Complete
-)
+	// Get orders from the queue
+	orders, err := getOrdersFromQueue()
+	if err != nil {
+		log.Printf("Failed to fetch orders from queue: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-type item struct {
-	Product  int     `json:"productId"`
-	Quantity int     `json:"quantity"`
-	Price    float64 `json:"price"`
+	// Save orders to database
+	err = client.repo.InsertOrders(orders)
+	if err != nil {
+		log.Printf("Failed to save orders to database: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// Return the orders to be processed
+	orders, err = client.repo.GetPendingOrders()
+	if err != nil {
+		log.Printf("Failed to get pending orders from database: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, orders)
+}
+
+// Gets a single order from database by order ID
+func getOrder(c *gin.Context) {
+	client, ok := c.MustGet("orderService").(*OrderService)
+	if !ok {
+		log.Printf("Failed to get order service")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	order, err := client.repo.GetOrder(c.Param("id"))
+	if err != nil {
+		log.Printf("Failed to get order from database: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, order)
+}
+
+// Updates the status of an order
+func updateOrder(c *gin.Context) {
+	client, ok := c.MustGet("orderService").(*OrderService)
+	if !ok {
+		log.Printf("Failed to get order service")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// unmarsal the order from the request body
+	var order Order
+	if err := c.BindJSON(&order); err != nil {
+		log.Printf("Failed to unmarshal order: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err := client.repo.UpdateOrder(order)
+	if err != nil {
+		log.Printf("Failed to update order status: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.SetAccepted("202")
 }
