@@ -35,22 +35,25 @@ export ORDER_QUEUE_NAME=orders
 To run this against Azure Service Bus, you will need to create a Service Bus namespace and a queue. You can do this using the Azure CLI. 
 
 ```bash
-az group create --name <resource-group-name> --location <location>
-az servicebus namespace create --name <namespace-name> --resource-group <resource-group-name>
-az servicebus queue create --name orders --namespace-name <namespace-name> --resource-group <resource-group-name>
+RGNAME=<resource-group-name>
+LOCNAME=<location>
+
+az group create --name $RGNAME --location $LOCNAME
+az servicebus namespace create --name <namespace-name> --resource-group $RGNAME
+az servicebus queue create --name orders --namespace-name <namespace-name> --resource-group $RGNAME
 ```
 
 Once you have created the Service Bus namespace and queue, you will need to create a shared access policy with the **Listen** permission for the namespace.
 
 ```bash
-az servicebus namespace authorization-rule create --name listener --namespace-name <namespace-name> --resource-group <resource-group-name> --rights Listen
+az servicebus namespace authorization-rule create --name listener --namespace-name <namespace-name> --resource-group $RGNAME --rights Listen
 ```
 
 Next, get the connection information for the Azure Service Bus queue and save the values to environment variables.
 
 ```bash
-HOSTNAME=$(az servicebus namespace show --name <namespace-name> --resource-group <resource-group-name> --query serviceBusEndpoint -o tsv | sed 's/https:\/\///;s/:443\///')
-PASSWORD=$(az servicebus namespace authorization-rule keys list --namespace-name <namespace-name> --resource-group <resource-group-name> --name listener --query primaryKey -o tsv)
+HOSTNAME=$(az servicebus namespace show --name <namespace-name> --resource-group $RGNAME --query serviceBusEndpoint -o tsv | sed 's/https:\/\///;s/:443\///')
+PASSWORD=$(az servicebus namespace authorization-rule keys list --namespace-name <namespace-name> --resource-group $RGNAME --name listener --query primaryKey -o tsv)
 ```
 
 Finally, set the environment variables.
@@ -83,28 +86,53 @@ export ORDER_DB_COLLECTION_NAME=orders
 To run this against Azure CosmosDB, you will need to create the CosmosDB account, the database, and collection. You can do this using the Azure CLI.
 
 ```bash
-az group create --name <resource-group-name> --location <location>
-az cosmosdb create --name <cosmosdb-account-name> --resource-group <resource-group-name> --kind MongoDB
-az cosmosdb mongodb database create --account-name <cosmosdb-account-name> --name orderdb --resource-group <resource-group-name> 
-az cosmosdb mongodb collection create --account-name <cosmosdb-account-name> --database-name orderdb --name orders --resource-group <resource-group-name>
+RGNAME=<resource-group-name>
+LOCNAME=<location>
+COSMOSDBNAME=<cosmosdb-account-name>
+
+az group create --name $RGNAME --location $LOCNAME
+az cosmosdb create --name $COSMOSDBNAME --resource-group $RGNAME --kind MongoDB # or --kind GlobalDocumentDB (for SQL API)
+
+# if database requires MongoDB API
+# create the database and collection
+az cosmosdb mongodb database create --account-name $COSMOSDBNAME --name orderdb --resource-group $RGNAME 
+az cosmosdb mongodb collection create --account-name $COSMOSDBNAME --database-name orderdb --name orders --resource-group $RGNAME
+
+# if database requires SQL API
+# create the database and container
+COSMOSDBPARTITIONKEY=<partition-key>
+az cosmosdb sql database create --account-name $COSMOSDBNAME --name orderdb --resource-group $RGNAME
+az cosmosdb sql container create --account-name $COSMOSDBNAME --database-name orderdb --name orders --resource-group $RGNAME --partition-key-path /$COSMOSDBPARTITIONKEY
 ```
 
 Next, get the connection information for the Azure Service Bus queue and save the values to environment variables.
 
 ```bash
-COSMOSDBNAME=<cosmosdb-account-name>
-USERNAME=<cosmosdb-account-name>
-PASSWORD=$(az cosmosdb keys list --name <cosmosdb-account-name> --resource-group <resource-group-name> --query primaryMasterKey -o tsv)
+COSMOSDBUSERNAME=$COSMOSDBNAME
+COSMOSDBPASSWORD=$(az cosmosdb keys list --name $COSMOSDBNAME --resource-group $RGNAME --query primaryMasterKey -o tsv)
 ```
 
 Finally, set the environment variables.
 
 ```bash
+# if database requires MongoDB API
+# set the following environment variables
+export ORDER_DB_API=mongodb
 export ORDER_DB_URI=mongodb://$COSMOSDBNAME.mongo.cosmos.azure.com:10255/?retryWrites=false
 export ORDER_DB_NAME=orderdb
 export ORDER_DB_COLLECTION_NAME=orders
-export ORDER_DB_USERNAME=$USERNAME
-export ORDER_DB_PASSWORD=$PASSWORD
+export ORDER_DB_USERNAME=$COSMOSDBUSERNAME
+export ORDER_DB_PASSWORD=$COSMOSDBPASSWORD
+
+# if database requires SQL API
+# set the following environment variables
+export ORDER_DB_API=cosmosdbsql
+export ORDER_DB_URI=https://$COSMOSDBNAME.documents.azure.com:443/
+export ORDER_DB_NAME=orderdb
+export ORDER_DB_CONTAINER_NAME=orders
+export ORDER_DB_PASSWORD=$COSMOSDBPASSWORD
+export ORDER_DB_PARTITION_KEY=$COSMOSDBPARTITIONKEY
+export ORDER_DB_PARTITION_VALUE="pets"
 ```
 
 > NOTE: With Azure CosmosDB, you must ensure the orderdb database and an unsharded orders collection exist before running the app. Otherwise you will get a "server selection error".

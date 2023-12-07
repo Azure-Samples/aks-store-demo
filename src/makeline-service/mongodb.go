@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"log"
-	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,34 +14,7 @@ type MongoDBOrderRepo struct {
 	db *mongo.Collection
 }
 
-func NewMongoDBOrderRepo() *MongoDBOrderRepo {
-	// Get database uri from environment variable
-	mongoUri := os.Getenv("ORDER_DB_URI")
-	if mongoUri == "" {
-		log.Printf("ORDER_DB_URI is not set")
-		return nil
-	}
-
-	// get database name from environment variable
-	mongoDb := os.Getenv("ORDER_DB_NAME")
-	if mongoDb == "" {
-		log.Printf("ORDER_DB_NAME is not set")
-		return nil
-	}
-
-	// get database collection name from environment variable
-	mongoCollection := os.Getenv("ORDER_DB_COLLECTION_NAME")
-	if mongoCollection == "" {
-		log.Printf("ORDER_DB_COLLECTION_NAME is not set")
-		return nil
-	}
-
-	// get database username from environment variable
-	mongoUser := os.Getenv("ORDER_DB_USERNAME")
-
-	// get database password from environment variable
-	mongoPassword := os.Getenv("ORDER_DB_PASSWORD")
-
+func NewMongoDBOrderRepo(mongoUri string, mongoDb string, mongoCollection string, mongoUser string, mongoPassword string) (*MongoDBOrderRepo, error) {
 	// create a context
 	ctx := context.Background()
 
@@ -63,12 +35,13 @@ func NewMongoDBOrderRepo() *MongoDBOrderRepo {
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Printf("failed to connect to mongodb: %s", err)
-		return nil
+		return nil, err
 	}
 
 	err = mongoClient.Ping(ctx, nil)
 	if err != nil {
 		log.Printf("failed to ping database: %s", err)
+		return nil, err
 	} else {
 		log.Printf("pong from database")
 	}
@@ -77,7 +50,7 @@ func NewMongoDBOrderRepo() *MongoDBOrderRepo {
 	collection := mongoClient.Database(mongoDb).Collection(mongoCollection)
 	//defer collection.Database().Client().Disconnect(context.Background())
 
-	return &MongoDBOrderRepo{collection}
+	return &MongoDBOrderRepo{collection}, nil
 }
 
 func (r *MongoDBOrderRepo) GetPendingOrders() ([]Order, error) {
