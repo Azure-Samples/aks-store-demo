@@ -9,6 +9,11 @@ hooks:
     continueOnError: false
     interactive: false
     run: infra/azd-hooks/preprovision.sh
+  postprovision:
+    shell: sh
+    continueOnError: false
+    interactive: false
+    run: infra/azd-hooks/postprovision.sh
   predeploy:
     shell: sh
     continueOnError: false

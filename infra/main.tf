@@ -45,6 +45,8 @@ resource "random_pet" "example" {
 locals {
   name     = "${random_pet.example.id}${random_integer.example.result}"
   location = var.location
+  default_cosmosdb_account_kind = "MongoDB"
+  cosmosdb_account_kind = var.cosmosdb_account_kind != "" ? var.cosmosdb_account_kind : local.default_cosmosdb_account_kind
 }
 
 data "azurerm_subscription" "current" {}

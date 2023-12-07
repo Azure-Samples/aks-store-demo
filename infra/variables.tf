@@ -29,3 +29,15 @@ variable "k8s_namespace" {
   type        = string
   default     = "default"
 }
+
+variable "cosmosdb_account_kind" {
+  description = "value of cosmosdb account kind"
+  type        = string
+  default     = "MongoDB"
+
+  validation {
+    condition     = contains(["MongoDB", "GlobalDocumentDB"], var.cosmosdb_account_kind)
+    error_message = "Valid values for var: cosmosdb_account_kind are (MongoDB, GlobalDocumentDB)."
+  }
+}
+

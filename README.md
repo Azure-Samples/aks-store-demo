@@ -119,6 +119,12 @@ azd auth login
 az login
 ```
 
+The `makeline-service` supports both MongoDB and SQL API for accessing data in Azure CosmosDB. The default API is MongoDB, but you can use SQL API. To use the SQL API for Azure CosmosDB, you must provision the service using the `GlobalDocumentDB` account kind. You can set the Azure CosmosDB account kind by running the following command prior to running `azd up`:
+
+```bash
+azd env set AZURE_COSMOSDB_ACCOUNT_KIND GlobalDocumentDB
+```
+
 Deploy the app with a single command.
 
 ```bash

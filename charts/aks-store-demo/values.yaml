@@ -34,6 +34,7 @@ orderService:
 
 makelineService:
   useAzureCosmosDB: false # when false, local mongodb will be used
+  useSqlApi: false # when false, mongodb api for azure cosmosdb will be used
   orderQueueUri: "amqp://rabbitmq:5672"
   orderQueueUsername: "username"
   orderQueuePassword: "password"
@@ -41,6 +42,7 @@ makelineService:
   orderDBUri: "mongodb://mongodb:27017"
   orderDBName: "orderdb"
   orderDBCollectionName: "orders"
+  orderDBContainerName: "orders"
   orderDBUsername: ""
   orderDBPassword: ""
   image:

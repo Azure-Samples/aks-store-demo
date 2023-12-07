@@ -54,8 +54,12 @@ output "db_account_name" {
   value = azurerm_cosmosdb_account.example.name
 }
 
+output "db_api" {
+  value = var.cosmosdb_account_kind == "MongoDB" ? "mongodb" : "cosmosdbsql"
+}
+
 output "db_uri" {
-  value = "mongodb://${azurerm_cosmosdb_account.example.name}.mongo.cosmos.azure.com:10255/?retryWrites=false"
+  value = var.cosmosdb_account_kind == "MongoDB" ? "mongodb://${azurerm_cosmosdb_account.example.name}.mongo.cosmos.azure.com:10255/?retryWrites=false" : "https://${azurerm_cosmosdb_account.example.name}.documents.azure.com:443/"
 }
 
 output "db_key" {

@@ -1,15 +1,5 @@
 #!/bin/bash
 
-echo "Build container images"
-az acr build --registry ${registry_name} --image aks-store-demo/ai-service:latest ./src/ai-service/
-az acr build --registry ${registry_name} --image aks-store-demo/makeline-service:latest ./src/makeline-service/
-az acr build --registry ${registry_name} --image aks-store-demo/order-service:latest ./src/order-service/
-az acr build --registry ${registry_name} --image aks-store-demo/product-service:latest ./src/product-service/
-az acr build --registry ${registry_name} --image aks-store-demo/store-admin:latest ./src/store-admin/
-az acr build --registry ${registry_name} --image aks-store-demo/store-front:latest ./src/store-front/
-az acr build --registry ${registry_name} --image aks-store-demo/virtual-customer:latest ./src/virtual-customer/
-az acr build --registry ${registry_name} --image aks-store-demo/virtual-worker:latest ./src/virtual-worker/
-
 echo "Retrieving cluster credentials"
 az aks get-credentials --resource-group ${rg_name} --name ${aks_name}
 
@@ -40,4 +30,5 @@ helm upgrade aks-store-demo ./charts/aks-store-demo \
   --set storeAdmin.image.repository=${registry_uri}/aks-store-demo/store-admin \
   --set storeFront.image.repository=${registry_uri}/aks-store-demo/store-front \
   --set virtualCustomer.image.repository=${registry_uri}/aks-store-demo/virtual-customer \
-  --set virtualWorker.image.repository=${registry_uri}/aks-store-demo/virtual-worker
+  --set virtualWorker.image.repository=${registry_uri}/aks-store-demo/virtual-worker \
+  $(if [ "${db_api}" == "cosmosdbsql" ]; then echo "--set makelineService.useSqlApi=true"; fi)
