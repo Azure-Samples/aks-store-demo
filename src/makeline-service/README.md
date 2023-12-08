@@ -85,22 +85,25 @@ export ORDER_DB_COLLECTION_NAME=orders
 
 To run this against Azure CosmosDB, you will need to create the CosmosDB account, the database, and collection. You can do this using the Azure CLI.
 
+> Azure CosmosDB supports multiple APIs. This app supports both the MongoDB and SQL APIs. You will need to create the database and collection based on the API you want to use.
+
 ```bash
 RGNAME=<resource-group-name>
 LOCNAME=<location>
 COSMOSDBNAME=<cosmosdb-account-name>
 
 az group create --name $RGNAME --location $LOCNAME
-az cosmosdb create --name $COSMOSDBNAME --resource-group $RGNAME --kind MongoDB # or --kind GlobalDocumentDB (for SQL API)
 
 # if database requires MongoDB API
 # create the database and collection
+az cosmosdb create --name $COSMOSDBNAME --resource-group $RGNAME --kind MongoDB
 az cosmosdb mongodb database create --account-name $COSMOSDBNAME --name orderdb --resource-group $RGNAME 
 az cosmosdb mongodb collection create --account-name $COSMOSDBNAME --database-name orderdb --name orders --resource-group $RGNAME
 
 # if database requires SQL API
 # create the database and container
-COSMOSDBPARTITIONKEY=<partition-key>
+COSMOSDBPARTITIONKEY=storeId
+az cosmosdb create --name $COSMOSDBNAME --resource-group $RGNAME --kind GlobalDocumentDB
 az cosmosdb sql database create --account-name $COSMOSDBNAME --name orderdb --resource-group $RGNAME
 az cosmosdb sql container create --account-name $COSMOSDBNAME --database-name orderdb --name orders --resource-group $RGNAME --partition-key-path /$COSMOSDBPARTITIONKEY
 ```
