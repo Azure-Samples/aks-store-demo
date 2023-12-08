@@ -1,288 +1,45 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
-	amqp "github.com/Azure/go-amqp"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/go-playground/validator/v10"
 )
 
-// Fetch orders from the order queue and store them in database
-func fetchOrders(c *gin.Context) {
-	var orders []order
+var validate *validator.Validate
 
-	// Get order queue connection string from environment variable
-	orderQueueUri := os.Getenv("ORDER_QUEUE_URI")
-	if orderQueueUri == "" {
-		log.Printf("ORDER_QUEUE_URI is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Get queue name from environment variable
-	orderQueueName := os.Getenv("ORDER_QUEUE_NAME")
-	if orderQueueName == "" {
-		log.Printf("ORDER_QUEUE_NAME is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Get queue username from environment variable
-	orderQueueUsername := os.Getenv("ORDER_QUEUE_USERNAME")
-	if orderQueueName == "" {
-		log.Printf("ORDER_QUEUE_USERNAME is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Get queue password from environment variable
-	orderQueuePassword := os.Getenv("ORDER_QUEUE_PASSWORD")
-	if orderQueuePassword == "" {
-		log.Printf("ORDER_QUEUE_PASSWORD is not set")
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	ctx := context.Background()
-
-	// Connect to order queue
-	conn, err := amqp.Dial(ctx, orderQueueUri, &amqp.ConnOptions{
-		SASLType: amqp.SASLTypePlain(orderQueueUsername, orderQueuePassword),
-	})
-	if err != nil {
-		log.Printf("%s: %s", "Failed to connect to order queue", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	defer conn.Close()
-
-	session, err := conn.NewSession(ctx, nil)
-	if err != nil {
-		log.Printf("Unable to create a new session")
-	}
-
-	{
-		// create a receiver
-		receiver, err := session.NewReceiver(ctx, orderQueueName, nil)
-		if err != nil {
-			log.Printf("Creating receiver link: %s", err)
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-		defer func() {
-			ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
-			receiver.Close(ctx)
-			cancel()
-		}()
-
-		for {
-			log.Printf("getting orders")
-
-			ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
-			defer cancel()
-
-			// receive next message
-			msg, err := receiver.Receive(ctx, nil)
-			if err != nil {
-				if err.Error() == "context deadline exceeded" {
-					log.Printf("No more orders for you: %v", err.Error())
-					break
-				} else {
-					c.AbortWithStatus(http.StatusInternalServerError)
-					return
-				}
-			}
-
-			messageBody := string(msg.GetData())
-			log.Printf("Message received: %s\n", messageBody)
-
-			// Create a random string to use as the order key
-			orderKey := strconv.Itoa(rand.Intn(100000))
-
-			// Deserialize msg data to order and add to []order slice
-			var order order
-			err = json.Unmarshal(msg.GetData(), &order)
-
-			if err != nil {
-				log.Printf("Failed to deserialize message: %s", err)
-				c.AbortWithStatus(http.StatusInternalServerError)
-				return
-			}
-
-			// add orderkey to order
-			order.OrderID = orderKey
-
-			// set the status to pending
-			order.Status = Pending
-
-			// Add order to []order slice
-			orders = append(orders, order)
-
-			// accept message
-			if err = receiver.AcceptMessage(context.TODO(), msg); err != nil {
-				log.Printf("Failure accepting message: %s", err)
-				// remove the order from the slice so that we pick it up on the next run
-				orders = orders[:len(orders)-1]
-			}
-		}
-	}
-
-	// Save orders to database
-	ctx = context.TODO()
-
-	// Connect to MongoDB
-	collection, err := connectToMongoDB()
-	if err != nil {
-		log.Printf("Failed to connect to MongoDB: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	} else {
-		log.Printf("Connected to MongoDB")
-	}
-
-	defer collection.Database().Client().Disconnect(context.Background())
-
-	var ordersInterface []interface{}
-	for _, o := range orders {
-		ordersInterface = append(ordersInterface, interface{}(o))
-	}
-
-	if len(ordersInterface) == 0 {
-		log.Printf("No orders to insert into database")
-	} else {
-		// Insert orders
-		insertResult, err := collection.InsertMany(ctx, ordersInterface)
-		if err != nil {
-			log.Printf("Failed to insert order: %s", err)
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-
-		log.Printf("Inserted %v documents into database\n", len(insertResult.InsertedIDs))
-	}
-
-	// Return all pending orders
-	orders = nil
-	cursor, err := collection.Find(ctx, bson.M{"status": Pending})
-	if err != nil {
-		log.Printf("Failed to find records: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	defer cursor.Close(ctx)
-
-	// Check if there was an error during iteration
-	if err := cursor.Err(); err != nil {
-		log.Printf("Failed to find records: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Iterate over the cursor and decode each document
-	for cursor.Next(ctx) {
-		var pendingOrder order
-		if err := cursor.Decode(&pendingOrder); err != nil {
-			log.Printf("Failed to decode order: %s", err)
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-		orders = append(orders, pendingOrder)
-	}
-
-	// Return the pending orders
-	c.IndentedJSON(http.StatusOK, orders)
-}
-
-// Get order from database
-func getOrder(c *gin.Context) {
-	// TODO: Validate order ID
-	orderId := c.Param("id")
-
-	// Read order from database
-	var ctx = context.TODO()
-
-	// Connect to MongoDB
-	collection, err := connectToMongoDB()
-	if err != nil {
-		log.Printf("Failed to connect to MongoDB: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	} else {
-		log.Printf("Connected to MongoDB")
-	}
-
-	defer collection.Database().Client().Disconnect(context.Background())
-
-	// Find the order by orderId
-	singleResult := collection.FindOne(ctx, bson.M{"orderid": orderId})
-	var order order
-	if singleResult.Decode(&order) != nil {
-		log.Printf("Failed to decode order: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// return the order to be processed
-	c.IndentedJSON(http.StatusOK, order)
-}
-
-func updateOrder(c *gin.Context) {
-	// unmarsal the order from the request body
-	var order order
-	if err := c.BindJSON(&order); err != nil {
-		log.Printf("Failed to unmarshal order: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Read order from database
-	var ctx = context.TODO()
-
-	// Connect to MongoDB
-	collection, err := connectToMongoDB()
-	if err != nil {
-		log.Printf("Failed to connect to MongoDB: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	} else {
-		log.Printf("Connected to MongoDB")
-	}
-
-	defer collection.Database().Client().Disconnect(context.Background())
-
-	log.Printf("Updating order: %v", order)
-
-	// Update the order
-	updateResult, err := collection.UpdateMany(
-		ctx,
-		bson.M{"orderid": order.OrderID},
-		bson.D{
-			{Key: "$set", Value: bson.D{{Key: "status", Value: order.Status}}},
-		},
-	)
-	if err != nil {
-		log.Printf("Failed to update order: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	log.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
-
-	c.SetAccepted("202")
-}
+// Valid database API types
+const (
+	AZURE_COSMOS_DB_SQL_API = "cosmosdbsql"
+)
 
 func main() {
+	var orderService *OrderService
+
+	// Get the database API type
+	apiType := os.Getenv("ORDER_DB_API")
+	switch apiType {
+	case "cosmosdbsql":
+		log.Printf("Using Azure CosmosDB SQL API")
+	default:
+		log.Printf("Using MongoDB API")
+	}
+
+	// Initialize the database
+	orderService, err := initDatabase(apiType)
+	if err != nil {
+		log.Printf("Failed to initialize database: %s", err)
+		os.Exit(1)
+	}
+
 	router := gin.Default()
 	router.Use(cors.Default())
+	router.Use(OrderMiddleware(orderService))
 	router.GET("/order/fetch", fetchOrders)
 	router.GET("/order/:id", getOrder)
 	router.PUT("/order", updateOrder)
@@ -295,23 +52,176 @@ func main() {
 	router.Run(":3001")
 }
 
-type order struct {
-	OrderID    string `json:"orderId"`
-	CustomerID string `json:"customerId"`
-	Items      []item `json:"items"`
-	Status     status `json:"status"`
+// OrderMiddleware is a middleware function that injects the order service into the request context
+func OrderMiddleware(orderService *OrderService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("orderService", orderService)
+		c.Next()
+	}
 }
 
-type status int
+// Fetches orders from the order queue and stores them in database
+func fetchOrders(c *gin.Context) {
+	client, ok := c.MustGet("orderService").(*OrderService)
+	if !ok {
+		log.Printf("Failed to get order service")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-const (
-	Pending status = iota
-	Processing
-	Complete
-)
+	// Get orders from the queue
+	orders, err := getOrdersFromQueue()
+	if err != nil {
+		log.Printf("Failed to fetch orders from queue: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-type item struct {
-	Product  int     `json:"productId"`
-	Quantity int     `json:"quantity"`
-	Price    float64 `json:"price"`
+	// Save orders to database
+	err = client.repo.InsertOrders(orders)
+	if err != nil {
+		log.Printf("Failed to save orders to database: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// Return the orders to be processed
+	orders, err = client.repo.GetPendingOrders()
+	if err != nil {
+		log.Printf("Failed to get pending orders from database: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, orders)
+}
+
+// Gets a single order from database by order ID
+func getOrder(c *gin.Context) {
+	client, ok := c.MustGet("orderService").(*OrderService)
+	if !ok {
+		log.Printf("Failed to get order service")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err := validate.Var(c.Param("id"), "required,numeric")
+	if err != nil {
+		log.Printf("Failed to validate order id: %s", err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		log.Printf("Failed to convert order id to int: %s", err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	orderId := strconv.FormatInt(int64(id), 10)
+
+	order, err := client.repo.GetOrder(orderId)
+	if err != nil {
+		log.Printf("Failed to get order from database: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, order)
+}
+
+// Updates the status of an order
+func updateOrder(c *gin.Context) {
+	client, ok := c.MustGet("orderService").(*OrderService)
+	if !ok {
+		log.Printf("Failed to get order service")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// unmarsal the order from the request body
+	var order Order
+	if err := c.BindJSON(&order); err != nil {
+		log.Printf("Failed to unmarshal order: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err := validate.Struct(order)
+	validationErrors := err.(validator.ValidationErrors)
+	if err != nil {
+		log.Printf("Failed to validate order: %s", validationErrors)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	err = validate.Var(order.OrderID, "required,numeric")
+	if err != nil {
+		log.Printf("Failed to validate order id: %s", err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		log.Printf("Failed to convert order id to int: %s", err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	sanitizedOrderId := strconv.FormatInt(int64(id), 10)
+
+	sanitizedOrder := Order{
+		OrderID:    sanitizedOrderId,
+		CustomerID: order.CustomerID,
+		Items:      order.Items,
+		Status:     order.Status,
+	}
+
+	err = client.repo.UpdateOrder(sanitizedOrder)
+	if err != nil {
+		log.Printf("Failed to update order status: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.SetAccepted("202")
+}
+
+// Gets an environment variable or exits if it is not set
+func getEnvVar(varName string) string {
+	value := os.Getenv(varName)
+	if value == "" {
+		log.Printf("%s is not set", varName)
+		os.Exit(1)
+	}
+	return value
+}
+
+// Initializes the database based on the API type
+func initDatabase(apiType string) (*OrderService, error) {
+	dbURI := getEnvVar("ORDER_DB_URI")
+	dbName := getEnvVar("ORDER_DB_NAME")
+
+	switch apiType {
+	case AZURE_COSMOS_DB_SQL_API:
+		containerName := getEnvVar("ORDER_DB_CONTAINER_NAME")
+		dbPassword := os.Getenv("ORDER_DB_PASSWORD")
+		dbPartitionKey := getEnvVar("ORDER_DB_PARTITION_KEY")
+		dbPartitionValue := getEnvVar("ORDER_DB_PARTITION_VALUE")
+		cosmosRepo, err := NewCosmosDBOrderRepo(dbURI, dbName, containerName, dbPassword, PartitionKey{dbPartitionKey, dbPartitionValue})
+		if err != nil {
+			return nil, err
+		}
+		return NewOrderService(cosmosRepo), nil
+	default:
+		collectionName := getEnvVar("ORDER_DB_COLLECTION_NAME")
+		dbUsername := os.Getenv("ORDER_DB_USERNAME")
+		dbPassword := os.Getenv("ORDER_DB_PASSWORD")
+		mongoRepo, err := NewMongoDBOrderRepo(dbURI, dbName, collectionName, dbUsername, dbPassword)
+		if err != nil {
+			return nil, err
+		}
+		return NewOrderService(mongoRepo), nil
+	}
 }

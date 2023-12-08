@@ -61,7 +61,7 @@ services:
     restart: always
     environment:
       - ORDER_SERVICE_URL=http://orderservice:3000/
-      - ORDERS_PER_HOUR=3600
+      - ORDERS_PER_HOUR=60
     networks:
       - backend_services
     depends_on:
