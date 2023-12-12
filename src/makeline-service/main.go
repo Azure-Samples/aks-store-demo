@@ -8,10 +8,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
-
-var validate *validator.Validate
 
 // Valid database API types
 const (
@@ -105,13 +102,6 @@ func getOrder(c *gin.Context) {
 		return
 	}
 
-	err := validate.Var(c.Param("id"), "required,numeric")
-	if err != nil {
-		log.Printf("Failed to validate order id: %s", err)
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Printf("Failed to convert order id to int: %s", err)
@@ -119,9 +109,9 @@ func getOrder(c *gin.Context) {
 		return
 	}
 
-	orderId := strconv.FormatInt(int64(id), 10)
+	sanitizedOrderId := strconv.FormatInt(int64(id), 10)
 
-	order, err := client.repo.GetOrder(orderId)
+	order, err := client.repo.GetOrder(sanitizedOrderId)
 	if err != nil {
 		log.Printf("Failed to get order from database: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -148,21 +138,7 @@ func updateOrder(c *gin.Context) {
 		return
 	}
 
-	err := validate.Struct(order)
-	validationErrors := err.(validator.ValidationErrors)
-	if err != nil {
-		log.Printf("Failed to validate order: %s", validationErrors)
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	err = validate.Var(order.OrderID, "required,numeric")
-	if err != nil {
-		log.Printf("Failed to validate order id: %s", err)
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(order.OrderID)
 	if err != nil {
 		log.Printf("Failed to convert order id to int: %s", err)
 		c.AbortWithStatus(http.StatusBadRequest)
