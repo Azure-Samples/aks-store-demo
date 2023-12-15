@@ -67,7 +67,7 @@ else:
             kernel.add_chat_service("dv", AzureChatCompletion(deployment_name=deployment, endpoint=endpoint, api_key=access_token.token, ad_auth=True))
         else:
             print("Authenticating to Azure OpenAI with OpenAI API key")
-            kernel.add_chat_service("dv", AzureChatCompletion(deployment, endpoint, api_key))
+            kernel.add_chat_service("dv", AzureChatCompletion(deployment_name=deployment, endpoint=endpoint, api_key=api_key))
 
     # Import semantic skills from the "skills" directory
     skills_directory: str = "skills"
