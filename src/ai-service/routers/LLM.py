@@ -63,7 +63,7 @@ def get_llm():
                 print("Authenticating to Azure OpenAI with Azure AD Workload Identity")
                 credential = DefaultAzureCredential()
                 access_token = credential.get_token("https://cognitiveservices.azure.com/.default")
-                kernel.add_chat_service("dv", AzureChatCompletion(deployment_name=deployment, endpoint=endpoint, api_key=access_token.token, ad_auth=True))
+                kernel.add_chat_service("dv", AzureChatCompletion(deployment_name=deployment, endpoint=endpoint, ad_token=access_token.token))
             else:
                 print("Authenticating to Azure OpenAI with OpenAI API key")
                 kernel.add_chat_service("dv", AzureChatCompletion(deployment_name=deployment, endpoint=endpoint, api_key=api_key))
