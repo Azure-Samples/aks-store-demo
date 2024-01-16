@@ -61,7 +61,7 @@ kind: Service
 metadata:
   name: store-admin
 spec:
-  type: ClusterIP  
+  type: LoadBalancer 
   ports:
   - port: 80
     targetPort: 8081
