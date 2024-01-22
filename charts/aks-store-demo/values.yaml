@@ -38,6 +38,12 @@ makelineService:
   orderDBUsername: ""
   orderDBPassword: ""
 
+storeFront:
+  serviceType: LoadBalancer
+
+storeAdmin:
+  serviceType: LoadBalancer
+
 podAnnotations: {}
 
 podSecurityContext: {}
