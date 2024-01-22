@@ -125,7 +125,15 @@ The `makeline-service` supports both MongoDB and SQL API for accessing data in A
 azd env set AZURE_COSMOSDB_ACCOUNT_KIND GlobalDocumentDB
 ```
 
-Deploy the app with a single command.
+The `azd up` command will provision all Azure infrastructure using Terraform and import containers from GitHub Container Registry into your Azure Container Registry. If you want to build containers from source you can set the `BUILD_CONTAINERS` environment variable to "true" and the `azd` post-provision process will build containers using the `az acr build` task to build each container from source.
+
+To build containers from source, run the following command. Otherwise, you can skip this command and containers will be imported instead.
+
+```bash
+azd env set BUILD_CONTAINERS true
+```
+
+Provision and deploy the app with a single command.
 
 ```bash
 azd up
@@ -137,11 +145,6 @@ Once the deployment is complete, you can verify all the services are running and
 
 - In the Azure portal, navigate to your Azure Service Bus resource and use Azure Service Bus explorer to check for order messages
 - In the Azure portal, navigate to your Azure Cosmos DB resource and use the database explorer to check for order records
-- Port-forward the store-admin service (using the command below) then open http://localhost:8081 in your browser and ensure you can add product descriptions using the AI service
-
-  ```bash
-  kubectl port-forward svc/store-admin 8081:80
-  ```
 
 ## Additional Resources
 

@@ -1,11 +1,17 @@
 #!/bin/bash
 
-echo "Build container images"
-az acr build --registry ${registry_name} --image aks-store-demo/ai-service:latest ./src/ai-service/
-az acr build --registry ${registry_name} --image aks-store-demo/makeline-service:latest ./src/makeline-service/
-az acr build --registry ${registry_name} --image aks-store-demo/order-service:latest ./src/order-service/
-az acr build --registry ${registry_name} --image aks-store-demo/product-service:latest ./src/product-service/
-az acr build --registry ${registry_name} --image aks-store-demo/store-admin:latest ./src/store-admin/
-az acr build --registry ${registry_name} --image aks-store-demo/store-front:latest ./src/store-front/
-az acr build --registry ${registry_name} --image aks-store-demo/virtual-customer:latest ./src/virtual-customer/
-az acr build --registry ${registry_name} --image aks-store-demo/virtual-worker:latest ./src/virtual-worker/
+services=("ai-service" "makeline-service" "order-service" "product-service" "store-admin" "store-front" "virtual-customer" "virtual-worker")
+
+if [ -n "$BUILD_CONTAINERS" ] && [ "$BUILD_CONTAINERS" == "true" ]; then
+  echo "Build container images"
+  for service in "${services[@]}"; do
+    echo "Building aks-store-demo/${service}:latest"
+    az acr build --registry ${registry_name} --image aks-store-demo/${service}:latest ./src/${service}/
+  done
+else
+  echo "Import container images"
+  for service in "${services[@]}"; do
+    echo "Importing aks-store-demo/${service}:latest"
+    az acr import --name ${registry_name} --source ghcr.io/azure-samples/aks-store-demo/${service}:latest --image aks-store-demo/${service}:latest
+  done
+fi
