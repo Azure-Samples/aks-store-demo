@@ -59,7 +59,7 @@ kind: Service
 metadata:
   name: store-front
 spec:
-  type: ClusterIP
+  type: {{ .Values.storeFront.serviceType }}
   ports:
   - port: 80
     targetPort: 8080
