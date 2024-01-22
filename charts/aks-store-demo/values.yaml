@@ -58,11 +58,13 @@ storeAdmin:
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/store-admin"
     tag: "latest"
+  serviceType: LoadBalancer
 
 storeFront:
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/store-front"
     tag: "latest"
+  serviceType: LoadBalancer
 
 virtualCustomer:
   image:
@@ -73,12 +75,6 @@ virtualWorker:
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/virtual-worker"
     tag: "latest"
-
-storeFront:
-  serviceType: LoadBalancer
-
-storeAdmin:
-  serviceType: LoadBalancer
 
 podAnnotations: {}
 
