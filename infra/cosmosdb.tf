@@ -10,7 +10,7 @@ resource "azurerm_cosmosdb_account" "example" {
   dynamic "capabilities" {
     for_each = var.cosmosdb_account_kind == "MongoDB" ? ["EnableAggregationPipeline", "mongoEnableDocLevelTTL", "MongoDBv3.4", "EnableMongo"] : ["EnableAggregationPipeline"]
     content {
-      name = "${capabilities.value}"
+      name = capabilities.value
     }
   }
 

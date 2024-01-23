@@ -125,9 +125,17 @@ The `makeline-service` supports both MongoDB and SQL API for accessing data in A
 azd env set AZURE_COSMOSDB_ACCOUNT_KIND GlobalDocumentDB
 ```
 
-The `azd up` command will provision all Azure infrastructure using Terraform and import containers from GitHub Container Registry into your Azure Container Registry. If you want to build containers from source you can set the `BUILD_CONTAINERS` environment variable to "true" and the `azd` post-provision process will build containers using the `az acr build` task to build each container from source.
+By default, all application containers will be sourced from the [GitHub Container Registry](https://github.com/orgs/Azure-Samples/packages?repo_name=aks-store-demo). If you want to deploy apps from an Azure Container registry instead, you can do so by setting the following environment variable.
 
-To build containers from source, run the following command. Otherwise, you can skip this command and containers will be imported instead.
+```bash
+azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
+```
+
+This will instruct the Terraform templates to provision an Azure Container Registry and enable authentication from the AKS cluster.
+
+When you choose to deploy containers from Azure Container Registry, you will have the option to import containers from GitHub Container Registry using the `az acr import` command or build containers from source using the `az acr build` command. 
+
+To build containers from source, run the following command. 
 
 ```bash
 azd env set BUILD_CONTAINERS true

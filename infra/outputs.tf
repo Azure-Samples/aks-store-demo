@@ -72,9 +72,9 @@ output "k8s_namespace" {
 }
 
 output "registry_name" {
-  value = azurerm_container_registry.example.name
+  value = local.deploy_acr ? azurerm_container_registry.example[0].name : ""
 }
 
 output "registry_uri" {
-  value = azurerm_container_registry.example.login_server
+  value = local.deploy_acr ? azurerm_container_registry.example[0].login_server : "ghcr.io/azure-samples"
 }

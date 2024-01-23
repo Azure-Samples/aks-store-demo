@@ -41,3 +41,8 @@ variable "cosmosdb_account_kind" {
   }
 }
 
+variable "deploy_acr" {
+  description = "value of deploy acr. this string value will be used to set the local variable"
+  type        = string
+  default     = "false"
+}

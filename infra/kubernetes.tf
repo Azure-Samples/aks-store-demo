@@ -1,4 +1,5 @@
 resource "azurerm_container_registry" "example" {
+  count               = local.deploy_acr ? 1 : 0
   name                = "acr${local.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -34,8 +35,9 @@ resource "azurerm_kubernetes_cluster" "example" {
 }
 
 resource "azurerm_role_assignment" "example" {
+  count                            = local.deploy_acr ? 1 : 0
   principal_id                     = azurerm_kubernetes_cluster.example.kubelet_identity[0].object_id
   role_definition_name             = "AcrPull"
-  scope                            = azurerm_container_registry.example.id
+  scope                            = azurerm_container_registry.example[0].id
   skip_service_principal_aad_check = true
 }
