@@ -8,7 +8,7 @@ resource "azurerm_cosmosdb_account" "example" {
   enable_automatic_failover = false
 
   dynamic "capabilities" {
-    for_each = var.cosmosdb_account_kind == "MongoDB" ? ["EnableAggregationPipeline", "mongoEnableDocLevelTTL", "MongoDBv3.4", "EnableMongo"] : ["EnableAggregationPipeline"]
+    for_each = local.cosmosdb_account_kind == "MongoDB" ? ["EnableAggregationPipeline", "mongoEnableDocLevelTTL", "MongoDBv3.4", "EnableMongo"] : ["EnableAggregationPipeline"]
     content {
       name = capabilities.value
     }
@@ -32,7 +32,7 @@ resource "azurerm_cosmosdb_account" "example" {
 }
 
 resource "azurerm_cosmosdb_mongo_database" "example" {
-  count               = var.cosmosdb_account_kind == "MongoDB" ? 1 : 0
+  count               = local.cosmosdb_account_kind == "MongoDB" ? 1 : 0
   name                = "orderdb"
   resource_group_name = azurerm_cosmosdb_account.example.resource_group_name
   account_name        = azurerm_cosmosdb_account.example.name
@@ -40,7 +40,7 @@ resource "azurerm_cosmosdb_mongo_database" "example" {
 }
 
 resource "azurerm_cosmosdb_mongo_collection" "example" {
-  count               = var.cosmosdb_account_kind == "MongoDB" ? 1 : 0
+  count               = local.cosmosdb_account_kind == "MongoDB" ? 1 : 0
   name                = "orders"
   resource_group_name = azurerm_cosmosdb_account.example.resource_group_name
   account_name        = azurerm_cosmosdb_account.example.name
@@ -54,7 +54,7 @@ resource "azurerm_cosmosdb_mongo_collection" "example" {
 }
 
 resource "azurerm_cosmosdb_sql_database" "example" {
-  count               = var.cosmosdb_account_kind == "GlobalDocumentDB" ? 1 : 0
+  count               = local.cosmosdb_account_kind == "GlobalDocumentDB" ? 1 : 0
   name                = "orderdb"
   resource_group_name = azurerm_cosmosdb_account.example.resource_group_name
   account_name        = azurerm_cosmosdb_account.example.name
@@ -62,7 +62,7 @@ resource "azurerm_cosmosdb_sql_database" "example" {
 }
 
 resource "azurerm_cosmosdb_sql_container" "example" {
-  count                 = var.cosmosdb_account_kind == "GlobalDocumentDB" ? 1 : 0
+  count                 = local.cosmosdb_account_kind == "GlobalDocumentDB" ? 1 : 0
   name                  = "orders"
   resource_group_name   = azurerm_cosmosdb_account.example.resource_group_name
   account_name          = azurerm_cosmosdb_account.example.name
