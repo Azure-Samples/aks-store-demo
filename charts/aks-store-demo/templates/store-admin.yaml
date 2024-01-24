@@ -25,6 +25,8 @@ spec:
           value: "http://product-service:3002/"
         - name: VUE_APP_MAKELINE_SERVICE_URL
           value: "http://makeline-service:3001/"
+        - name: VUE_APP_AI_SERVICE_URL               # this key/value pair is to support previous versions of store-admin <= 1.1.0
+          value: "http://ai-service:5001/"           # container images hosted on ghcr.io and will be removed in future releases
         resources:
           requests:
             cpu: 1m
