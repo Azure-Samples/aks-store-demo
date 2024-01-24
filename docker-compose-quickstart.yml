@@ -53,6 +53,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    environment:
+      - AI_SERVICE_URL=http://ai-service:5001/
     networks:
       - backend_services
   store-front:
