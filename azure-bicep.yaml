@@ -15,5 +15,5 @@ hooks:
     interactive: false
     run: infra/azd-hooks/postprovision.sh
 infra:
-  provider: terraform
-  path: infra/terraform
+  provider: bicep
+  path: infra/bicep

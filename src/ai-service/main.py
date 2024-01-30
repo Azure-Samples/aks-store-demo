@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status
 from routers.description_generator import description
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import   JSONResponse
+from fastapi.responses import JSONResponse
 import os
 
 app = FastAPI(version=os.environ.get("APP_VERSION", "0.1.0"))
