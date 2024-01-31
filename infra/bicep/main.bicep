@@ -55,7 +55,7 @@ var openAiDeployment = [
     name: openAiModelName
     sku: {
       name: 'Standard'
-      capacity: 120
+      capacity: 60
     }
     model: {
       format: 'OpenAI'
