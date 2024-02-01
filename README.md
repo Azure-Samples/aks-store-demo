@@ -66,12 +66,12 @@ git clone https://github.com/Azure-Samples/aks-store-demo.git
 cd aks-store-demo
 ```
 
-Configure your Azure OpenAI or OpenAI API keys in [`docker-compose.yml`](./docker-compose.yml) using the environment variables in the `aiservice` section:
+Configure your Azure OpenAI or OpenAI API keys in [`docker-compose.yml`](./docker-compose.yml) using the environment variables in the `ai-service` section:
 
 ```yaml
-  aiservice:
+  ai-service:
     build: src/ai-service
-    container_name: 'aiservice'
+    container_name: 'ai-service'
     ...
     environment:
       - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
@@ -82,12 +82,12 @@ Configure your Azure OpenAI or OpenAI API keys in [`docker-compose.yml`](./docke
     ...
 ```
 
-Alternatively, if you do not have access to Azure OpenAI or OpenAI API keys, you can run the app without the `ai-service` by commenting out the `aiservice` section in [`docker-compose.yml`](./docker-compose.yml). For example:
+Alternatively, if you do not have access to Azure OpenAI or OpenAI API keys, you can run the app without the `ai-service` by commenting out the `ai-service` section in [`docker-compose.yml`](./docker-compose.yml). For example:
 
 ```yaml
-#  aiservice:
+#  ai-service:
 #    build: src/ai-service
-#    container_name: 'aiservice'
+#    container_name: 'ai-service'
 ...
 #    networks:
 #      - backend_services
@@ -119,7 +119,29 @@ azd auth login
 az login
 ```
 
-Deploy the app with a single command.
+The `makeline-service` supports both MongoDB and SQL API for accessing data in Azure CosmosDB. The default API is `MongoDB`, but you can use SQL API. To use the SQL API for Azure CosmosDB, you must provision the service using the `GlobalDocumentDB` account kind. You can set the Azure CosmosDB account kind by running the following command prior to running `azd up`:
+
+```bash
+azd env set AZURE_COSMOSDB_ACCOUNT_KIND GlobalDocumentDB
+```
+
+By default, all application containers will be sourced from the [GitHub Container Registry](https://github.com/orgs/Azure-Samples/packages?repo_name=aks-store-demo). If you want to deploy apps from an Azure Container registry instead, you can do so by setting the following environment variable.
+
+```bash
+azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
+```
+
+This will instruct the Terraform templates to provision an Azure Container Registry and enable authentication from the AKS cluster.
+
+When you choose to deploy containers from Azure Container Registry, you will have the option to import containers from GitHub Container Registry using the `az acr import` command or build containers from source using the `az acr build` command. 
+
+To build containers from source, run the following command. 
+
+```bash
+azd env set BUILD_CONTAINERS true
+```
+
+Provision and deploy the app with a single command.
 
 ```bash
 azd up
@@ -131,11 +153,6 @@ Once the deployment is complete, you can verify all the services are running and
 
 - In the Azure portal, navigate to your Azure Service Bus resource and use Azure Service Bus explorer to check for order messages
 - In the Azure portal, navigate to your Azure Cosmos DB resource and use the database explorer to check for order records
-- Port-forward the store-admin service (using the command below) then open http://localhost:8081 in your browser and ensure you can add product descriptions using the AI service
-
-  ```bash
-  kubectl port-forward svc/store-admin 8081:80
-  ```
 
 ## Additional Resources
 

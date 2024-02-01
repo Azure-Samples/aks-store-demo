@@ -1,29 +1,19 @@
 #!/bin/bash
 
-echo "Retrieving cluster credentials"
-az aks get-credentials --resource-group ${rg_name} --name ${aks_name}
+services=("ai-service" "makeline-service" "order-service" "product-service" "store-admin" "store-front" "virtual-customer" "virtual-worker")
 
-# echo "Deploy the manifests"
-# kubectl apply -f manifests/
-
-echo "Deploy Helm chart"
-helm upgrade aks-store-demo ./charts/aks-store-demo \
-  --install \
-  --set aiService.create=true \
-  --set aiService.modelDeploymentName=${ai_model_name} \
-  --set aiService.openAiEndpoint=${ai_endpoint} \
-  --set aiService.managedIdentityClientId=${ai_managed_identity_client_id} \
-  --set orderService.useAzureServiceBus=true \
-  --set orderService.queueHost=${sb_namespace_host} \
-  --set orderService.queuePort=5671 \
-  --set orderService.queueUsername=${sb_sender_username} \
-  --set orderService.queuePassword=${sb_sender_key} \
-  --set orderService.queueTransport=tls \
-  --set makelineService.useAzureCosmosDB=true \
-  --set makelineService.orderQueueUri=${sb_namespace_uri} \
-  --set makelineService.orderQueueUsername=${sb_listener_username} \
-  --set makelineService.orderQueuePassword=${sb_listener_key} \
-  --set makelineService.orderDBUri=${db_uri} \
-  --set makelineService.orderDBUsername=${db_account_name} \
-  --set makelineService.orderDBPassword=${db_key} \
-  
+if [ -n "$DEPLOY_AZURE_CONTAINER_REGISTRY" ] && [ "$BUILD_CONTAINERS" == "true" ]; then
+  echo "Build container images"
+  for service in "${services[@]}"; do
+    echo "Building aks-store-demo/${service}:latest"
+    az acr build --registry ${registry_name} --image aks-store-demo/${service}:latest ./src/${service}/
+  done
+elif [ -n "$DEPLOY_AZURE_CONTAINER_REGISTRY" ] && ([ -z "$BUILD_CONTAINERS" ] || [ "$BUILD_CONTAINERS" == "false" ]); then
+  echo "Import container images"
+  for service in "${services[@]}"; do
+    echo "Importing aks-store-demo/${service}:latest"
+    az acr import --name ${registry_name} --source ghcr.io/azure-samples/aks-store-demo/${service}:latest --image aks-store-demo/${service}:latest
+  done
+else 
+  echo "No BUILD_CONTAINERS variable set, skipping container build/import"
+fi

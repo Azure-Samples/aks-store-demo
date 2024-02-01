@@ -54,8 +54,12 @@ output "db_account_name" {
   value = azurerm_cosmosdb_account.example.name
 }
 
+output "db_api" {
+  value = local.cosmosdb_account_kind == "MongoDB" ? "mongodb" : "cosmosdbsql"
+}
+
 output "db_uri" {
-  value = "mongodb://${azurerm_cosmosdb_account.example.name}.mongo.cosmos.azure.com:10255/?retryWrites=false"
+  value = local.cosmosdb_account_kind == "MongoDB" ? "mongodb://${azurerm_cosmosdb_account.example.name}.mongo.cosmos.azure.com:10255/?retryWrites=false" : "https://${azurerm_cosmosdb_account.example.name}.documents.azure.com:443/"
 }
 
 output "db_key" {
@@ -65,4 +69,12 @@ output "db_key" {
 
 output "k8s_namespace" {
   value = var.k8s_namespace
+}
+
+output "registry_name" {
+  value = local.deploy_acr ? azurerm_container_registry.example[0].name : ""
+}
+
+output "registry_uri" {
+  value = local.deploy_acr ? azurerm_container_registry.example[0].login_server : "ghcr.io/azure-samples"
 }

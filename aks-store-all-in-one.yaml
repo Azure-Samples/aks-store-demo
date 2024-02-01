@@ -300,13 +300,16 @@ spec:
         image: ghcr.io/azure-samples/aks-store-demo/product-service:latest
         ports:
         - containerPort: 3002
+        env: 
+        - name: AI_SERVICE_URL
+          value: "http://ai-service:5001/"
         resources:
           requests:
             cpu: 1m
             memory: 1Mi
           limits:
-            cpu: 1m
-            memory: 7Mi
+            cpu: 2m
+            memory: 10Mi
         readinessProbe:
           httpGet:
             path: /health
@@ -374,7 +377,7 @@ spec:
             path: /health
             port: 8080
           failureThreshold: 3
-          initialDelaySeconds: 15
+          initialDelaySeconds: 5
           periodSeconds: 5
         readinessProbe:
           httpGet:
@@ -430,8 +433,6 @@ spec:
           value: "http://product-service:3002/"
         - name: VUE_APP_MAKELINE_SERVICE_URL
           value: "http://makeline-service:3001/"
-        - name: VUE_APP_AI_SERVICE_URL
-          value: "http://ai-service:5001/"
         resources:
           requests:
             cpu: 1m
@@ -444,7 +445,7 @@ spec:
             path: /health
             port: 8081
           failureThreshold: 3
-          initialDelaySeconds: 15
+          initialDelaySeconds: 5
           periodSeconds: 5
         readinessProbe:
           httpGet:

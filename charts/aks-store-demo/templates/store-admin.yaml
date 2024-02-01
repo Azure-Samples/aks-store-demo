@@ -16,7 +16,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: store-admin
-        image: ghcr.io/azure-samples/aks-store-demo/store-admin:1.0.0
+        image: {{ .Values.storeAdmin.image.repository }}:{{ .Values.storeAdmin.image.tag }}
         ports:
         - containerPort: 8081
           name: store-admin
@@ -25,8 +25,8 @@ spec:
           value: "http://product-service:3002/"
         - name: VUE_APP_MAKELINE_SERVICE_URL
           value: "http://makeline-service:3001/"
-        - name: VUE_APP_AI_SERVICE_URL
-          value: "http://ai-service:5001/"
+        - name: VUE_APP_AI_SERVICE_URL               # this key/value pair is to support previous versions of store-admin <= 1.1.0
+          value: "http://ai-service:5001/"           # container images hosted on ghcr.io and will be removed in future releases
         resources:
           requests:
             cpu: 1m
@@ -39,7 +39,7 @@ spec:
             path: /health
             port: 8081
           failureThreshold: 3
-          initialDelaySeconds: 15
+          initialDelaySeconds: 5
           periodSeconds: 5
         readinessProbe:
           httpGet:

@@ -42,11 +42,6 @@ resource "random_pet" "example" {
   }
 }
 
-locals {
-  name     = "${random_pet.example.id}${random_integer.example.result}"
-  location = var.location
-}
-
 data "azurerm_subscription" "current" {}
 data "azurerm_client_config" "current" {}
 

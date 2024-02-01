@@ -16,16 +16,19 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: product-service
-        image: ghcr.io/azure-samples/aks-store-demo/product-service:1.0.0
+        image: {{ .Values.productService.image.repository }}:{{ .Values.productService.image.tag }}
         ports:
         - containerPort: 3002
+        env: 
+        - name: AI_SERVICE_URL
+          value: "http://ai-service:5001/"
         resources:
           requests:
             cpu: 1m
             memory: 1Mi
           limits:
-            cpu: 1m
-            memory: 6Mi
+            cpu: 2m
+            memory: 10Mi
         readinessProbe:
           httpGet:
             path: /health
