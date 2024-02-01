@@ -19,6 +19,32 @@ Content-Type: application/json
     "image": "/placeholder.png"
 }
 
+### Update product with too short of a description
+PUT /
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "id": 11,
+    "name": "Where My Dogs At Digital Collar Tag",
+    "price": 105.99,
+    "description": "Tag your dog",
+    "image": "/placeholder.png"
+}
+
+### Update product with invalid price
+PUT /
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "id": 11,
+    "name": "Where My Dogs At Digital Collar Tag",
+    "price": 105.99,
+    "description": "Ensure your furry friend always finds their way home with this Where My Dogs At Digital Collar Tag. This digital tag uses low energy bluetooth to connect to your phone and features a fun design that will make your dog the talk of the town. It also includes a metal ring that makes it easy to attach to your dog's collar.",
+    "image": "/placeholder.png"
+}
+
 ### Update product
 PUT /
 Host: localhost:3002
