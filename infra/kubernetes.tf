@@ -25,6 +25,14 @@ resource "azurerm_kubernetes_cluster" "example" {
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
 
+  monitor_metrics {
+  }
+  
+  oms_agent {
+    log_analytics_workspace_id      = azurerm_log_analytics_workspace.example.id
+    msi_auth_for_monitoring_enabled = true
+  }
+
   lifecycle {
     ignore_changes = [
       monitor_metrics,
