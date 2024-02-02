@@ -7,7 +7,7 @@ test('can add product ', async ({ page }) => {
     await page.getByRole('link', { name: 'Products' }).click();
     await page.getByRole('button', { name: 'Add Product' }).click();
 
-    await page.getByPlaceholder('Product Name').fill('Scooby Snacks');
+    await page.getByPlaceholder('Product Name').fill('Bear Snacks');
     await page.getByPlaceholder('Price').fill('29.99');
     await page.getByPlaceholder('Product Keywords').fill('dog, snack, treat, courage, ghosts');
 
@@ -23,6 +23,6 @@ test('can add product ', async ({ page }) => {
     }
 
     await page.getByRole('button', { name: 'Save Product' }).click();
-    await expect(page.getByRole('heading', { name: 'Scooby Snacks - 29.99' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Bear Snacks - 29.99' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Edit Product' })).toBeVisible();
   });

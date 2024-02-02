@@ -2,12 +2,6 @@ name: Playwright Tests
 on:
   workflow_call:
     inputs:
-      testName:
-        required: true
-        type: string
-      runPlaywrightTests:
-        required: true
-        type: boolean
       storeAdminUrl:
         required: true
         type: string
@@ -17,7 +11,6 @@ on:
 
 jobs:
   playwright-tests:
-    if: inputs.runPlaywrightTests
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -42,6 +35,6 @@ jobs:
     - uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: playwright-report-${{ inputs.testName }}
+        name: playwright-report-store-admin
         path: tests/playwright-report/
         retention-days: 30
