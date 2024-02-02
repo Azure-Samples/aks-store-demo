@@ -49,7 +49,6 @@ resource "azurerm_cosmosdb_mongo_collection" "example" {
 
   index {
     keys   = ["_id"]
-    unique = true
   }
 }
 
