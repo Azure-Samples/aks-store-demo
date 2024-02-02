@@ -119,7 +119,7 @@ azd auth login
 az login
 ```
 
-> Note: This project is configured to be deployed with Terraform by default. In order to deploy using the bicep template, make sure to rename the `azure-bicep.yaml` file to `azure.yaml`.
+> Note: This project is configured to be deployed with Terraform by default. If you want to deploy using the bicep template, please rename the `azure-bicep.yaml` file to `azure.yaml`.
 
 Deploy the app with a single command.
 
