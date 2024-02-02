@@ -4,7 +4,8 @@ This sample demo app consists of a group of containerized microservices that can
 
 This application is inspired by another demo app called [Red Dog](https://github.com/Azure/reddog-code).
 
-> Note: This is not meant to be an example of perfect code to be used in production, but more about showing a realistic application running in AKS. 
+> [!NOTE]
+> This is not meant to be an example of perfect code to be used in production, but more about showing a realistic application running in AKS. 
 
 <!-- 
 To walk through a quick deployment of this application, see the [AKS Quickstart](https://learn.microsoft.com/azure/aks/learn/quick-kubernetes-deploy-cli).
@@ -36,7 +37,8 @@ The application has the following services:
 
 To learn how to depoy this app on AKS, see [Quickstart: Deploy an Azure Kubernetes Service (AKS) cluster using Azure CLI](https://learn.microsoft.com/azure/aks/learn/quick-kubernetes-deploy-cli).
 
-> Note: The above article shows a simplified version of the store app with some services removed. For the full application, you can use the `aks-store-all-in-one.yaml` file in this repo.
+> [!NOTE]
+> The above article shows a simplified version of the store app with some services removed. For the full application, you can use the `aks-store-all-in-one.yaml` file in this repo.
 
 ## Run on any Kubernetes
 
@@ -55,7 +57,8 @@ kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/
 
 The application is designed to be [run in an AKS cluster](#run-the-app-on-aks), but can also be run locally using Docker Compose.
 
-> **IMPORTANT**: You must have [Docker Desktop](https://www.docker.com/products/docker-desktop) installed to run this app locally.
+> [!TIP]
+> You must have [Docker Desktop](https://www.docker.com/products/docker-desktop) installed to run this app locally. If you do not have it installed locally, you can try opening this repo in a [GitHub Codespace instead](#run-the-app-with-github-codespaces)
 
 To run this app locally:
 
@@ -119,7 +122,7 @@ azd auth login
 az login
 ```
 
-> [!IMPORTANT]
+> [!WARNING]
 > Before you run the `azd up` command, make sure that you have the "Owner" role on the subscription you are deploying to. This is because the Terraform templates will create Azure role based access control (RBAC) assignments. Otherwise, the deployment will fail.
 
 The `makeline-service` supports both MongoDB and SQL API for accessing data in Azure CosmosDB. The default API is `MongoDB`, but you can use SQL API. To use the SQL API for Azure CosmosDB, you must provision the service using the `GlobalDocumentDB` account kind. You can set the Azure CosmosDB account kind by running the following command prior to running `azd up`:
@@ -149,8 +152,8 @@ Provision and deploy the app with a single command.
 ```bash
 azd up
 ```
-
-> Note: When selecting an Azure region, make sure to choose one that supports all the services used in this app including Azure OpenAI, Azure Kubernetes Service, Azure Service Bus, and Azure Cosmos DB.
+> [!WARNING]
+> When selecting an Azure region, make sure to choose one that supports all the services used in this app including Azure OpenAI, Azure Kubernetes Service, Azure Service Bus, Azure Cosmos DB, Azure Log Analytics Workspace, Azure Monitor workspace, and Azure Managed Grafana.
 
 Once the deployment is complete, you can verify all the services are running and the app is working by following these steps:
 
