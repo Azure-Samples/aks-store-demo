@@ -2,6 +2,10 @@ param name string
 param location string
 param tags object = {}
 
+param keyVaultName string
+param listenerKeyName string = 'AZURE-SERVICE-BUS-LISTENER-KEY'
+param senderKeyName string = 'AZURE-SERVICE-BUS-SENDER-KEY'
+
 // Service Bus Namespace
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   name: name
@@ -40,9 +44,27 @@ resource serviceBusNamespaceQueueAuthorizationRule 'Microsoft.ServiceBus/namespa
   }
 }
 
+module senderKey '../core/security/keyvault-secret.bicep' = {
+  name: 'senderKey'
+  params: {
+    name: senderKeyName
+    keyVaultName: keyVaultName
+    secretValue: serviceBusNamespaceQueueAuthorizationRule.listKeys().primaryKey
+  }
+}
+
+module listenerKey '../core/security/keyvault-secret.bicep' = {
+  name: 'listenerKey'
+  params: {
+    name: listenerKeyName
+    keyVaultName: keyVaultName
+    secretValue: serviceBusNamespaceAuthorizationRule.listKeys().primaryKey
+  }
+}
+
 output serviceBusEndpoint string = serviceBusNamespace.properties.serviceBusEndpoint
 output serviceBusListenerName string = serviceBusNamespaceAuthorizationRule.name
 output serviceBusSenderName string = serviceBusNamespaceQueueAuthorizationRule.name
-output serviceBusListenerKey string = serviceBusNamespaceAuthorizationRule.listKeys().primaryKey
-output serviceBusSenderKey string = serviceBusNamespaceQueueAuthorizationRule.listKeys().primaryKey
+output serviceBusListenerKey string = listenerKeyName
+output serviceBusSenderKey string = senderKeyName
 output serviceBusNamespaceName string = serviceBusNamespace.name

@@ -24,6 +24,7 @@ param cosmosAccountName string = ''
 param cosmosDatabaseName string = 'orderdb'
 param servicebusName string = ''
 
+
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
 
@@ -93,7 +94,7 @@ module identity './app/identity.bicep' = {
     location: location
     tags: tags
     principalId: principalId
-    k8s_namespace: k8s_namespace
+    AZURE_AKS_NAMESPACE: k8s_namespace
     clusterName: kubernetes.outputs.clusterName
   }
 }
@@ -149,6 +150,7 @@ module serviceBus './app/servicebus.bicep' = {
     name: !empty(servicebusName) ? servicebusName : '${abbrs.serviceBusNamespaces}${resourceToken}'
     location: location
     tags: tags
+    keyVaultName: keyVault.outputs.name
   }
 }
 
@@ -157,6 +159,7 @@ module getKeys './app/get-keys.bicep' = {
   name: 'get-keys'
   scope: rg
   params:{
+    keyVaultName: keyVault.outputs.name
     openAiName: openAi.outputs.name
     cosmosAccountName: !empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
   }
@@ -166,19 +169,19 @@ module getKeys './app/get-keys.bicep' = {
 }
 
 // outputs data
-output rg_name string = rg.name
-output aks_name string = kubernetes.outputs.clusterName
-output ai_model_name string = openAiModelName
-output ai_endpoint string = openAi.outputs.endpoint
-output ai_key string = getKeys.outputs.openAiKey
-output ai_managed_identity_client_id string = identity.outputs.clientId
-output sb_namespace_host string = '${serviceBus.outputs.serviceBusNamespaceName}.servicebus.windows.net'
-output sb_namespace_uri string = 'amqps://${serviceBus.outputs.serviceBusNamespaceName}.servicebus.windows.net'
-output sb_listener_username string = serviceBus.outputs.serviceBusListenerName
-output sb_listener_key string = serviceBus.outputs.serviceBusListenerKey
-output sb_sender_username string = serviceBus.outputs.serviceBusSenderName
-output sb_sender_key string = serviceBus.outputs.serviceBusSenderKey
-output db_account_name string = !empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
-output db_uri string = 'mongodb://${!empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'}.mongo.cosmos.azure.com:10255/?retryWrites=false'
-output db_key string = getKeys.outputs.dbKey
-output k8s_namespace string = k8s_namespace
+output AZURE_RESOURCEGROUP_NAME string = rg.name
+output AZURE_AKS_CLUSTER_NAME string = kubernetes.outputs.clusterName
+output AZURE_OPENAI_MODEL_NAME string = openAiModelName
+output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
+output AZURE_IDENTITY_CLIENT_ID string = identity.outputs.clientId
+output AZURE_SERVICE_BUS_HOST string = '${serviceBus.outputs.serviceBusNamespaceName}.servicebus.windows.net'
+output AZURE_SERVICE_BUS_URI string = 'amqps://${serviceBus.outputs.serviceBusNamespaceName}.servicebus.windows.net'
+output AZURE_SERVICE_BUS_LISTENER_NAME string = serviceBus.outputs.serviceBusListenerName
+output AZURE_SERVICE_BUS_LISTENER_KEY string = serviceBus.outputs.serviceBusListenerKey
+output AZURE_SERVICE_BUS_SENDER_NAME string = serviceBus.outputs.serviceBusSenderName
+output AZURE_SERVICE_BUS_SENDER_KEY string = serviceBus.outputs.serviceBusSenderKey
+output AZURE_COSMOS_DATABASE_NAME string = !empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+output AZURE_COSMOS_DATABASE_URI string = 'mongodb://${!empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'}.mongo.cosmos.azure.com:10255/?retryWrites=false'
+output AZURE_COSMOS_DATABASE_KEY string = getKeys.outputs.cosmosKey
+output AZURE_AKS_NAMESPACE string = k8s_namespace
+output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name

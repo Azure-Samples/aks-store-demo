@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Retrieving cluster credentials"
-az aks get-credentials --resource-group ${rg_name} --name ${aks_name}
+az aks get-credentials --resource-group ${AZURE_RESOURCEGROUP_NAME} --name ${AZURE_AKS_CLUSTER_NAME}
 
 # echo "Deploy the manifests"
 # kubectl apply -f manifests/
@@ -10,20 +10,20 @@ echo "Deploy Helm chart"
 helm upgrade aks-store-demo ./charts/aks-store-demo \
   --install \
   --set aiService.create=true \
-  --set aiService.modelDeploymentName=${ai_model_name} \
-  --set aiService.openAiEndpoint=${ai_endpoint} \
-  --set aiService.managedIdentityClientId=${ai_managed_identity_client_id} \
+  --set aiService.modelDeploymentName=${AZURE_OPENAI_MODEL_NAME} \
+  --set aiService.openAiEndpoint=${AZURE_OPENAI_ENDPOINT} \
+  --set aiService.managedIdentityClientId=${AZURE_IDENTITY_CLIENT_ID} \
   --set orderService.useAzureServiceBus=true \
-  --set orderService.queueHost=${sb_namespace_host} \
+  --set orderService.queueHost=${AZURE_SERVICE_BUS_HOST} \
   --set orderService.queuePort=5671 \
-  --set orderService.queueUsername=${sb_sender_username} \
-  --set orderService.queuePassword=${sb_sender_key} \
+  --set orderService.queueUsername=${AZURE_SERVICE_BUS_SENDER_NAME} \
+  --set orderService.queuePassword=$(az keyvault secret show --name ${AZURE_SERVICE_BUS_SENDER_KEY} --vault-name ${AZURE_KEY_VAULT_NAME} --query value -o tsv) \
   --set orderService.queueTransport=tls \
   --set makelineService.useAzureCosmosDB=true \
-  --set makelineService.orderQueueUri=${sb_namespace_uri} \
-  --set makelineService.orderQueueUsername=${sb_listener_username} \
-  --set makelineService.orderQueuePassword=${sb_listener_key} \
-  --set makelineService.orderDBUri=${db_uri} \
-  --set makelineService.orderDBUsername=${db_account_name} \
-  --set makelineService.orderDBPassword=${db_key} \
+  --set makelineService.orderQueueUri=${AZURE_SERVICE_BUS_URI} \
+  --set makelineService.orderQueueUsername=${AZURE_SERVICE_BUS_LISTENER_NAME} \
+  --set makelineService.orderQueuePassword=$(az keyvault secret show --name ${AZURE_SERVICE_BUS_LISTENER_KEY} --vault-name ${AZURE_KEY_VAULT_NAME} --query value -o tsv) \
+  --set makelineService.orderDBUri=${AZURE_COSMOS_DATABASE_URI} \
+  --set makelineService.orderDBUsername=${AZURE_COSMOS_DATABASE_NAME} \
+  --set makelineService.orderDBPassword=$(az keyvault secret show --name ${AZURE_COSMOS_DATABASE_KEY} --vault-name ${AZURE_KEY_VAULT_NAME} --query value -o tsv) \
   

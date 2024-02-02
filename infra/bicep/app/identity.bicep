@@ -2,7 +2,7 @@ param name string
 param location string
 param tags object = {}
 param principalId string
-param k8s_namespace string
+param AZURE_AKS_NAMESPACE string
 param clusterName string
 
 // identity for the openai
@@ -19,7 +19,7 @@ resource federatedCredential 'Microsoft.ManagedIdentity/userAssignedIdentities/f
   properties: {
     audiences: ['api://AzureADTokenExchange']
     issuer: aks.properties.oidcIssuerProfile.issuerURL
-    subject: 'system:serviceaccount:${k8s_namespace}:ai-service-account'
+    subject: 'system:serviceaccount:${AZURE_AKS_NAMESPACE}:ai-service-account'
   }
 }
 
