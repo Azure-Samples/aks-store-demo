@@ -119,6 +119,9 @@ azd auth login
 az login
 ```
 
+> [!IMPORTANT]
+> Before you run the `azd up` command, make sure that you have the "Owner" role on the subscription you are deploying to. This is because the Terraform templates will create Azure role based access control (RBAC) assignments. Otherwise, the deployment will fail.
+
 The `makeline-service` supports both MongoDB and SQL API for accessing data in Azure CosmosDB. The default API is `MongoDB`, but you can use SQL API. To use the SQL API for Azure CosmosDB, you must provision the service using the `GlobalDocumentDB` account kind. You can set the Azure CosmosDB account kind by running the following command prior to running `azd up`:
 
 ```bash
