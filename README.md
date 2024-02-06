@@ -35,7 +35,7 @@ The application has the following services:
 
 ## Run the app on Azure Kubernetes Service (AKS)
 
-To learn how to depoy this app on AKS, see [Quickstart: Deploy an Azure Kubernetes Service (AKS) cluster using Azure CLI](https://learn.microsoft.com/azure/aks/learn/quick-kubernetes-deploy-cli).
+To learn how to deploy this app on AKS, see [Quickstart: Deploy an Azure Kubernetes Service (AKS) cluster using Azure CLI](https://learn.microsoft.com/azure/aks/learn/quick-kubernetes-deploy-cli).
 
 > [!NOTE]
 > The above article shows a simplified version of the store app with some services removed. For the full application, you can use the `aks-store-all-in-one.yaml` file in this repo.
@@ -122,6 +122,9 @@ azd auth login
 az login
 ```
 
+> Note: This project is configured to be deployed with Terraform by default. If you want to deploy using the bicep template, please rename the `azure-bicep.yaml` file to `azure.yaml`.
+
+Deploy the app with a single command.
 > [!WARNING]
 > Before you run the `azd up` command, make sure that you have the "Owner" role on the subscription you are deploying to. This is because the Terraform templates will create Azure role based access control (RBAC) assignments. Otherwise, the deployment will fail.
 

@@ -2,7 +2,7 @@
 
 name: aks-store-demo
 metadata:
-  template: aks-store-demo@1.0.0
+  template: aks-store-dmeo@1.0.0
 hooks:
   preprovision:
     shell: sh
@@ -20,5 +20,5 @@ hooks:
     interactive: false
     run: azd-hooks/predeploy.sh
 infra:
-  provider: terraform
-  path: infra/terraform
+  provider: bicep
+  path: infra/bicep
