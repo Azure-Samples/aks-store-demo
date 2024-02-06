@@ -18,7 +18,7 @@ The app relies on the [product-service](../product-service), [makeline-service](
 
 To run the necessary services, clone the repo, open a terminal, and navigate to the `store-admin` directory.
 
-If you have access to OpenAI or Azure OpenAI, open the `docker-compose.yml` file, uncomment the `aiservices` block, and add your OpenAI or Azure OpenAI credentials.
+If you have access to OpenAI or Azure OpenAI, open the `docker-compose.yml` file, uncomment the `ai-services` block, and add your OpenAI or Azure OpenAI credentials.
 
 > IMPORTANT: When filling in the values, do not put the value in double-quotes.
 
@@ -42,7 +42,6 @@ With the services running, open a new terminal and navigate to the `store-admin`
 ```bash
 export VUE_APP_PRODUCT_SERVICE_URL=http://localhost:3002/
 export VUE_APP_MAKELINE_SERVICE_URL=http://localhost:3001/
-export VUE_APP_AI_SERVICE_URL=http://localhost:5001/
 
 npm install
 npm run serve

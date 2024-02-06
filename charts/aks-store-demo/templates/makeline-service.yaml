@@ -9,7 +9,14 @@ data:
   ORDER_QUEUE_NAME: "{{ .Values.makelineService.orderQueueName }}"
   ORDER_DB_URI: "{{ .Values.makelineService.orderDBUri }}"
   ORDER_DB_NAME: "{{ .Values.makelineService.orderDBName }}"
+  {{- if eq .Values.makelineService.useSqlApi true }}
+  ORDER_DB_API: cosmosdbsql
+  ORDER_DB_CONTAINER_NAME: "{{ .Values.makelineService.orderDBContainerName }}"
+  ORDER_DB_PARTITION_KEY: "storeId"
+  ORDER_DB_PARTITION_VALUE: "pets"
+  {{- else }}
   ORDER_DB_COLLECTION_NAME: "{{ .Values.makelineService.orderDBCollectionName }}"
+  {{- end }}
 ---
 {{- if and .Values.makelineService.orderDBUsername .Values.makelineService.orderDBPassword }}
 apiVersion: v1
@@ -39,7 +46,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: makeline-service
-        image: ghcr.io/azure-samples/aks-store-demo/makeline-service:1.0.0
+        image: {{ .Values.makelineService.image.repository }}:{{ .Values.makelineService.image.tag }}
         ports:
         - containerPort: 3001
         envFrom:

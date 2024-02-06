@@ -32,14 +32,14 @@ services:
       - ./rabbitmq_enabled_plugins:/etc/rabbitmq/enabled_plugins
     networks:
       - backend_services
-  orderservice:
+  order-service:
     build: src/order-service
-    container_name: 'orderservice'
+    container_name: 'order-service'
     restart: always
     ports:
       - 3000:3000
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://orderservice:3000/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://order-service:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -55,14 +55,14 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-  makelineservice:
+  makeline-service:
     build: src/makeline-service
-    container_name: 'makelineservice'
+    container_name: 'makeline-service'
     restart: always
     ports:
       - 3001:3001
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://makelineservice:3001/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://makeline-service:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -81,90 +81,91 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
-  productservice:
+  product-service:
     build: src/product-service
-    container_name: 'productservice'
+    container_name: 'product-service'
     restart: always
     ports:
       - 3002:3002
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://productservice:3002/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://product-service:3002/health"]
       interval: 30s
       timeout: 10s
       retries: 5
+    environment:
+      - AI_SERVICE_URL=http://ai-service:5001/
     networks:
       - backend_services
-  storefront:
+  store-front:
     build: src/store-front
-    container_name: 'storefront'
+    container_name: 'store-front'
     restart: always
     ports:
       - 8080:8080
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://storefront:80/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://store-front:80/health"]
       interval: 30s
       timeout: 10s
       retries: 5
     environment:
-      - VUE_APP_PRODUCT_SERVICE_URL=http://productservice:3002/
-      - VUE_APP_ORDER_SERVICE_URL=http://orderservice:3000/
+      - VUE_APP_PRODUCT_SERVICE_URL=http://product-service:3002/
+      - VUE_APP_ORDER_SERVICE_URL=http://order-service:3000/
     networks:
       - backend_services
     depends_on:
-      - productservice
-      - orderservice
-  storeadmin:
+      - product-service
+      - order-service
+  store-admin:
     build: src/store-admin
-    container_name: 'storeadmin'
+    container_name: 'store-admin'
     restart: always
     ports:
       - 8081:8081
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://storeadmin:80/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://store-admin:80/health"]
       interval: 30s
       timeout: 10s
       retries: 5
     environment:
-      - VUE_APP_PRODUCT_SERVICE_URL=http://productservice:3002/
-      - VUE_APP_MAKELINE_SERVICE_URL=http://makelineservice:3001/
-      - VUE_APP_AI_SERVICE_URL=http://aiservice:5001/
+      - VUE_APP_PRODUCT_SERVICE_URL=http://product-service:3002/
+      - VUE_APP_MAKELINE_SERVICE_URL=http://makeline-service:3001/
     networks:
       - backend_services
     depends_on:
-      - productservice
-      - makelineservice
-  virtualcustomer:
+      - product-service
+      - makeline-service
+  virtual-customer:
     build: src/virtual-customer
-    container_name: 'virtualcustomer'
+    container_name: 'virtual-customer'
     restart: always
     environment:
-      - ORDER_SERVICE_URL=http://orderservice:3000/
+      - ORDER_SERVICE_URL=http://order-service:3000/
       - ORDERS_PER_HOUR=500
     networks:
       - backend_services
     depends_on:
-      orderservice:
+      order-service:
         condition: service_healthy
-  virtualworker:
+  virtual-worker:
     build: src/virtual-worker
-    container_name: 'virtualworker'
+    container_name: 'virtual-worker'
     restart: always
     environment:
-      - MAKELINE_SERVICE_URL=http://makelineservice:3001
+      - MAKELINE_SERVICE_URL=http://makeline-service:3001
       - ORDERS_PER_HOUR=400
     networks:
       - backend_services
     depends_on:
-      makelineservice:
+      makeline-service:
         condition: service_healthy
-  aiservice:
+  ai-service:
     build: src/ai-service
-    container_name: 'aiservice'
+    container_name: 'ai-service'
     restart: always
     ports:
       - 5001:5001
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://aiservice:5001/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://ai-service:5001/health"]
       interval: 30s
       timeout: 10s
       retries: 5

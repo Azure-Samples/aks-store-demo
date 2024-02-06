@@ -20,24 +20,22 @@ param openAiModelName string = 'gpt-35-turbo'
 param identityName string = ''
 param kubernetesName string = ''
 param keyVaultName string = ''
-param cosmosAccountName string = ''
-param cosmosDatabaseName string = 'orderdb'
 param servicebusName string = ''
+param logAnalyticsName string = ''
+param monitorAccountName string = ''
+param containerRegistryName string = ''
 
+@description('Deploy an Azure Container Registry or not')
+param deployAcr bool = false
+
+@allowed([
+  'MongoDB'
+  'GlobalDocumentDB'
+])
+param cosmosdbAccountKind string = 'MongoDB'
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
-
-@description('The collections to create in the database')
-param collections array = [
-  {
-    id: 'orders'
-    name: 'orders'
-    shardKey: 'Hash'
-    indexKey: '_id'
-    throughput: 400
-  }
-]
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
@@ -128,19 +126,19 @@ module keyVault './core/security/keyvault.bicep' = {
   }
 }
 
-// the application database
-module cosmos './core/database/cosmos/mongo/cosmos-mongo-db.bicep' = {
-  name: 'cosmos-mongo'
+// create the cosmosdb
+module cosmos './app/db.bicep' = {
+  name: 'cosmos'
   scope: rg
   params: {
-    accountName: !empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
-    databaseName: cosmosDatabaseName
+    resourceToken: resourceToken
     location: location
-    collections: collections
     tags: tags
+    kind: cosmosdbAccountKind
     keyVaultName: keyVault.outputs.name
   }
 }
+
 
 // create the service bus
 module serviceBus './app/servicebus.bicep' = {
@@ -161,11 +159,72 @@ module getKeys './app/get-keys.bicep' = {
   params:{
     keyVaultName: keyVault.outputs.name
     openAiName: openAi.outputs.name
-    cosmosAccountName: !empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+    cosmosAccountName: cosmos.outputs.name
   }
-  dependsOn: [
-    cosmos
-  ]
+}
+
+// create the monitor workspace
+module monitor './app/monitor.bicep' = {
+  name: 'monitor'
+  scope: rg
+  params: {
+    name: !empty(monitorAccountName) ? monitorAccountName : 'amon-${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+// create the log analytics workspace
+module logAnalytics './core/monitor/loganalytics.bicep' = {
+  name: 'log-analytics'
+  scope: rg
+  params: {
+    name: !empty(logAnalyticsName) ? logAnalyticsName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+// create observability
+module observability './app/observability.bicep' = {
+  name: 'observability'
+  scope: rg
+  params: {
+    name: 'amg-${resourceToken}'
+    principalId: principalId
+    clusterId: kubernetes.outputs.clusterId
+    clusterName: kubernetes.outputs.clusterName
+    logAnalyticsName: logAnalytics.outputs.name
+    logAnalyticsId: logAnalytics.outputs.id
+    monitorName: monitor.outputs.name
+    monitorId: monitor.outputs.id
+    location: location
+    tags: tags
+  }
+}
+
+// create the container if the deployAcr is true
+module containerRegistry './core/host/container-registry.bicep' = if(deployAcr) {
+  name: 'container-registry'
+  scope: rg
+  params: {
+    name: !empty(containerRegistryName) ? containerRegistryName : '${abbrs.containerRegistryRegistries}${resourceToken}'
+    location: location
+    tags: tags
+    sku: {
+      name: 'Premium'
+    }
+  }
+}
+
+// acr pull role assignment
+module acrPullRoleAssignment './core/security/registry-access.bicep' = if(deployAcr) {
+  name: 'acr-pull-role-assignment'
+  scope: rg
+  params: {
+    containerRegistryName: deployAcr ? containerRegistry.outputs.name : ''
+    principalId: identity.outputs.principalId
+  }
 }
 
 // outputs data
@@ -180,8 +239,11 @@ output AZURE_SERVICE_BUS_LISTENER_NAME string = serviceBus.outputs.serviceBusLis
 output AZURE_SERVICE_BUS_LISTENER_KEY string = serviceBus.outputs.serviceBusListenerKey
 output AZURE_SERVICE_BUS_SENDER_NAME string = serviceBus.outputs.serviceBusSenderName
 output AZURE_SERVICE_BUS_SENDER_KEY string = serviceBus.outputs.serviceBusSenderKey
-output AZURE_COSMOS_DATABASE_NAME string = !empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
-output AZURE_COSMOS_DATABASE_URI string = 'mongodb://${!empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'}.mongo.cosmos.azure.com:10255/?retryWrites=false'
+output AZURE_COSMOS_DATABASE_NAME string = cosmos.outputs.name
+output AZURE_COSMOS_DATABASE_URI string = cosmos.outputs.endpoint
 output AZURE_COSMOS_DATABASE_KEY string = getKeys.outputs.cosmosKey
 output AZURE_AKS_NAMESPACE string = k8s_namespace
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
+output AZURE_DATABASE_API string = cosmosdbAccountKind == 'MongoDB' ? 'mongodb': 'cosmosdbsql'
+output AZURE_REGISTRY_NAME string = deployAcr ? containerRegistry.outputs.name : ''
+output AZURE_REGISTRY_URI string = deployAcr ? containerRegistry.outputs.loginServer : 'ghcr.io/azure-samples'

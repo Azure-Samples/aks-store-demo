@@ -145,3 +145,5 @@ output clusterIdentity object = {
   objectId: aks.properties.identityProfile.kubeletidentity.objectId
   resourceId: aks.properties.identityProfile.kubeletidentity.resourceId
 }
+
+output clusterId string = aks.id

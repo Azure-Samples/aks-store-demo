@@ -10,6 +10,12 @@
     },
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
+    },
+    "deployAcr": {
+      "value": "${DEPLOY_AZURE_CONTAINER_REGISTRY=false}"
+    },
+    "cosmosdbAccountKind": {
+      "value": "${COSMOSDB_ACCOUNT_KIND=MongoDB}"
     }
   }
 }

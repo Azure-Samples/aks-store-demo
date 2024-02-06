@@ -39,3 +39,18 @@ Host: localhost:3002
 ### Delete product by id
 DELETE /11 
 Host: localhost:3002
+
+### Get ai service health
+GET /ai/health
+Host: localhost:3002
+
+### Get product description from ai service
+POST /ai/generate/description
+Host: localhost:3002
+Content-Type: application/json
+
+{
+    "name": "Seafarer's Tug Rope",
+    "tags": ["toy","dog"]
+}
+

@@ -37,7 +37,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: order-service
-        image: ghcr.io/azure-samples/aks-store-demo/order-service:1.0.0
+        image: {{ .Values.orderService.image.repository }}:{{ .Values.orderService.image.tag }}
         ports:
         - containerPort: 3000
         envFrom:
