@@ -5,7 +5,11 @@ languages:
 - go
 - javascript
 - rust
+- nodejs
+- python
 - bicep
+- terraform
+- dockerfile
 products:
 - azure
 - azure-kubernetes-service
@@ -13,6 +17,10 @@ products:
 - azure-cosmos-db
 - azure-container-registry
 - azure-service-bus
+- azure-monitor
+- azure-log-analytics
+- azure-managed-grafana
+- azure-key-vault
 urlFragment: aks-store-demo
 name: AKS Store Demo
 description: This sample demo app consists of a group of containerized microservices that can be easily deployed into an Azure Kubernetes Service (AKS) cluster. 
