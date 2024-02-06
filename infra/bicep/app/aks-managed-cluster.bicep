@@ -11,9 +11,6 @@ param location string = resourceGroup().location
 @description('Custom tags to apply to the AKS resources')
 param tags object = {}
 
-@description('Kubernetes Version')
-param kubernetesVersion string = '1.28.3'
-
 @description('Whether RBAC is enabled for local accounts')
 param enableRbac bool = true
 
@@ -71,7 +68,6 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-03-02-preview' = {
   }
   properties: {
     nodeResourceGroup: !empty(nodeResourceGroupName) ? nodeResourceGroupName : 'rg-mc-${name}'
-    kubernetesVersion: kubernetesVersion
     dnsPrefix: empty(dnsPrefix) ? '${name}-dns' : dnsPrefix
     enableRBAC: enableRbac
     aadProfile: enableAad ? {
@@ -88,11 +84,6 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-03-02-preview' = {
     }
     disableLocalAccounts: disableLocalAccounts && enableAad
     addonProfiles: addOns
-    ingressProfile: {
-      webAppRouting: {
-        enabled: webAppRoutingAddon
-      }
-    }
     securityProfile:{
       workloadIdentity: {
         enabled: true
@@ -100,10 +91,6 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-03-02-preview' = {
     }
     oidcIssuerProfile: {
       enabled: true
-    }
-    podIdentityProfile: {
-      enabled: true
-      allowNetworkPluginKubenet: true
     }
   }
 }

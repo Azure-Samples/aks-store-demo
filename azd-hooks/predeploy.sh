@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Retrieving cluster credentials"
-az aks get-credentials --resource-group ${AZURE_RESOURCEGROUP_NAME} --name ${AZURE_AKS_CLUSTER_NAME}
+az aks get-credentials --resource-group ${AZURE_RESOURCEGROUP_NAME} --name ${AZURE_AKS_CLUSTER_NAME} --overwrite-existing
 
 echo "Deploy Helm chart"
 helm upgrade aks-store-demo ./charts/aks-store-demo \

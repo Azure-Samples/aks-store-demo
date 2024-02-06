@@ -223,7 +223,7 @@ module acrPullRoleAssignment './core/security/registry-access.bicep' = if(deploy
   scope: rg
   params: {
     containerRegistryName: deployAcr ? containerRegistry.outputs.name : ''
-    principalId: identity.outputs.principalId
+    principalId: kubernetes.outputs.clusterIdentity.objectId
   }
 }
 

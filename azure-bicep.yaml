@@ -14,6 +14,11 @@ hooks:
     continueOnError: false
     interactive: false
     run: azd-hooks/postprovision.sh
+  predeploy: # This is a hack until Helm is supported in azd (https://github.com/Azure/azure-dev/issues/1618)
+    shell: sh
+    continueOnError: false
+    interactive: false
+    run: azd-hooks/predeploy.sh
 infra:
   provider: bicep
   path: infra/bicep
