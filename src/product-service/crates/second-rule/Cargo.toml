@@ -1,0 +1,18 @@
+[package]
+name = "second-rule"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.component]
+package = "component:second-rule"
+target = { path = "../product-service/rule_engine.wit", world="rule-extension" }
+
+[package.metadata.component.dependencies]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cargo-component-bindings = "0.5.0"
+
+[lib]
+crate-type = ["cdylib"]

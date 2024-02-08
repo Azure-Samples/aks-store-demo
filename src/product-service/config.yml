@@ -1,0 +1,3 @@
+dependencies:
+  aksstoredemo:rules/engine@0.1.1: 
+    path: ../sample-rule/target/wasm32-wasi/release/sample_rule.wasm
