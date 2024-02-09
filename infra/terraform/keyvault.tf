@@ -8,7 +8,7 @@ resource "azurerm_key_vault" "example" {
     enable_rbac_authorization   = true
 }
 
-resource "azurerm_role_assignment" "example_aoai_me" {
+resource "azurerm_role_assignment" "example_akv_me" {
     principal_id         = data.azurerm_client_config.current.object_id
     role_definition_name = "Key Vault Administrator"
     scope                = azurerm_key_vault.example.id
