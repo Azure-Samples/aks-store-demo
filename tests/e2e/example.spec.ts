@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.use({ baseURL: process.env.STORE_ADMIN_URL });
+
 test('has title', async ({ page }) => {
   await page.goto('/');
 
