@@ -1,10 +1,12 @@
 resource "azurerm_monitor_workspace" "example" {
+  count               = local.deploy_observability_tools ? 1 : 0
   name                = "amon-${local.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
 }
 
 resource "azurerm_log_analytics_workspace" "example" {
+  count               = local.deploy_observability_tools ? 1 : 0
   name                = "alog-${local.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -13,6 +15,7 @@ resource "azurerm_log_analytics_workspace" "example" {
 }
 
 resource "azurerm_dashboard_grafana" "example" {
+  count               = local.deploy_observability_tools ? 1 : 0
   name                = "amg-${local.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -22,23 +25,26 @@ resource "azurerm_dashboard_grafana" "example" {
   }
 
   azure_monitor_workspace_integrations {
-    resource_id = azurerm_monitor_workspace.example.id
+    resource_id = azurerm_monitor_workspace.example[0].id
   }
 }
 
 resource "azurerm_role_assignment" "example_amg_me" {
-  scope                = azurerm_dashboard_grafana.example.id
+  count                = local.deploy_observability_tools ? 1 : 0
+  scope                = azurerm_dashboard_grafana.example[0].id
   role_definition_name = "Grafana Admin"
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
 resource "azurerm_role_assignment" "example_rg_amg" {
-  principal_id         = azurerm_dashboard_grafana.example.identity[0].principal_id
+  count                = local.deploy_observability_tools ? 1 : 0
+  principal_id         = azurerm_dashboard_grafana.example[0].identity[0].principal_id
   role_definition_name = "Monitoring Data Reader"
   scope                = azurerm_resource_group.example.id
 }
 
 resource "azurerm_monitor_data_collection_endpoint" "example_msprom" {
+  count               = local.deploy_observability_tools ? 1 : 0
   name                = "MSProm-${azurerm_resource_group.example.location}-${azurerm_kubernetes_cluster.example.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -47,10 +53,11 @@ resource "azurerm_monitor_data_collection_endpoint" "example_msprom" {
 
 
 resource "azurerm_monitor_data_collection_rule" "example_msprom" {
+  count                       = local.deploy_observability_tools ? 1 : 0
   name                        = "MSProm-${azurerm_kubernetes_cluster.example.location}-${azurerm_kubernetes_cluster.example.name}"
   resource_group_name         = azurerm_resource_group.example.name
   location                    = azurerm_resource_group.example.location
-  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.example_msprom.id
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.example_msprom[0].id
 
   data_sources {
     prometheus_forwarder {
@@ -61,36 +68,39 @@ resource "azurerm_monitor_data_collection_rule" "example_msprom" {
 
   destinations {
     monitor_account {
-      monitor_account_id = azurerm_monitor_workspace.example.id
-      name               = azurerm_monitor_workspace.example.name
+      monitor_account_id = azurerm_monitor_workspace.example[0].id
+      name               = azurerm_monitor_workspace.example[0].name
     }
   }
 
   data_flow {
     streams      = ["Microsoft-PrometheusMetrics"]
-    destinations = [azurerm_monitor_workspace.example.name]
+    destinations = [azurerm_monitor_workspace.example[0].name]
   }
 }
 
 resource "azurerm_monitor_data_collection_rule_association" "example_dcr_to_aks" {
+  count                   = local.deploy_observability_tools ? 1 : 0
   name                    = "dcr-${azurerm_kubernetes_cluster.example.name}"
   target_resource_id      = azurerm_kubernetes_cluster.example.id
-  data_collection_rule_id = azurerm_monitor_data_collection_rule.example_msprom.id
+  data_collection_rule_id = azurerm_monitor_data_collection_rule.example_msprom[0].id
 }
 
 resource "azurerm_monitor_data_collection_rule_association" "example_dce_to_aks" {
+  count                       = local.deploy_observability_tools ? 1 : 0
   target_resource_id          = azurerm_kubernetes_cluster.example.id
-  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.example_msprom.id
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.example_msprom[0].id
 }
 
 resource "azurerm_monitor_alert_prometheus_rule_group" "example_node" {
+  count               = local.deploy_observability_tools ? 1 : 0
   name                = "NodeRecordingRulesRuleGroup-${azurerm_kubernetes_cluster.example.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
   cluster_name        = azurerm_kubernetes_cluster.example.name
   rule_group_enabled  = true
   interval            = "PT1M"
-  scopes              = [azurerm_monitor_workspace.example.id]
+  scopes              = [azurerm_monitor_workspace.example[0].id]
 
   rule {
     record     = "instance:node_num_cpu:sum"
@@ -149,13 +159,14 @@ resource "azurerm_monitor_alert_prometheus_rule_group" "example_node" {
 }
 
 resource "azurerm_monitor_alert_prometheus_rule_group" "example_k8s" {
+  count               = local.deploy_observability_tools ? 1 : 0
   name                = "KubernetesRecordingRulesRuleGroup-${azurerm_kubernetes_cluster.example.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
   cluster_name        = azurerm_kubernetes_cluster.example.name
   rule_group_enabled  = true
   interval            = "PT1M"
-  scopes              = [azurerm_monitor_workspace.example.id]
+  scopes              = [azurerm_monitor_workspace.example[0].id]
 
   rule {
     record     = "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate"
@@ -267,6 +278,7 @@ resource "azurerm_monitor_alert_prometheus_rule_group" "example_k8s" {
 }
 
 resource "azurerm_monitor_data_collection_rule" "example_msci" {
+  count               = local.deploy_observability_tools ? 1 : 0
   name                = "MSCI-${azurerm_resource_group.example.location}-${azurerm_kubernetes_cluster.example.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -291,19 +303,20 @@ resource "azurerm_monitor_data_collection_rule" "example_msci" {
 
   destinations {
     log_analytics {
-      workspace_resource_id = azurerm_log_analytics_workspace.example.id
-      name                  = azurerm_log_analytics_workspace.example.name
+      workspace_resource_id = azurerm_log_analytics_workspace.example[0].id
+      name                  = azurerm_log_analytics_workspace.example[0].name
     }
   }
 
   data_flow {
     streams      = ["Microsoft-ContainerInsights-Group-Default"]
-    destinations = [azurerm_log_analytics_workspace.example.name]
+    destinations = [azurerm_log_analytics_workspace.example[0].name]
   }
 }
 
 resource "azurerm_monitor_data_collection_rule_association" "example_msci_to_aks" {
+  count                   = local.deploy_observability_tools ? 1 : 0
   name                    = "msci-${azurerm_kubernetes_cluster.example.name}"
   target_resource_id      = azurerm_kubernetes_cluster.example.id
-  data_collection_rule_id = azurerm_monitor_data_collection_rule.example_msci.id
+  data_collection_rule_id = azurerm_monitor_data_collection_rule.example_msci[0].id
 }

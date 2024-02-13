@@ -14,8 +14,8 @@ aiService:
   openAiKey: ""
   openAiOrgId: ""
   managedIdentityClientId: ""
-  useAzureOpenAi: true
-  useAzureAd: true
+  useAzureOpenAi: false
+  useAzureAd: false
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/ai-service"
     tag: "latest"

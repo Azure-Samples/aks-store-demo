@@ -6,19 +6,41 @@ metadata:
 data:
   AZURE_OPENAI_DEPLOYMENT_NAME: "{{ .Values.aiService.modelDeploymentName }}"
   AZURE_OPENAI_ENDPOINT: "{{ .Values.aiService.openAiEndpoint }}"
-  {{- if .Values.aiService.useAzureOpenAi }}
+  {{- /*
+  Use Azure OpenAI or OpenAI  
+  */}}
+  {{- if eq .Values.aiService.useAzureOpenAi true }}
   USE_AZURE_OPENAI: "True"
   {{- else }}
   USE_AZURE_OPENAI: "False"
   OPENAI_ORG_ID: "{{ .Values.aiService.openAiOrgId }}"
   {{- end }}
-  {{- if .Values.aiService.useAzureAd }}
+  
+  {{- /*
+  Use Azure AD or OpenAI API Key  
+  */}}
+  {{- if eq .Values.aiService.useAzureAd true }}
   USE_AZURE_AD: "True"
   {{- else }}
   USE_AZURE_AD: "False"
   {{- end }}
 ---
-{{- if eq .Values.aiService.useAzureAd false }}
+
+{{- /*
+If Azure AD is used, create a service account with managed identity
+*/}}
+{{- if eq .Values.aiService.useAzureAd true }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-service-account
+  annotations:
+    azure.workload.identity/client-id: "{{ .Values.aiService.managedIdentityClientId }}"
+---
+{{- /*
+If Azure AD is not used, create a secret with OpenAI API Key
+*/}}
+{{- else }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -27,13 +49,7 @@ data:
   OPENAI_API_KEY: "{{ .Values.aiService.openAiKey | b64enc }}"
 ---
 {{- end }}
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: ai-service-account
-  annotations:
-    azure.workload.identity/client-id: "{{ .Values.aiService.managedIdentityClientId }}"
----
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -47,9 +63,19 @@ spec:
     metadata:
       labels:
         app: ai-service
+        {{- /*
+        If Azure AD is used, set the label to use workload identity
+        */}}
+        {{- if eq .Values.aiService.useAzureAd true }}
         azure.workload.identity/use: "true"
+        {{- end }}
     spec:
+      {{- /*
+      If Azure AD is used, use the service account
+      */}}
+      {{- if eq .Values.aiService.useAzureAd true }}
       serviceAccount: ai-service-account
+      {{- end }}
       nodeSelector:
         "kubernetes.io/os": linux
       containers:

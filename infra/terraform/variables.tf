@@ -31,7 +31,7 @@ variable "k8s_namespace" {
 }
 
 variable "cosmosdb_account_kind" {
-  description = "value of cosmosdb account kind. this string value will be used to set the local variable"
+  description = "value of azure cosmosdb account kind. this string value defaults to MongoDB and will be used to set the local variable"
   type        = string
   default     = "MongoDB"
 
@@ -41,8 +41,38 @@ variable "cosmosdb_account_kind" {
   # }
 }
 
-variable "deploy_acr" {
-  description = "value of deploy acr. this string value will be used to set the local variable"
+variable "deploy_azure_container_registry" {
+  description = "value of setting to deploy azure container registry. this string value will be used to set the local boolean variable"
+  type        = string
+  default     = "false"
+}
+
+variable "deploy_azure_workload_identity" {
+  description = "value of setting to deploy azure workload identity for service authentication. this string value will be used to set the local boolean variable"
+  type        = string
+  default     = "false"
+}
+
+variable "deploy_azure_openai" {
+  description = "value of setting to deploy azure openai. this string value will be used to set the local boolean variable"
+  type        = string
+  default     = "false"
+}
+
+variable "deploy_azure_servicebus" {
+  description = "value of setting to deploy azure service bus. this string value will be used to set the local boolean variable"
+  type        = string
+  default     = "false"
+}
+
+variable "deploy_azure_cosmosdb" {
+  description = "value of setting to deploy azure cosmosdb. this string value will be used to set the local boolean variable"
+  type        = string
+  default     = "false"
+}
+
+variable "deploy_observability_tools" {
+  description = "value of setting to deploy observability stack which includes prometheus, grafana, and container insights. this string value will be used to set the local boolean variable"
   type        = string
   default     = "false"
 }
