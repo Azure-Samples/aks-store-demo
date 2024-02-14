@@ -7,5 +7,6 @@ az feature register --namespace Microsoft.ContainerService --name AKS-Prometheus
 az feature register --namespace Microsoft.ContainerService --name EnableWorkloadIdentityPreview
 az feature register --namespace Microsoft.ContainerService --name NetworkObservabilityPreview
 az feature register --namespace "Microsoft.ContainerService" --name "NodeOsUpgradeChannelPreview"
+az feature register --namespace "Microsoft.ContainerService" --name "AzureMonitorMetricsControlPlanePreview" 
 az extension add --upgrade --name aks-preview
 az extension add --upgrade --name amg
