@@ -27,7 +27,7 @@ variable "openai_model_capacity" {
 variable "k8s_namespace" {
   description = "value of kubernetes namespace"
   type        = string
-  default     = "default"
+  default     = "pets"
 }
 
 variable "cosmosdb_account_kind" {

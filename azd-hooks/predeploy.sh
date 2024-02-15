@@ -6,6 +6,8 @@ az aks get-credentials --resource-group ${AZURE_RESOURCEGROUP_NAME} --name ${AZU
 echo "Deploy Helm chart"
 cmd="helm upgrade aks-store-demo ./charts/aks-store-demo \
   --install \
+  --namespace ${AZURE_AKS_NAMESPACE} \
+  --create-namespace \
   --set aiService.image.repository=${AZURE_REGISTRY_URI}/aks-store-demo/ai-service \
   --set orderService.image.repository=${AZURE_REGISTRY_URI}/aks-store-demo/order-service \
   --set makelineService.image.repository=${AZURE_REGISTRY_URI}/aks-store-demo/makeline-service \
