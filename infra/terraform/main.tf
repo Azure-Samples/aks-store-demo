@@ -30,6 +30,10 @@ provider "azurerm" {
     key_vault {
       purge_soft_delete_on_destroy = true
     }
+
+    log_analytics_workspace {
+      permanently_delete_on_destroy = true
+    }
   }
 }
 
