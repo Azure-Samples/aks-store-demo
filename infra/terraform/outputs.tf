@@ -10,6 +10,22 @@ output "AZURE_AKS_CLUSTER_NAME" {
   value = azurerm_kubernetes_cluster.example.name
 }
 
+output "AZURE_AKS_NAMESPACE" {
+  value = var.k8s_namespace
+}
+
+output "AZURE_AKS_CLUSTER_ID" {
+  value = azurerm_kubernetes_cluster.example.id
+}
+
+output "AZURE_AKS_CLUSTER_NODE_RESOURCEGROUP_NAME" {
+  value = azurerm_kubernetes_cluster.example.node_resource_group
+}
+
+output "AZURE_AKS_OIDC_ISSUER_URL" {
+  value = azurerm_kubernetes_cluster.example.oidc_issuer_url
+}
+
 output "AZURE_OPENAI_MODEL_NAME" {
   value = local.deploy_azure_openai ? var.openai_model_name : ""
 }
@@ -24,7 +40,7 @@ output "AZURE_OPENAI_KEY" {
 }
 
 output "AZURE_IDENTITY_CLIENT_ID" {
-  value = local.deploy_azure_workload_identity ? azurerm_user_assigned_identity.example[0].client_id : ""
+  value = local.deploy_azure_openai && local.deploy_azure_workload_identity ? azurerm_user_assigned_identity.example[0].client_id : ""
 }
 
 output "AZURE_SERVICE_BUS_HOST" {
@@ -71,10 +87,6 @@ output "AZURE_COSMOS_DATABASE_KEY" {
   sensitive = true
 }
 
-output "AZURE_AKS_NAMESPACE" {
-  value = var.k8s_namespace
-}
-
 output "AZURE_KEY_VAULT_NAME" {
   value = azurerm_key_vault.example.name
 }
@@ -85,4 +97,8 @@ output "AZURE_REGISTRY_NAME" {
 
 output "AZURE_REGISTRY_URI" {
   value = local.deploy_azure_container_registry ? azurerm_container_registry.example[0].login_server : "ghcr.io/azure-samples"
+}
+
+output "AZURE_TENANT_ID" {
+  value = data.azurerm_client_config.current.tenant_id
 }
