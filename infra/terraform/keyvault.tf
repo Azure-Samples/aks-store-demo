@@ -5,10 +5,89 @@ resource "azurerm_key_vault" "example" {
   enabled_for_disk_encryption = true
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "standard"
-  enable_rbac_authorization   = true
+  enable_rbac_authorization   = var.kv_rbac_enabled
+
+  dynamic "access_policy" {
+    for_each = var.kv_rbac_enabled ? [] : [1]
+    content {
+      tenant_id = data.azurerm_client_config.current.tenant_id
+      object_id = data.azurerm_client_config.current.object_id
+
+      certificate_permissions = [
+        "Backup",
+        "Create",
+        "Delete",
+        "DeleteIssuers",
+        "Get",
+        "GetIssuers",
+        "Import",
+        "List",
+        "ListIssuers",
+        "ManageContacts",
+        "ManageIssuers",
+        "Purge",
+        "Recover",
+        "Restore",
+        "SetIssuers",
+        "Update"
+      ]
+
+      key_permissions = [
+        "Backup",
+        "Create",
+        "Decrypt",
+        "Delete",
+        "Encrypt",
+        "Get",
+        "Import",
+        "List",
+        "Purge",
+        "Recover",
+        "Restore",
+        "Sign",
+        "UnwrapKey",
+        "Update",
+        "Verify",
+        "WrapKey",
+        "Release",
+        "Rotate",
+        "GetRotationPolicy",
+        "SetRotationPolicy"
+      ]
+
+      secret_permissions = [
+        "Backup",
+        "Delete",
+        "Get",
+        "List",
+        "Purge",
+        "Recover",
+        "Restore",
+        "Set"
+      ]
+
+      storage_permissions = [
+        "Backup",
+        "Delete",
+        "DeleteSAS",
+        "Get",
+        "GetSAS",
+        "List",
+        "ListSAS",
+        "Purge",
+        "Recover",
+        "RegenerateKey",
+        "Restore",
+        "Set",
+        "SetSAS",
+        "Update"
+      ]
+    }
+  }
 }
 
 resource "azurerm_role_assignment" "example_akv_rbac" {
+  count                = var.kv_rbac_enabled ? 1 : 0
   principal_id         = data.azurerm_client_config.current.object_id
   role_definition_name = "Key Vault Administrator"
   scope                = azurerm_key_vault.example.id

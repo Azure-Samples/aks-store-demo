@@ -2,6 +2,12 @@ variable "location" {
   type = string
 }
 
+variable "kv_rbac_enabled" {
+  description = "value of keyvault rbac enabled. when set to true, key vault will use azure role-based access control"
+  type        = bool
+  default     = false
+}
+
 variable "ai_location" {
   description = "value of azure region for deploying azure ai service"
   type        = string
