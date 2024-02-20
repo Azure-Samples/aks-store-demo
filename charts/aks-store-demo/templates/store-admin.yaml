@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: store-admin
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.storeAdmin.replicaCount }}
   selector:
     matchLabels:
       app: store-admin

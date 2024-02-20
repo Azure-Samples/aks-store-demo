@@ -55,7 +55,7 @@ kind: Deployment
 metadata:
   name: ai-service
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.aiService.replicaCount }}
   selector:
     matchLabels:
       app: ai-service

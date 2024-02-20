@@ -24,7 +24,7 @@ kind: Deployment
 metadata:
   name: order-service
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.orderService.replicaCount }}
   selector:
     matchLabels:
       app: order-service
