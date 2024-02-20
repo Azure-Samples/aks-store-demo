@@ -33,7 +33,7 @@ kind: Deployment
 metadata:
   name: makeline-service
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.makelineService.replicaCount }}
   selector:
     matchLabels:
       app: makeline-service

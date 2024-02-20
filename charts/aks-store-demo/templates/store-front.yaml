@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: store-front
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.storeFront.replicaCount }}
   selector:
     matchLabels:
       app: store-front
@@ -65,3 +65,14 @@ spec:
     targetPort: 8080
   selector:
     app: store-front
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: store-front
+spec:
+  minAvailable: {{ .Values.storeFront.minAvailable }}
+  selector:
+    matchLabels:
+      app: store-front
+  unhealthyPodEvictionPolicy: AlwaysAllow
