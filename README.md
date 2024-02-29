@@ -27,8 +27,6 @@ description: This sample demo app consists of a group of containerized microserv
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=648726487)
-
 # AKS Store Demo
 
 This sample demo app consists of a group of containerized microservices that can be easily deployed into an Azure Kubernetes Service (AKS) cluster. This is meant to show a realistic scenario using a polyglot architecture, event-driven design, and common open source back-end services (eg - RabbitMQ, MongoDB). The application also leverages OpenAI's GPT-3 models to generate product descriptions. This can be done using either [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) or [OpenAI](https://openai.com/).
@@ -81,7 +79,6 @@ This deployment deploys everything except the `ai-service` that integrates OpenA
 kubectl create ns pets
 
 kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-all-in-one.yaml -n pets
-
 ```
 
 ## Run the app locally
@@ -139,60 +136,11 @@ To stop the app, you can hit the `CTRL+C` key combination in the terminal window
 
 This repo also includes [DevContainer configuration](./.devcontainer/devcontainer.json), so you can open the repo using [GitHub Codespaces](https://docs.github.com/en/codespaces/overview). This will allow you to run the app in a container in the cloud, without having to install Docker on your local machine. When the Codespace is created, you can run the app using the same instructions as above.
 
-## Run the app with Azure Service Bus and Azure Cosmos DB using Azure Developer CLI
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=648726487)
 
-This repo also includes an alternate deployment type that uses Azure Service Bus and Azure Cosmos DB instead of RabbitMQ and MongoDB. To deploy this version of the app, you can use the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview) with a GitHub Codespace or DevContainer which has all the tools (e.g., `azure-cli`, `azd`, `terraform`, `kubectl`, and `helm`) pre-installed. This deployment will use Terraform to provision the Azure resources then retrieve output variables and pass them to Helm to deploy the app.
+## Deploy the app to Azure using Azure Developer CLI
 
-To get started, authenticate to Azure using the Azure Developer CLI and Azure CLI.
-
-```bash
-# authenticate to Azure Developer CLI
-azd auth login
-
-# authenticate to Azure CLI
-az login
-```
-
-> Note: This project is configured to be deployed with Terraform by default. If you want to deploy using the bicep template, please rename the `azure-bicep.yaml` file to `azure.yaml`.
-
-Deploy the app with a single command.
-> [!WARNING]
-> Before you run the `azd up` command, make sure that you have the "Owner" role on the subscription you are deploying to. This is because the Terraform templates will create Azure role based access control (RBAC) assignments. Otherwise, the deployment will fail.
-
-The `makeline-service` supports both MongoDB and SQL API for accessing data in Azure CosmosDB. The default API is `MongoDB`, but you can use SQL API. To use the SQL API for Azure CosmosDB, you must provision the service using the `GlobalDocumentDB` account kind. You can set the Azure CosmosDB account kind by running the following command prior to running `azd up`:
-
-```bash
-azd env set AZURE_COSMOSDB_ACCOUNT_KIND GlobalDocumentDB
-```
-
-By default, all application containers will be sourced from the [GitHub Container Registry](https://github.com/orgs/Azure-Samples/packages?repo_name=aks-store-demo). If you want to deploy apps from an Azure Container registry instead, you can do so by setting the following environment variable.
-
-```bash
-azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
-```
-
-This will instruct the Terraform templates to provision an Azure Container Registry and enable authentication from the AKS cluster.
-
-When you choose to deploy containers from Azure Container Registry, you will have the option to import containers from GitHub Container Registry using the `az acr import` command or build containers from source using the `az acr build` command. 
-
-To build containers from source, run the following command. 
-
-```bash
-azd env set BUILD_CONTAINERS true
-```
-
-Provision and deploy the app with a single command.
-
-```bash
-azd up
-```
-> [!WARNING]
-> When selecting an Azure region, make sure to choose one that supports all the services used in this app including Azure OpenAI, Azure Kubernetes Service, Azure Service Bus, Azure Cosmos DB, Azure Log Analytics Workspace, Azure Monitor workspace, and Azure Managed Grafana.
-
-Once the deployment is complete, you can verify all the services are running and the app is working by following these steps:
-
-- In the Azure portal, navigate to your Azure Service Bus resource and use Azure Service Bus explorer to check for order messages
-- In the Azure portal, navigate to your Azure Cosmos DB resource and use the database explorer to check for order records
+See the [Azure Developer CLI](./docs/azd.md) documentation for instructions on how to quickly deploy the app to Azure.
 
 ## Additional Resources
 
