@@ -70,7 +70,10 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
 
       - name: Deploy Application
-        run: azd deploy --no-prompt
+        run: |
+          azd env set DEPLOY_AZURE_OPENAI true
+          azd env set DEPLOY_AZURE_WORKLOAD_IDENTITY true
+          azd deploy --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
           AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
