@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: virtual-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: virtual-worker
+  template:
+    metadata:
+      labels:
+        app: virtual-worker
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: virtual-worker
+        image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest
+        env:
+        - name: MAKELINE_SERVICE_URL
+          value: http://makeline-service:3001
+        - name: ORDERS_PER_HOUR
+          value: "100"
+        resources:
+          requests:
+            cpu: 1m
+            memory: 1Mi
+          limits:
+            cpu: 1m
+            memory: 5Mi
