@@ -2,11 +2,10 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
-
 namespace: "dev"
 
 aiService:
+  replicaCount: 1
   # Specifies whether a ai-service deployment and service should be created
   create: false
   modelDeploymentName: ""
@@ -21,6 +20,7 @@ aiService:
     tag: "latest"
 
 orderService:
+  replicaCount: 1
   useAzureServiceBus: false # when false, local rabbitmq will be used
   queueHost: "rabbitmq"
   queuePort: "5672"
@@ -33,6 +33,7 @@ orderService:
     tag: "latest"
 
 makelineService:
+  replicaCount: 1
   useAzureCosmosDB: false # when false, local mongodb will be used
   useSqlApi: false # when false, mongodb api for azure cosmosdb will be used
   orderQueueUri: "amqp://rabbitmq:5672"
@@ -55,12 +56,15 @@ productService:
     tag: "latest"
 
 storeAdmin:
+  replicaCount: 1
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/store-admin"
     tag: "latest"
   serviceType: LoadBalancer
 
 storeFront:
+  replicaCount: 3
+  minAvailable: 60%
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/store-front"
     tag: "latest"
