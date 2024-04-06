@@ -122,19 +122,8 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
-
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 120px;
+  padding: 1rem;
 }
 
 footer {
@@ -187,18 +176,17 @@ td {
   text-align: left;
 }
 
-.button {
-  padding: 10px 10px;
-  border-radius: 5px;
-  border: none;
-  background-color: #007acc;
+button {
+  padding: 10px;
+  background-color: #005f8b;
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  height: 42px;
 }
 
-.button:hover {
+button:hover {
   background-color: #005f8b;
 }
 
@@ -207,8 +195,12 @@ td {
 }
 
 .product-detail {
-  margin: 2rem auto;
   text-align: left;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem auto;
 }
 
 .product-form {

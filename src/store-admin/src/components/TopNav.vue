@@ -1,15 +1,18 @@
 <template>
   <nav>
     <div class="logo">
-      <a href="/">Contoso Pet Supplies - Admin Portal</a>
+      <a href="/">
+        <img src="/contoso-pet-store-logo.png" alt="Contoso Pet Store Logo">
+      </a>
+      Admin Portal
     </div>
-    <button class="hamburger" @click="toggleNav">
-      <span class="hamburger-icon"></span>
-    </button>
     <ul class="nav-links" :class="{ 'nav-links--open': isNavOpen }">
       <li><router-link to="/orders" @click="closeNav">Orders</router-link></li>
       <li><router-link to="/products" @click="closeNav">Products</router-link></li>
     </ul>
+    <button class="hamburger" @click="toggleNav">
+      <span class="hamburger-icon"></span>
+    </button>
   </nav>
 </template>
 
@@ -39,11 +42,33 @@ nav {
   align-items: center;
   background-color: #333;
   color: #fff;
-  padding: 1rem;
+  padding-top: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 0.25rem;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+nav img {
+  padding-right: 15px;
+  width: 100px;
+  height: auto;
+  align-self: center;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
 }
 
 .hamburger {
@@ -53,6 +78,7 @@ nav {
   cursor: pointer;
   padding: 0;
   margin: 0;
+  margin-top: -40px;
 }
 
 .hamburger-icon {

@@ -41,14 +41,6 @@ a {
   text-decoration: underline;
 }
 
-.product-detail {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 1rem;
-  margin: 1rem;
-}
-
 .product-image {
   flex: 1;
   margin-right: 20px;
@@ -72,5 +64,11 @@ a {
 .product-info p {
   font-size: 16px;
   margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .product-detail {
+    flex-direction: column;
+  }
 }
 </style>

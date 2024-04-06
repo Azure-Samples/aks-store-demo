@@ -116,12 +116,7 @@ a {
   text-decoration: underline;
 }
 
-.order-header {
-  margin: 0.5rem;
-}
-
 .order-detail {
-  margin: 2rem auto;
   text-align: left;
 }
 </style>

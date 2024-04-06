@@ -57,7 +57,6 @@ a {
 }
 
 .order-list {
-  margin: 2rem auto;
   text-align: left;
 }
 </style>
