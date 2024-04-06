@@ -208,4 +208,8 @@ ul {
   width: 100%;
   color: #ff0000;
 }
+
+.ai-button {
+  height: 60px;
+}
 </style>

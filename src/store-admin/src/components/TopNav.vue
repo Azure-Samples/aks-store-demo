@@ -45,7 +45,7 @@ nav {
   padding-top: 0.5rem;
   padding-left: 1rem;
   padding-right: 1rem;
-  padding-bottom: 0.25rem;
+  padding-bottom: 1px;
   position: fixed;
   top: 0;
   left: 0;
