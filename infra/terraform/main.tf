@@ -54,6 +54,6 @@ data "azurerm_subscription" "current" {}
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "example" {
-  name     = "rg-${local.name}"
+  name     = "rg-${var.resource_group_name_suffix}"
   location = local.location
 }

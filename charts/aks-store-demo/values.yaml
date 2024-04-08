@@ -6,6 +6,9 @@ replicaCount: 1
 
 namespace: "dev"
 
+useRabbitMQ: true # when true, local rabbitmq container will be used
+useMongoDB:  true # when true, local mongodb container will be used
+
 aiService:
   # Specifies whether a ai-service deployment and service should be created
   create: false
@@ -21,7 +24,6 @@ aiService:
     tag: "latest"
 
 orderService:
-  useAzureServiceBus: false # when false, local rabbitmq will be used
   queueHost: "rabbitmq"
   queuePort: "5672"
   queueUsername: "username"
@@ -33,12 +35,11 @@ orderService:
     tag: "latest"
 
 makelineService:
-  useAzureCosmosDB: false # when false, local mongodb will be used
-  useSqlApi: false # when false, mongodb api for azure cosmosdb will be used
   orderQueueUri: "amqp://rabbitmq:5672"
   orderQueueUsername: "username"
   orderQueuePassword: "password"
   orderQueueName: "orders"
+  orderDBApi: "mongodb"
   orderDBUri: "mongodb://mongodb:27017"
   orderDBName: "orderdb"
   orderDBCollectionName: "orders"

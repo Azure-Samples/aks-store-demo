@@ -1,4 +1,4 @@
-{{- if .Values.aiService.create }}
+{{- if eq .Values.aiService.create true }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -15,7 +15,6 @@ data:
   USE_AZURE_OPENAI: "False"
   OPENAI_ORG_ID: "{{ .Values.aiService.openAiOrgId }}"
   {{- end }}
-  
   {{- /*
   Use Azure AD or OpenAI API Key  
   */}}
@@ -25,7 +24,6 @@ data:
   USE_AZURE_AD: "False"
   {{- end }}
 ---
-
 {{- /*
 If Azure AD is used, create a service account with managed identity
 */}}
@@ -49,7 +47,6 @@ data:
   OPENAI_API_KEY: "{{ .Values.aiService.openAiKey | b64enc }}"
 ---
 {{- end }}
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:

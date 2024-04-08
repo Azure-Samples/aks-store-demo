@@ -16,6 +16,10 @@ resource "azurerm_kubernetes_cluster" "example" {
     name       = "system"
     vm_size    = "Standard_D4s_v4"
     node_count = 3
+
+    upgrade_settings {
+      max_surge = "10%"
+    }
   }
 
   identity {
