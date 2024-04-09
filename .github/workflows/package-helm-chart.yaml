@@ -11,7 +11,10 @@ on:
 
 jobs:
   package-helm-chart:
-  
+    permissions:
+      contents: read
+      packages: write
+
     runs-on: ubuntu-latest
 
     steps:
@@ -41,6 +44,14 @@ jobs:
         run: |
           helm package ./charts/aks-store-demo --version ${{ steps.set-variables.outputs.VERSION }}
           helm push ./aks-store-demo-chart-${{ steps.set-variables.outputs.VERSION }}.tgz oci://${{ steps.set-variables.outputs.REPOSITORY }}/charts
+  
+  publish-helm-chart:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Publish Helm chart to GitHub Pages
         uses: stefanprodan/helm-gh-pages@0ad2bb377311d61ac04ad9eb6f252fb68e207260 # v1.7.0
