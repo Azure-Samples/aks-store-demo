@@ -9,10 +9,6 @@ on:
   
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
   package-helm-chart:
   
@@ -20,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Set environment variables
         id: set-variables
@@ -35,7 +31,7 @@ jobs:
           echo ${{ steps.set-variables.outputs.VERSION }}
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
