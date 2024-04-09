@@ -1,9 +1,0 @@
-fastapi==0.109.1
-uvicorn==0.22.0
-pydantic==2.5.0
-pytest==7.3.1
-httpx
-pyyaml
-semantic-kernel==0.4.2.dev0
-azure.identity==1.14.0
-requests==2.31.0
