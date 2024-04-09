@@ -46,7 +46,14 @@ jobs:
           helm push ./aks-store-demo-chart-${{ steps.set-variables.outputs.VERSION }}.tgz oci://${{ steps.set-variables.outputs.REPOSITORY }}/charts
   
   publish-helm-chart:
-
+    permissions:
+      id-token: write
+      packages: write
+      contents: write
+      actions: read
+      deployments: read
+      pull-requests: read
+      
     runs-on: ubuntu-latest
 
     steps:
