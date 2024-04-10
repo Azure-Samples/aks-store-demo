@@ -11,7 +11,8 @@ def get_llm():
     useLocalLLM: bool = False
     useAzureOpenAI: bool = False
     kernel = False
-
+    endpoint: str = ''
+    
     if os.environ.get("USE_LOCAL_LLM"):
         useLocalLLM = os.environ.get("USE_LOCAL_LLM").lower() == "true"
 
@@ -24,7 +25,7 @@ def get_llm():
 
     # if useLocalLLM or useAzureOpenAI are set to true, get the endpoint from the environment variables
     if useLocalLLM or useAzureOpenAI:
-        endpoint: str = os.environ.get("AI_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT")
+        endpoint = os.environ.get("AI_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT")
         
         if isinstance(endpoint, str) == False or endpoint == "":
             raise Exception("AI_ENDPOINT or AZURE_OPENAI_ENDPOINT environment variable must be set when USE_LOCAL_LLM or USE_AZURE_OPENAI is set to true")
