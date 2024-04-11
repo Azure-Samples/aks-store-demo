@@ -289,15 +289,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: store-front
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: webapprouting.kubernetes.azure.com
   rules:
   - http:
       paths:
-      - backend:
+      - path: /store-front(/|$)(.*)
+        pathType: Prefix
+        backend:
           service:
             name: store-front
             port:
               number: 80
-        path: /store-front
-        pathType: Prefix
+        
