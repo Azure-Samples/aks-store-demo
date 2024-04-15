@@ -1,5 +1,7 @@
 #!/usr/bin/env pwsh
 
+az aks get-credentials --resource-group ${AZURE_RESOURCEGROUP_NAME} --name ${AZURE_AKS_CLUSTER_NAME} --overwrite-existing
+
 ###########################################################
 # Create the custom-values.yaml file with base images
 ###########################################################

@@ -1,7 +1,5 @@
 #!/usr/bin/env pwsh
 
-az aks get-credentials --resource-group ${AZURE_RESOURCEGROUP_NAME} --name ${AZURE_AKS_CLUSTER_NAME} --overwrite-existing
-
 $services=@("ai-service", "makeline-service", "order-service", "product-service", "store-admin", "store-front", "virtual-customer", "virtual-worker")
 
 if (($env:DEPLOY_AZURE_CONTAINER_REGISTRY -like "true") -and ($env:BUILD_CONTAINERS -like "true")) {
