@@ -1,4 +1,4 @@
-{{- if eq .Values.orderService.useAzureServiceBus false }}
+{{- if eq .Values.useRabbitMQ true }}
 apiVersion: v1
 data:
   rabbitmq_enabled_plugins: |

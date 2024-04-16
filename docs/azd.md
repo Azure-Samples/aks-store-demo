@@ -9,7 +9,7 @@ Using the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azur
 Opening the [AKS Store Demo repo](https://github.com/Azure-Samples/aks-store-demo) in [GitHub Codespaces](https://github.com/features/codespaces) is preferred; however, if you want to run the app locally, you will need the following tools:
 
 - [Azure CLI](https://learn.microsoft.com/cli/azure/what-is-azure-cli)
-- [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview)
+- [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview) version 1.6.0 or later
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
@@ -29,6 +29,13 @@ azd auth login
 
 # authenticate to Azure CLI
 az login
+```
+
+> [!NOTE]
+> The app will be deployed via Helm which is in preview in the Azure Developer CLI. To enable Helm, run the following command:
+
+```bash
+azd config set alpha.aks.helm on
 ```
 
 > [!WARNING]

@@ -1,3 +1,9 @@
+variable "resource_group_name_suffix" {
+  description = "value of azure resource group name suffix"
+  type        = string
+  default     = "demo"
+}
+
 variable "location" {
   type = string
 }

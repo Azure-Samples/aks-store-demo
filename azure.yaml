@@ -2,7 +2,7 @@
 
 name: aks-store-demo
 metadata:
-  template: aks-store-demo@1.0.0
+  template: aks-store-demo@1.1.0
 hooks:
   preprovision:
     posix:
@@ -26,7 +26,7 @@ hooks:
       continueOnError: false
       interactive: false
       run: azd-hooks/postprovision.ps1
-  predeploy: # This is a hack until Helm is supported in azd (https://github.com/Azure/azure-dev/issues/1618)
+  predeploy: # This hook is executed before the deployment of the application to create the custom-values.yaml file
     posix:
       shell: sh
       continueOnError: false
@@ -37,6 +37,33 @@ hooks:
       continueOnError: false
       interactive: false
       run: azd-hooks/predeploy.ps1
+  postdeploy:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postdeploy.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postdeploy.ps1
 infra:
   provider: terraform
   path: infra/terraform
+services:
+  demo:
+    host: aks
+    k8s:
+      namespace: pets
+      service:
+        name: store-admin
+      helm:
+        repositories:
+          - name: aks-store-demo
+            url: https://azure-samples.github.io/aks-store-demo
+        releases:
+          - name: demo
+            chart: aks-store-demo/aks-store-demo-chart
+            version: 1.1.0
+            values: custom-values.yaml # This file is created by the predeploy hook
