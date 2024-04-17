@@ -2,7 +2,7 @@ output "AZURE_RESOURCENAME_SUFFIX" {
   value = local.name
 }
 
-output "AZURE_RESOURCEGROUP_NAME" {
+output "AZURE_RESOURCE_GROUP" {
   value = azurerm_resource_group.example.name
 }
 

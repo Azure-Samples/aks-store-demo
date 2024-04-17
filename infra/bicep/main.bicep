@@ -13,7 +13,7 @@ param location string
 // "resourceGroupName": {
 //      "value": "myGroupName"
 // }
-param k8s_namespace string = 'default'
+param k8s_namespace string = 'pets'
 param resourceGroupName string = ''
 param openAiServiceName string = ''
 param openAiModelName string = 'gpt-35-turbo'
@@ -228,7 +228,7 @@ module acrPullRoleAssignment './core/security/registry-access.bicep' = if(deploy
 }
 
 // outputs data
-output AZURE_RESOURCEGROUP_NAME string = rg.name
+output AZURE_RESOURCE_GROUP string = rg.name
 output AZURE_AKS_CLUSTER_NAME string = kubernetes.outputs.clusterName
 output AZURE_OPENAI_MODEL_NAME string = openAiModelName
 output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint

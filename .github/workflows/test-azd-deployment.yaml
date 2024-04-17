@@ -83,7 +83,7 @@ jobs:
         id: kubectl_get_service
         run: |
           eval $(azd env get-values)
-          az aks get-credentials --resource-group $AZURE_RESOURCEGROUP_NAME --name $AZURE_AKS_CLUSTER_NAME
+          az aks get-credentials --resource-group $AZURE_RESOURCE_GROUP --name $AZURE_AKS_CLUSTER_NAME
           storeAdminIp=$(kubectl get service store-admin -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
           while [ -z "$storeAdminIp" ]; do
             sleep 60
