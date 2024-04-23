@@ -11,3 +11,13 @@ Content-Type: application/json
     "name": "Seafarer's Tug Rope",
     "tags": ["toy","dog"]
 }
+
+### Generate product image
+POST /generate/image 
+Host: localhost:5001
+Content-Type: application/json
+
+{
+    "name": "Seafarer's Tug Rope",
+    "description": "Engage your pup in a game of tug-of-war with the Seafarer's Tug Rope. Made from durable materials, this toy is perfect for interactive playtime and bonding with your furry friend."
+}
