@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/data/azcosmos"
 	"github.com/gofrs/uuid"
 )
@@ -18,6 +19,33 @@ type PartitionKey struct {
 type CosmosDBOrderRepo struct {
 	db           *azcosmos.ContainerClient
 	partitionKey PartitionKey
+}
+
+func NewCosmosDBOrderRepoWithManagedIdentity(cosmosDbEndpoint string, dbName string, containerName string, partitionKey PartitionKey) (*CosmosDBOrderRepo, error) {
+	cred, err := azidentity.NewDefaultAzureCredential(nil)
+	if err != nil {
+		log.Printf("failed to create cosmosdb workload identity credential: %v\n", err)
+		return nil, err
+	}
+
+	opts := azcosmos.ClientOptions{
+		EnableContentResponseOnWrite: true,
+	}
+
+	client, err := azcosmos.NewClient(cosmosDbEndpoint, cred, &opts)
+	if err != nil {
+		log.Printf("failed to create cosmosdb client: %v\n", err)
+		return nil, err
+	}
+
+	// create a cosmos container
+	container, err := client.NewContainer(dbName, containerName)
+	if err != nil {
+		log.Printf("failed to create cosmosdb container: %v\n", err)
+		return nil, err
+	}
+
+	return &CosmosDBOrderRepo{container, partitionKey}, nil
 }
 
 func NewCosmosDBOrderRepo(cosmosDbEndpoint string, dbName string, containerName string, cosmosDbKey string, partitionKey PartitionKey) (*CosmosDBOrderRepo, error) {
