@@ -160,8 +160,8 @@ spec:
             cpu: 1m
             memory: 50Mi
           limits:
-            cpu: 75m
-            memory: 128Mi
+            cpu: 100m
+            memory: 256Mi
         startupProbe:
           httpGet:
             path: /health
@@ -192,8 +192,8 @@ spec:
             cpu: 1m
             memory: 50Mi
           limits:
-            cpu: 75m
-            memory: 128Mi    
+            cpu: 100m
+            memory: 256Mi   
 ---
 apiVersion: v1
 kind: Service
