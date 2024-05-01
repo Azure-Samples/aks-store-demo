@@ -8,18 +8,6 @@ while ((az provider show --namespace "Microsoft.ContainerService" --query "regis
   Start-Sleep -Seconds 3
 }
 
-az feature register --namespace "Microsoft.ContainerService" --name "AKS-KedaPreview"
-while ((az feature show --namespace "Microsoft.ContainerService" --name "AKS-KedaPreview" --query "properties.state" -o tsv) -ne "Registered") {
-  Write-Host "Waiting for AKS-KedaPreview feature registration..."
-  Start-Sleep -Seconds 3
-}
-
-az feature register --namespace "Microsoft.ContainerService" --name "AKS-PrometheusAddonPreview"
-while ((az feature show --namespace "Microsoft.ContainerService" --name "AKS-PrometheusAddonPreview" --query "properties.state" -o tsv) -ne "Registered") {
-  Write-Host "Waiting for AKS-PrometheusAddonPreview feature registration..."
-  Start-Sleep -Seconds 3
-}
-
 az feature register --namespace "Microsoft.ContainerService" --name "NetworkObservabilityPreview"
 while ((az feature show --namespace "Microsoft.ContainerService" --name "NetworkObservabilityPreview" --query "properties.state" -o tsv) -ne "Registered") {
   Write-Host "Waiting for NetworkObservabilityPreview feature registration..."
