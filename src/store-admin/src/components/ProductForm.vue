@@ -291,7 +291,7 @@ ul {
 }
 
 img {
-  max-width: 100%;
+  max-width: 103%;
 }
 
 table {
@@ -316,7 +316,7 @@ td {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 103%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   color: white;
