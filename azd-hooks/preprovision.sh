@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if ${AZURE_COSMOSDB_ACCOUNT_KIND} == "MongoDB" && ${DEPLOY_AZURE_WORKLOAD_IDENTITY} == "true"; then
+  echo "Azure CosmosDB account kind cannot be MongoDB when deploying Azure Workload Identity"
+  exit 1
+fi
+
 echo "Ensuring Azure CLI extensions and dependencies are installed"
 
 az provider register --namespace "Microsoft.ContainerService"

@@ -1,7 +1,7 @@
 locals {
   name                            = "${random_pet.example.id}${random_integer.example.result}"
   location                        = var.location
-  default_cosmosdb_account_kind   = "MongoDB"
+  default_cosmosdb_account_kind   = var.deploy_azure_workload_identity == "true" ? "GlobalDocumentDB" : "MongoDB"
   cosmosdb_account_kind           = var.cosmosdb_account_kind != "" ? var.cosmosdb_account_kind : local.default_cosmosdb_account_kind
   deploy_azure_container_registry = var.deploy_azure_container_registry == "true" ? true : false
   deploy_azure_workload_identity  = var.deploy_azure_workload_identity == "true" ? true : false

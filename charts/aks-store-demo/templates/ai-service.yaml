@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ai-service-configmap
+  name: ai-service-configs
 data:
   AZURE_OPENAI_DEPLOYMENT_NAME: "{{ .Values.aiService.modelDeploymentName }}"
   AZURE_OPENAI_ENDPOINT: "{{ .Values.aiService.openAiEndpoint }}"
@@ -18,27 +18,16 @@ data:
   {{- /*
   Use Azure AD or OpenAI API Key  
   */}}
-  {{- if eq .Values.aiService.useAzureAd true }}
+  {{- if eq .Values.useAzureAd true }}
   USE_AZURE_AD: "True"
   {{- else }}
   USE_AZURE_AD: "False"
   {{- end }}
 ---
 {{- /*
-If Azure AD is used, create a service account with managed identity
-*/}}
-{{- if eq .Values.aiService.useAzureAd true }}
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: ai-service-account
-  annotations:
-    azure.workload.identity/client-id: "{{ .Values.aiService.managedIdentityClientId }}"
----
-{{- /*
 If Azure AD is not used, create a secret with OpenAI API Key
 */}}
-{{- else }}
+{{- if eq .Values.useAzureAd false }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -63,27 +52,27 @@ spec:
         {{- /*
         If Azure AD is used, set the label to use workload identity
         */}}
-        {{- if eq .Values.aiService.useAzureAd true }}
+        {{- if eq .Values.useAzureAd true }}
         azure.workload.identity/use: "true"
         {{- end }}
     spec:
       {{- /*
       If Azure AD is used, use the service account
       */}}
-      {{- if eq .Values.aiService.useAzureAd true }}
-      serviceAccount: ai-service-account
+      {{- if eq .Values.useAzureAd true }}
+      serviceAccount: {{ .Values.managedIdentityName }}
       {{- end }}
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-      - name: order-service
+      - name: ai-service
         image: {{ .Values.aiService.image.repository }}:{{ .Values.aiService.image.tag }}
         ports:
         - containerPort: 5001
         envFrom:
         - configMapRef:
-            name: ai-service-configmap
-        {{- if eq .Values.aiService.useAzureAd false }}
+            name: ai-service-configs
+        {{- if eq .Values.useAzureAd false }}
         - secretRef:
             name: ai-service-secrets
         {{- end }}

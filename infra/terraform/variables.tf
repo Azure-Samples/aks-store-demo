@@ -24,6 +24,7 @@ variable "openai_model_name" {
   type        = string
   default     = "gpt-35-turbo"
 }
+
 variable "openai_model_version" {
   description = "value of azure openai model version"
   type        = string

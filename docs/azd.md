@@ -68,8 +68,9 @@ The following environment variables are used to define the deployment settings:
 | `DEPLOY_AZURE_CONTAINER_REGISTRY` | By default, all application containers will be sourced from the [GitHub Container Registry](https://github.com/orgs/Azure-Samples/packages?repo_name=aks-store-demo). If you want to deploy apps from an Azure Container registry instead, set this environment variable to `true` to provision an Azure Container Registry and enable authentication from the AKS cluster. When this is set to true, you also have an option to set `BUILD_CONTAINERS` to `true` to build containers from source using the `az acr build command`; otherwise, the containers will be imported from the [GitHub Container Registry](https://github.com/orgs/Azure-Samples/packages?repo_name=aks-store-demo) using the `az acr import` command. |
 | `DEPLOY_AZURE_WORKLOAD_IDENTITY` | Set to `true` to deploy Azure Managed Identities for services that support it and enables workload identity and OIDC Issuer URL on AKS. |
 | `DEPLOY_AZURE_OPENAI` | Set to `true` to deploy Azure OpenAI, the `ai-service` microservice with workload identity authentication if that option was set to true. |
+| `DEPLOY_AZURE_OPENAI_DALL_E_3` | Set to `true` to deploy the DALL-E 3 model on Azure OpenAI. |
 | `DEPLOY_AZURE_SERVICE_BUS` | Set to `true` to deploy Azure Service Bus and configures workload identity if that option is set to true. |
-| `DEPLOY_AZURE_COSMOSDB` | The `makeline-service` supports both MongoDB and SQL API for accessing data in Azure CosmosDB. The default API is `MongoDB`, but you can use SQL API when using Azure CosmosDB. Set this to `true` to deploy Azure Cosmos DB. When this is set to true, you can also set `AZURE_COSMOSDB_ACCOUNT_KIND` to `GlobalDocumentDB` to use the SQL API for Azure Cosmos DB; otherwise, MongoDB API will be used. |
+| `DEPLOY_AZURE_COSMOSDB` | Set to `true` to deploy Azure Cosmos DB. When this is set to true, you can also set `AZURE_COSMOSDB_ACCOUNT_KIND` to `GlobalDocumentDB` to use the SQL API for Azure Cosmos DB; otherwise, MongoDB API will be used. The `makeline-service` supports both MongoDB and SQL API for accessing data in Azure CosmosDB. The default API is `MongoDB`, but if `DEPLOY_AZURE_WORKLOAD_IDENTITY` is set this will default to SQL API so that Azure RBAC authentication can be enabled for the Azure CosmosDB. |
 | `DEPLOY_OBSERVABILITY_TOOLS` | Set to `true` to deploy Azure Log Analytics workspace, Azure Monitor managed service for Promethues, Azure Managed Grafana, and onboard the AKS cluster to Container Insights. |
 
 These environment variables listed above can be set with commands like this:
@@ -85,11 +86,16 @@ azd env set DEPLOY_AZURE_WORKLOAD_IDENTITY true
 # deploys azure openai
 azd env set DEPLOY_AZURE_OPENAI true
 
+# deploys the DALL-E 3 model on azure openai
+azd env set DEPLOY_AZURE_OPENAI_DALL_E_3 true
+
 # deploys azure service bus
 azd env set DEPLOY_AZURE_SERVICE_BUS true
 
 # deploys azure cosmos db with the sql api
 azd env set DEPLOY_AZURE_COSMOSDB true
+
+# note this is the default when DEPLOY_AZURE_WORKLOAD_IDENTITY is set to true
 azd env set AZURE_COSMOSDB_ACCOUNT_KIND GlobalDocumentDB
 
 # deploys aks observability tools
