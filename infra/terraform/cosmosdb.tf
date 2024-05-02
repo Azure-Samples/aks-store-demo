@@ -6,8 +6,8 @@ resource "azurerm_cosmosdb_account" "example" {
   offer_type                         = "Standard"
   kind                               = local.cosmosdb_account_kind
   access_key_metadata_writes_enabled = !local.deploy_azure_workload_identity
-
-  enable_automatic_failover = false
+  minimal_tls_version                = "Tls12"
+  automatic_failover_enabled         = false
 
   dynamic "capabilities" {
     for_each = local.cosmosdb_account_kind == "MongoDB" ? ["EnableAggregationPipeline", "mongoEnableDocLevelTTL", "MongoDBv3.4", "EnableMongo"] : ["EnableAggregationPipeline"]

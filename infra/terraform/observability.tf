@@ -15,10 +15,11 @@ resource "azurerm_log_analytics_workspace" "example" {
 }
 
 resource "azurerm_dashboard_grafana" "example" {
-  count               = local.deploy_observability_tools ? 1 : 0
-  name                = "amg-${local.name}"
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  count                 = local.deploy_observability_tools ? 1 : 0
+  name                  = "amg-${local.name}"
+  resource_group_name   = azurerm_resource_group.example.name
+  location              = azurerm_resource_group.example.location
+  grafana_major_version = "10"
 
   identity {
     type = "SystemAssigned"
