@@ -9,7 +9,7 @@ resource "azurerm_cognitive_account" "example" {
   local_auth_enabled    = !local.deploy_azure_workload_identity
 }
 
-resource "azurerm_cognitive_deployment" "example" {
+resource "azurerm_cognitive_deployment" "gpt" {
   count                = local.deploy_azure_openai ? 1 : 0
   name                 = var.openai_model_name
   cognitive_account_id = azurerm_cognitive_account.example[0].id
@@ -23,6 +23,23 @@ resource "azurerm_cognitive_deployment" "example" {
   scale {
     type     = "Standard"
     capacity = var.openai_model_capacity
+  }
+}
+
+resource "azurerm_cognitive_deployment" "dalle" {
+  count                = local.deploy_azure_openai && local.deploy_azure_openai_dalle_model ? 1 : 0
+  name                 = var.openai_dalle_model_name
+  cognitive_account_id = azurerm_cognitive_account.example[0].id
+
+  model {
+    format  = "OpenAI"
+    name    = var.openai_dalle_model_name
+    version = var.openai_dalle_model_version
+  }
+
+  scale {
+    type     = "Standard"
+    capacity = var.openai_dalle_model_capacity
   }
 }
 

@@ -63,6 +63,14 @@ EOF
   openAiKey: $(az keyvault secret show --name ${AZURE_OPENAI_KEY} --vault-name ${AZURE_KEY_VAULT_NAME} --query value -o tsv)
 EOF
   fi
+
+  # If DALL-E model endpoint and name exists
+  if [ -n "${AZURE_OPENAI_DALL_E_ENDPOINT}" ] && [ -n "${AZURE_OPENAI_DALL_E_MODEL_NAME}" ]; then
+    cat << EOF >> custom-values.yaml
+  openAiDalleEndpoint: ${AZURE_OPENAI_DALL_E_ENDPOINT}
+  openAiDalleModelName: ${AZURE_OPENAI_DALL_E_MODEL_NAME}
+EOF
+  fi
 fi
 
 ###########################################################

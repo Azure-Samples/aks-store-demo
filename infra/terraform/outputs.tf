@@ -34,6 +34,14 @@ output "AZURE_OPENAI_ENDPOINT" {
   value = local.deploy_azure_openai ? azurerm_cognitive_account.example[0].endpoint : ""
 }
 
+output "AZURE_OPENAI_DALL_E_MODEL_NAME" {
+  value = local.deploy_azure_openai_dalle_model ? var.openai_dalle_model_name : ""
+}
+
+output "AZURE_OPENAI_DALL_E_ENDPOINT" {
+  value = local.deploy_azure_openai_dalle_model ? azurerm_cognitive_account.example[0].endpoint : ""
+}
+
 output "AZURE_OPENAI_KEY" {
   value     = local.deploy_azure_openai && !local.deploy_azure_workload_identity ? azurerm_key_vault_secret.openai_key[0].name : ""
   sensitive = true

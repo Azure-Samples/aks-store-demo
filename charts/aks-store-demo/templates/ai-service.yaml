@@ -4,8 +4,8 @@ kind: ConfigMap
 metadata:
   name: ai-service-configs
 data:
-  AZURE_OPENAI_DEPLOYMENT_NAME: "{{ .Values.aiService.modelDeploymentName }}"
   AZURE_OPENAI_ENDPOINT: "{{ .Values.aiService.openAiEndpoint }}"
+  AZURE_OPENAI_DEPLOYMENT_NAME: "{{ .Values.aiService.modelDeploymentName }}"
   {{- /*
   Use Azure OpenAI or OpenAI  
   */}}
@@ -22,6 +22,14 @@ data:
   USE_AZURE_AD: "True"
   {{- else }}
   USE_AZURE_AD: "False"
+  {{- end }}
+  {{- /*
+  If DALL-E model is used, set the model name
+  */}}
+  {{- if and .Values.aiService.openAiDalleEndpoint .Values.aiService.openAiDalleModelName }}
+  AZURE_OPENAI_DALLE_ENDPOINT: "{{ .Values.aiService.openAiDalleEndpoint }}"
+  AZURE_OPENAI_DALLE_DEPLOYMENT_NAME: "{{ .Values.aiService.openAiDalleModelName }}"
+  AZURE_OPENAI_API_VERSION: "{{ .Values.aiService.azureOpenAiApiVersion }}"
   {{- end }}
 ---
 {{- /*

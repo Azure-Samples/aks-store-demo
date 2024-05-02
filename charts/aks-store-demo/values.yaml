@@ -21,6 +21,9 @@ aiService:
   openAiKey: ""
   openAiOrgId: ""
   useAzureOpenAi: false
+  openAiDalleEndpoint: ""
+  openAiDalleModelName: ""
+  azureOpenAiApiVersion: "2024-02-15-preview"
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/ai-service"
     tag: "latest"
