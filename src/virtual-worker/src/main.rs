@@ -53,7 +53,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 } else {
                     println!("Processing orders");
 
-                    let orders: Vec<Order> = serde_json::from_str(&json).unwrap();
+                    let orders: Vec<Order> = match serde_json::from_str(&json) {
+                        Ok(orders) => orders,
+                        Err(e) => {
+                            println!("Failed to parse JSON: {}", e);
+                            vec![]
+                        }
+                    };
 
                     if orders.len() == 0 {
                         println!("No orders to process");
