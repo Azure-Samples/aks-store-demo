@@ -7,7 +7,6 @@ use std::fmt;
 use actix_web::{web, Error, HttpResponse, ResponseError};
 use crate::startup::AppState;
 use futures_util::StreamExt;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub struct ProxyError(reqwest::Error);
@@ -30,13 +29,6 @@ impl From<reqwest::Error> for ProxyError {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-struct AIHealthResponseBody {
-    status: String,
-    version: String,
-    capabilities: Vec<String>,
-}
-
 pub async fn ai_health(data: web::Data<AppState>) -> Result<HttpResponse, Error> {
     let client = reqwest::Client::new();
     let ai_service_url = data.settings.ai_service_url.to_owned();
@@ -48,9 +40,8 @@ pub async fn ai_health(data: web::Data<AppState>) -> Result<HttpResponse, Error>
     };
     let status = resp.status();
     if status.is_success() {
-        let body: AIHealthResponseBody = resp.json().await.map_err(ProxyError::from)?;
-        let body_json = serde_json::to_string(&body).unwrap();
-        Ok(HttpResponse::Ok().body(body_json))
+        let body_text = resp.text().await.map_err(ProxyError::from)?;
+        Ok(HttpResponse::Ok().body(body_text))
     } else {
         Ok(HttpResponse::build(actix_web::http::StatusCode::NOT_FOUND).body(""))
     }
