@@ -28,7 +28,7 @@ async def post_image(request: Request) -> JSONResponse:
         print("Calling OpenAI")
         
         api_version = os.environ.get("AZURE_OPENAI_API_VERSION")
-        endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+        endpoint = os.environ.get("AZURE_OPENAI_DALLE_ENDPOINT")
         model_deployment_name = os.environ.get("AZURE_OPENAI_DALLE_DEPLOYMENT_NAME")
         
         token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
@@ -40,9 +40,9 @@ async def post_image(request: Request) -> JSONResponse:
         )
 
         result = client.images.generate(
-          model=model_deployment_name,
-          prompt="Generate a cute photo realistic image of a product in its packaging in front of a plain background for a product called <"+ name + "> with a description <" + description + "> to be sold in an online pet supply store",
-          n=1
+            model=model_deployment_name,
+            prompt="Generate a cute photo realistic image of a product in its packaging in front of a plain background for a product called <"+ name + "> with a description <" + description + "> to be sold in an online pet supply store",
+            n=1
         )
 
         json_response = json.loads(result.model_dump_json())

@@ -25,9 +25,10 @@ pip install -r requirements.txt
 export USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
 export USE_AZURE_AD=True # set to True if you are using Azure OpenAI with Azure AD authentication
 export AZURE_OPENAI_API_VERSION=2024-02-15-preview # set to the version of the Azure OpenAI API you are using https://learn.microsoft.com/azure/ai-services/openai/reference#rest-api-versioning
-export AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI
 export AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
 export AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
+export AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI's DALL-E model
+export AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI's DALL-E model
 export OPENAI_API_KEY= # always required if using OpenAI if using Azure OpenAI, consider use Workload Identity https://learn.microsoft.com/azure/aks/open-ai-secure-access-quickstart
 export OPENAI_ORG_ID= # required if using OpenAI
 

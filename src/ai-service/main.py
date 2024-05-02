@@ -19,7 +19,7 @@ async def get_health():
     capabilities = ["description"]
 
     # Check if the environment variable is set
-    if os.environ.get("AZURE_OPENAI_DALLE_DEPLOYMENT_NAME"):
+    if os.environ.get("AZURE_OPENAI_DALLE_ENDPOINT") and os.environ.get("AZURE_OPENAI_DALLE_DEPLOYMENT_NAME"):
         # If it is, add "image" to the array
         capabilities.append("image")
 

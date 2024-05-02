@@ -36,21 +36,21 @@
           <input type="hidden" id="product-id" placeholder="Product ID" v-model="product.id" />
         </td>
         <td>
-          <button @click="generateDescription" class="ai-button">Ask AI Assistant</button>
+          <button @click="generateDescription" class="ai-button" v-show="aiCapabilities.includes('description')">Ask AI Assistant</button>
         </td>
       </tr>
 
       <tr>
         <td><label for="product-image">Image</label></td>
         <td>
-          <input id="product-image-text" placeholder="Product Image" v-model="product.image" />
-          <div id="product-image-container" class="image-container" :class="{ loading: isLoadingImage }" style="display: flex; align-items: center;">
+          <input id="product-image-text" placeholder="Product Image" v-model="product.image" v-show="!aiCapabilities.includes('image')"/>
+          <div id="product-image-container" class="image-container" :class="{ loading: isLoadingImage }" style="display: flex; align-items: center;" v-show="aiCapabilities.includes('image')">
             <img v-if="product.image" :src="product.image" alt="Product Image" />
             <div class="overlay">{{ overlayText }}</div>
           </div>
         </td>
         <td>
-          <button id="product-image-btn" @click="generateImage" class="ai-button">Generate Image</button>
+          <button id="product-image-btn" @click="generateImage" class="ai-button" v-show="aiCapabilities.includes('image')">Generate Image</button>
         </td>
       </tr>
     </table>
@@ -75,6 +75,7 @@
           price: 0.00,
           tags: []
         },
+        aiCapabilities: [],
         showValidationErrors: false,
         isLoadingImage: false,
         overlayText: ''
@@ -93,42 +94,19 @@
         }
       }
 
-      // if the AI service is not responding, hide the button
       fetch(`${aiServiceUrl}health`)
-        // .then(response => {
-        //   console.log(JSON.stringify(response.json()));
-        //   if (response.ok) {
-        //     console.log('AI service is healthy');
-        //   } else {
-        //     console.log('AI service is not healthy');
-        //     document.getElementsByClassName('ai-button')[0].style.display = 'none';
-        //   }
-        //   return response.json();
-        // })
         .then(response => response.json())
         .then(data => {
           if (data.status === 'ok') {
-            console.log('AI service is healthy');
-            
-            if (data.capabilities.includes('image')) {
-              document.getElementById('product-image-text').style.display = 'none';
-            } else {
-              document.getElementById('product-image-container').style.display = 'none';
-              document.getElementById('product-image-btn').style.display = 'none';
-            }
+            console.log('ai service health is ok');
+            this.aiCapabilities = data.capabilities;
           } else {
-            console.log('AI service is not healthy');
-            document.getElementsByClassName('ai-button')[0].style.display = 'none';
-            document.getElementById('product-image-container').style.display = 'none';
-            document.getElementById('product-image-btn').style.display = 'none';
+            console.log('ai service health is not ok');
           }
         })
         .catch(error => {
-          console.log('Error calling the AI service');
+          console.log('error occured when evaluating ai service health');
           console.log(error)
-          document.getElementsByClassName('ai-button')[0].style.display = 'none';
-          document.getElementById('product-image-container').style.display = 'none';
-          document.getElementById('product-image-btn').style.display = 'none';
         })
     },
     computed: {
@@ -211,10 +189,11 @@
           body: JSON.stringify(requestBody)
         })
           .then(response => {
-            this.overlayText = 'Downloading...'; // update overlay text
             return response.json();
           })
           .then(product => {
+            this.overlayText = 'Downloading...';
+            this.product.image = '';
             this.product.image = product.image
           })
           .catch(error => {
@@ -291,7 +270,7 @@ ul {
 }
 
 img {
-  max-width: 103%;
+  width: 100%;
 }
 
 table {
@@ -299,8 +278,18 @@ table {
 }
 
 td {
-  vertical-align: top;
+  vertical-align: center;
   border: none;
+}
+
+.product-form {
+  display: flex;
+  justify-content: center;
+}
+
+.product-form input {
+  padding: 5px;
+  margin: 5px;
 }
 
 .ai-button {
@@ -309,14 +298,14 @@ td {
 
 .image-container {
   position: relative;
-  display: inline-block;
+  width: 102%;
 }
 
 .overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 103%;
+  width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   color: white;
@@ -331,10 +320,5 @@ td {
 
 .image-container.loading .overlay {
   opacity: 1;
-}
-
-.product-form {
-  display: flex;
-  justify-content: center;
 }
 </style>
