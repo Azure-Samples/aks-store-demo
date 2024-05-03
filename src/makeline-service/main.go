@@ -165,31 +165,57 @@ func updateOrder(c *gin.Context) {
 }
 
 // Gets an environment variable or exits if it is not set
-func getEnvVar(varName string) string {
+func getEnvVar(varName string, fallbackVarNames ...string) string {
 	value := os.Getenv(varName)
 	if value == "" {
-		log.Printf("%s is not set", varName)
-		os.Exit(1)
+		for _, fallbackVarName := range fallbackVarNames {
+			value = os.Getenv(fallbackVarName)
+			if value == "" {
+				break
+			}
+		}
+		if value == "" {
+			log.Printf("%s is not set", varName)
+			if len(fallbackVarNames) > 0 {
+				log.Printf("Tried fallback variables: %v", fallbackVarNames)
+			}
+			os.Exit(1)
+		}
 	}
 	return value
 }
 
 // Initializes the database based on the API type
 func initDatabase(apiType string) (*OrderService, error) {
-	dbURI := getEnvVar("ORDER_DB_URI")
+	dbURI := getEnvVar("AZURE_COSMOS_RESOURCEENDPOINT", "ORDER_DB_URI")
 	dbName := getEnvVar("ORDER_DB_NAME")
 
 	switch apiType {
 	case AZURE_COSMOS_DB_SQL_API:
 		containerName := getEnvVar("ORDER_DB_CONTAINER_NAME")
-		dbPassword := os.Getenv("ORDER_DB_PASSWORD")
 		dbPartitionKey := getEnvVar("ORDER_DB_PARTITION_KEY")
 		dbPartitionValue := getEnvVar("ORDER_DB_PARTITION_VALUE")
-		cosmosRepo, err := NewCosmosDBOrderRepo(dbURI, dbName, containerName, dbPassword, PartitionKey{dbPartitionKey, dbPartitionValue})
-		if err != nil {
-			return nil, err
+
+		// check if USE_WORKLOAD_IDENTITY_AUTH is set
+		useWorkloadIdentityAuth := os.Getenv("USE_WORKLOAD_IDENTITY_AUTH")
+		if useWorkloadIdentityAuth == "" {
+			useWorkloadIdentityAuth = "false"
 		}
-		return NewOrderService(cosmosRepo), nil
+
+		if useWorkloadIdentityAuth == "true" {
+			cosmosRepo, err := NewCosmosDBOrderRepoWithManagedIdentity(dbURI, dbName, containerName, PartitionKey{dbPartitionKey, dbPartitionValue})
+			if err != nil {
+				return nil, err
+			}
+			return NewOrderService(cosmosRepo), nil
+		} else {
+			dbPassword := os.Getenv("ORDER_DB_PASSWORD")
+			cosmosRepo, err := NewCosmosDBOrderRepo(dbURI, dbName, containerName, dbPassword, PartitionKey{dbPartitionKey, dbPartitionValue})
+			if err != nil {
+				return nil, err
+			}
+			return NewOrderService(cosmosRepo), nil
+		}
 	default:
 		collectionName := getEnvVar("ORDER_DB_COLLECTION_NAME")
 		dbUsername := os.Getenv("ORDER_DB_USERNAME")

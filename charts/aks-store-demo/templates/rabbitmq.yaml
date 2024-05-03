@@ -10,7 +10,7 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: rabbitmq-secret
+  name: rabbitmq-secrets
 data:
   RABBITMQ_DEFAULT_USER: "{{ .Values.orderService.queueUsername | b64enc  }}"
   RABBITMQ_DEFAULT_PASS: "{{ .Values.orderService.queuePassword | b64enc  }}"
@@ -42,7 +42,7 @@ spec:
           name: rabbitmq-http
         envFrom:
         - secretRef:
-            name: rabbitmq-secret
+            name: rabbitmq-secrets
         resources:
           requests:
             cpu: 10m

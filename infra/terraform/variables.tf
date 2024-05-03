@@ -24,6 +24,7 @@ variable "openai_model_name" {
   type        = string
   default     = "gpt-35-turbo"
 }
+
 variable "openai_model_version" {
   description = "value of azure openai model version"
   type        = string
@@ -34,6 +35,24 @@ variable "openai_model_capacity" {
   description = "value of azure openai model capacity"
   type        = number
   default     = 30
+}
+
+variable "openai_dalle_model_name" {
+  description = "value of azure openai dall-e-3 model name"
+  type        = string
+  default     = "dall-e-3"
+}
+
+variable "openai_dalle_model_version" {
+  description = "value of azure openai dall-e-3 model version"
+  type        = string
+  default     = "3.0"
+}
+
+variable "openai_dalle_model_capacity" {
+  description = "value of azure openai dall-e-3 model capacity"
+  type        = number
+  default     = 1
 }
 
 variable "k8s_namespace" {
@@ -70,6 +89,13 @@ variable "deploy_azure_openai" {
   type        = string
   default     = "false"
 }
+
+variable "deploy_azure_openai_dalle_model" {
+  description = "value of setting to deploy azure openai dall-e-3 model. this string value will be used to set the local boolean variable"
+  type        = string
+  default     = "false"
+}
+
 
 variable "deploy_azure_servicebus" {
   description = "value of setting to deploy azure service bus. this string value will be used to set the local boolean variable"

@@ -1,24 +1,30 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: order-service-configmap
+  name: order-service-configs
 data:  
-  ORDER_QUEUE_HOSTNAME: "{{ .Values.orderService.queueHost }}"
+  {{- if eq .Values.useAzureAd true }}
+  USE_WORKLOAD_IDENTITY_AUTH: "true"
+  {{- else }}
   ORDER_QUEUE_PORT: "{{ .Values.orderService.queuePort }}"
+  {{- end }}
   {{- if .Values.orderService.queueTransport }}
   ORDER_QUEUE_TRANSPORT: "{{ .Values.orderService.queueTransport }}"
   {{- end }}
+  ORDER_QUEUE_HOSTNAME: "{{ .Values.orderService.queueHost }}"
   ORDER_QUEUE_NAME: "{{ .Values.orderService.queueName }}"
   FASTIFY_ADDRESS: "0.0.0.0"
 ---
+{{- if eq .Values.useAzureAd false }}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: order-service-secret
+  name: order-service-secrets
 data:
   ORDER_QUEUE_USERNAME: "{{ .Values.orderService.queueUsername | b64enc }}"
   ORDER_QUEUE_PASSWORD: "{{ .Values.orderService.queuePassword | b64enc }}"
 ---
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,7 +38,13 @@ spec:
     metadata:
       labels:
         app: order-service
+        {{- if eq .Values.useAzureAd true }}
+        azure.workload.identity/use: "true"
+        {{- end }}
     spec:
+      {{- if eq .Values.useAzureAd true }}
+      serviceAccount: {{ .Values.managedIdentityName }}
+      {{- end }}
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
@@ -42,9 +54,11 @@ spec:
         - containerPort: 3000
         envFrom:
         - configMapRef:
-            name: order-service-configmap
+            name: order-service-configs
+        {{- if eq .Values.useAzureAd false }}
         - secretRef:
-            name: order-service-secret
+            name: order-service-secrets
+        {{- end }}
         resources:
           requests:
             cpu: 1m

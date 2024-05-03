@@ -49,6 +49,10 @@ pub fn run(mut settings: Settings) -> Result<Server, std::io::Error> {
             "/ai/generate/description",
             web::post().to(ai_generate_description),
         )
+        .route(
+            "/ai/generate/image",
+            web::post().to(ai_generate_image),
+        )
     })
     .listen(listener)?
     .run();

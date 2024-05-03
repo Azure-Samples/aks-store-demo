@@ -1,12 +1,13 @@
 resource "azurerm_cosmosdb_account" "example" {
-  count               = local.deploy_azure_cosmosdb ? 1 : 0
-  name                = "db-${local.name}"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-  offer_type          = "Standard"
-  kind                = local.cosmosdb_account_kind
-
-  enable_automatic_failover = false
+  count                              = local.deploy_azure_cosmosdb ? 1 : 0
+  name                               = "db-${local.name}"
+  location                           = azurerm_resource_group.example.location
+  resource_group_name                = azurerm_resource_group.example.name
+  offer_type                         = "Standard"
+  kind                               = local.cosmosdb_account_kind
+  access_key_metadata_writes_enabled = !local.deploy_azure_workload_identity
+  minimal_tls_version                = "Tls12"
+  automatic_failover_enabled         = false
 
   dynamic "capabilities" {
     for_each = local.cosmosdb_account_kind == "MongoDB" ? ["EnableAggregationPipeline", "mongoEnableDocLevelTTL", "MongoDBv3.4", "EnableMongo"] : ["EnableAggregationPipeline"]

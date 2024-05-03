@@ -15,6 +15,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/identity": "^4.1.0",
+    "@azure/service-bus": "^7.9.4",
     "@fastify/autoload": "^5.0.0",
     "@fastify/cors": "^8.3.0",
     "@fastify/sensible": "^4.1.0",

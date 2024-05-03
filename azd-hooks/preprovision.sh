@@ -1,23 +1,15 @@
 #!/bin/bash
 
+if ${AZURE_COSMOSDB_ACCOUNT_KIND} == "MongoDB" && ${DEPLOY_AZURE_WORKLOAD_IDENTITY} == "true"; then
+  echo "Azure CosmosDB account kind cannot be MongoDB when deploying Azure Workload Identity"
+  exit 1
+fi
+
 echo "Ensuring Azure CLI extensions and dependencies are installed"
 
 az provider register --namespace "Microsoft.ContainerService"
 while [[ $(az provider show --namespace "Microsoft.ContainerService" --query "registrationState" -o tsv) != "Registered" ]]; do
   echo "Waiting for Microsoft.ContainerService provider registration..."
-  sleep 3
-done
-
-
-az feature register --namespace "Microsoft.ContainerService" --name "AKS-KedaPreview"
-while [[ $(az feature show --namespace "Microsoft.ContainerService" --name "AKS-KedaPreview" --query "properties.state" -o tsv) != "Registered" ]]; do
-  echo "Waiting for AKS-KedaPreview feature registration..."
-  sleep 3
-done
-
-az feature register --namespace "Microsoft.ContainerService" --name "AKS-PrometheusAddonPreview"
-while [[ $(az feature show --namespace "Microsoft.ContainerService" --name "AKS-PrometheusAddonPreview" --query "properties.state" -o tsv) != "Registered" ]]; do
-  echo "Waiting for AKS-PrometheusAddonPreview feature registration..."
   sleep 3
 done
 

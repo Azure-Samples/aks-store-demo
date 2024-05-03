@@ -34,13 +34,25 @@ output "AZURE_OPENAI_ENDPOINT" {
   value = local.deploy_azure_openai ? azurerm_cognitive_account.example[0].endpoint : ""
 }
 
+output "AZURE_OPENAI_DALL_E_MODEL_NAME" {
+  value = local.deploy_azure_openai_dalle_model ? var.openai_dalle_model_name : ""
+}
+
+output "AZURE_OPENAI_DALL_E_ENDPOINT" {
+  value = local.deploy_azure_openai_dalle_model ? azurerm_cognitive_account.example[0].endpoint : ""
+}
+
 output "AZURE_OPENAI_KEY" {
-  value     = local.deploy_azure_openai ? azurerm_key_vault_secret.openai_key[0].name : ""
+  value     = local.deploy_azure_openai && !local.deploy_azure_workload_identity ? azurerm_key_vault_secret.openai_key[0].name : ""
   sensitive = true
 }
 
+output "AZURE_IDENTITY_NAME" {
+  value = local.deploy_azure_workload_identity ? azurerm_user_assigned_identity.example[0].name : ""
+}
+
 output "AZURE_IDENTITY_CLIENT_ID" {
-  value = local.deploy_azure_openai && local.deploy_azure_workload_identity ? azurerm_user_assigned_identity.example[0].client_id : ""
+  value = local.deploy_azure_workload_identity ? azurerm_user_assigned_identity.example[0].client_id : ""
 }
 
 output "AZURE_SERVICE_BUS_HOST" {
@@ -53,20 +65,20 @@ output "AZURE_SERVICE_BUS_URI" {
 }
 
 output "AZURE_SERVICE_BUS_LISTENER_NAME" {
-  value = local.deploy_azure_servicebus ? azurerm_servicebus_namespace_authorization_rule.example[0].name : ""
+  value = local.deploy_azure_servicebus && !local.deploy_azure_workload_identity ? azurerm_servicebus_namespace_authorization_rule.example[0].name : ""
 }
 
 output "AZURE_SERVICE_BUS_LISTENER_KEY" {
-  value     = local.deploy_azure_servicebus ? azurerm_key_vault_secret.listener_key[0].name : ""
+  value     = local.deploy_azure_servicebus && !local.deploy_azure_workload_identity ? azurerm_key_vault_secret.listener_key[0].name : ""
   sensitive = true
 }
 
 output "AZURE_SERVICE_BUS_SENDER_NAME" {
-  value = local.deploy_azure_servicebus ? azurerm_servicebus_queue_authorization_rule.example[0].name : ""
+  value = local.deploy_azure_servicebus && !local.deploy_azure_workload_identity ? azurerm_servicebus_queue_authorization_rule.example[0].name : ""
 }
 
 output "AZURE_SERVICE_BUS_SENDER_KEY" {
-  value     = local.deploy_azure_servicebus ? azurerm_key_vault_secret.sender_key[0].name : ""
+  value     = local.deploy_azure_servicebus && !local.deploy_azure_workload_identity ? azurerm_key_vault_secret.sender_key[0].name : ""
   sensitive = true
 }
 
@@ -83,12 +95,12 @@ output "AZURE_DATABASE_API" {
 }
 
 output "AZURE_COSMOS_DATABASE_KEY" {
-  value     = local.deploy_azure_cosmosdb ? azurerm_key_vault_secret.cosmosdb_key[0].name : ""
+  value     = local.deploy_azure_cosmosdb && !local.deploy_azure_workload_identity ? azurerm_key_vault_secret.cosmosdb_key[0].name : ""
   sensitive = true
 }
 
 output "AZURE_KEY_VAULT_NAME" {
-  value = azurerm_key_vault.example.name
+  value = !local.deploy_azure_workload_identity ? azurerm_key_vault.example[0].name : ""
 }
 
 output "AZURE_REGISTRY_NAME" {

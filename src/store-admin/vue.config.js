@@ -140,13 +140,10 @@ module.exports = defineConfig({
 
       // Get AI service health
       devServer.app.get('/ai/health', (_, res) => {
-        fetch(`${PRODUCT_SERVICE_URL}/ai/health`)
-          .then(response => {
-            if (response.status === 200) {
-              res.send(response.json());
-            } else {
-              res.status(500).send('Health check failed');
-            }
+        fetch(`${PRODUCT_SERVICE_URL}ai/health`)
+          .then(response => response.json())
+          .then(health => {
+            res.send(health);
           })
           .catch(error => {
             console.error(error);
@@ -160,7 +157,7 @@ module.exports = defineConfig({
         const product = req.body
         console.log(product)
 
-        fetch(`${PRODUCT_SERVICE_URL}/ai/generate/description`, {
+        fetch(`${PRODUCT_SERVICE_URL}ai/generate/description`, {
           method: 'POST',
           body: JSON.stringify(product),
           headers: { 'Content-Type': 'application/json' }
@@ -169,6 +166,27 @@ module.exports = defineConfig({
           .then(description => {
             console.log(description);
             res.send(description)
+          })
+          .catch(error => {
+            console.log(error)
+          })
+      })
+
+      // Generate product image
+      devServer.app.post('/ai/generate/image', (req, res) => {
+        console.log('Generating product image')
+        const product = req.body
+        console.log(product)
+
+        fetch(`${PRODUCT_SERVICE_URL}ai/generate/image`, {
+          method: 'POST',
+          body: JSON.stringify(product),
+          headers: { 'Content-Type': 'application/json' }
+        })
+          .then(response => response.json())
+          .then(image => {
+            console.log(image);
+            res.send(image)
           })
           .catch(error => {
             console.log(error)
