@@ -46,13 +46,10 @@ async def post_image(request: Request) -> JSONResponse:
         )
 
         json_response = json.loads(result.model_dump_json())
-
-        if "error" in str(json_response).lower():
-            return Response(content=str(json_response), status_code=status.HTTP_401_UNAUTHORIZED)
         print(json_response)
 
         # Return the image as a JSON response
         return JSONResponse(content={"image": json_response["data"][0]["url"]}, status_code=status.HTTP_200_OK)
     except Exception as e:
         # Return an error message as a JSON response
-        return JSONResponse(content={"error": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
+        return JSONResponse(content={"error": str(e)}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
