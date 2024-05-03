@@ -110,13 +110,11 @@ export ORDER_DB_COLLECTION_NAME=orders
 
 To run this against Azure CosmosDB, you will need to create the CosmosDB account, the database, and collection/container. You can do this using the Azure CLI.
 
-Run the following command to create the Azure CosmosDB Account.
+Run the following command to create the resource group for the Azure CosmosDB Account.
 
 ```bash
 RGNAME=<resource-group-name>
 LOCNAME=<location>
-COSMOSDBNAME=<cosmosdb-account-name>
-
 az group create --name $RGNAME --location $LOCNAME
 ```
 
@@ -133,7 +131,11 @@ If you choose to use Workload Identity, you will need to do the following tasks:
 You can do this using the Azure CLI.
 
 ```bash
-PRINCIPALID=$(az ad signed-in-user show --query objectId -o tsv)
+# create the cosmosdb account
+COSMOSDBNAME=<cosmosdb-account-name>
+az cosmosdb create --name $COSMOSDBNAME --resource-group $RGNAME --kind GlobalDocumentDB --minimal-tls-version Tls12
+
+PRINCIPALID=$(az ad signed-in-user show --query id -o tsv)
 COSMOSDBID=$(az cosmosdb show --name $COSMOSDBNAME --resource-group $RGNAME --query id -o tsv)
 ROLEID=$(az role definition list -n "DocumentDB Account Contributor" --query "[].id" -o tsv)
 
@@ -155,10 +157,11 @@ cat <<EOF > customRole.json
     }]
 }
 EOF
+
 ROLEDEFINITIONID=$(az cosmosdb sql role definition create --account-name $COSMOSDBNAME --resource-group $RGNAME --body @customRole.json --query id -o tsv)
 
 # assign the custom role to yourself
-az cosmosdb sql role assignment create --account-name $COSMOSDBNAME --resource-group $RGNAME --scope $COSMOSDBID--principal-id $PRINCIPALID --role-definition-id $ROLEDEFINITIONID
+az cosmosdb sql role assignment create --account-name $COSMOSDBNAME --resource-group $RGNAME --scope $COSMOSDBID --principal-id $PRINCIPALID --role-definition-id $ROLEDEFINITIONID
 
 # disable account key authentication
 az cosmosdb update --name $COSMOSDBNAME --resource-group $RGNAME --disable-key-based-metadata-write-access
@@ -168,7 +171,6 @@ If you are using the SQL API, you will need to create the database and container
 
 ```bash
 COSMOSDBPARTITIONKEY=storeId
-az cosmosdb create --name $COSMOSDBNAME --resource-group $RGNAME --kind GlobalDocumentDB
 az cosmosdb sql database create --account-name $COSMOSDBNAME --name orderdb --resource-group $RGNAME
 az cosmosdb sql container create --account-name $COSMOSDBNAME --database-name orderdb --name orders --resource-group $RGNAME --partition-key-path /$COSMOSDBPARTITIONKEY
 ```
@@ -176,7 +178,7 @@ az cosmosdb sql container create --account-name $COSMOSDBNAME --database-name or
 If you are using the MongoDB API, you will need to create the database and collection. Run the following commands to create the database and collection.
 
 ```bash
-az cosmosdb create --name $COSMOSDBNAME --resource-group $RGNAME --kind MongoDB
+az cosmosdb create --name $COSMOSDBNAME --resource-group $RGNAME --kind MongoDB --minimal-tls-version Tls12
 az cosmosdb mongodb database create --account-name $COSMOSDBNAME --name orderdb --resource-group $RGNAME
 az cosmosdb mongodb collection create --account-name $COSMOSDBNAME --database-name orderdb --name orders --resource-group $RGNAME
 ```
@@ -230,7 +232,7 @@ The app relies on RabbitMQ and MongoDB. Additionally, to simulate orders, you wi
 To run the necessary services, clone the repo, open a terminal, and navigate to the `makeline-service` directory. Then run the following command:
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 Now you can run the following commands to start the application:
