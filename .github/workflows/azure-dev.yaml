@@ -18,11 +18,6 @@ jobs:
 
       - name: Install azd
         uses: Azure/setup-azd@v1.0.0
-      
-      - name: Install Nodejs
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
 
       - name: Log in with Azure (Federated Credentials)
         run: |
@@ -31,9 +26,35 @@ jobs:
             --federated-credential-provider "github" \
             --tenant-id ${{ env.AZURE_TENANT_ID}}
 
-      - name: Provision Infrastructure and Deploy Application
-        run: azd up --no-prompt
+      - name: Provision Infrastructure
+        run: azd provision --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
           AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
           AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Application
+        run: azd deploy --no-prompt
+        env:
+          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Store IPs
+        run: |
+          eval $(azd env get-values)
+          az aks get-credentials --resource-group $AZURE_RESOURCE_GROUP --name $AZURE_AKS_CLUSTER_NAME
+          storeAdminIp=$(kubectl get service store-admin -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          while [ -z "$storeAdminIp" ]; do
+            sleep 60
+            storeAdminIp=$(kubectl get service store-admin -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          done
+          echo "STORE_ADMIN_IP=${storeAdminIp}"
+          echo "STORE_ADMIN_IP=${storeAdminIp}" >> "$GITHUB_OUTPUT"
+          storeFrontIp=$(kubectl get service store-front -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          while [ -z "$storeFrontIp" ]; do
+            sleep 60
+            storeFrontIp=$(kubectl get service store-front -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          done
+          echo "STORE_FRONT_IP=${storeFrontIp}"
+          echo "STORE_FRONT_IP=${storeFrontIp}" >> "$GITHUB_OUTPUT"
