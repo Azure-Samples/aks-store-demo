@@ -43,7 +43,7 @@ module.exports = fp(async function (fastify, opts) {
 
       const fullyQualifiedNamespace = process.env.ORDER_QUEUE_HOSTNAME || process.env.AZURE_SERVICEBUS_FULLYQUALIFIEDNAMESPACE;
 
-      console.log('sending message ${body} to ${process.env.ORDER_QUEUE_NAME} on ${fullyQualifiedNamespace} using Microsoft Entra ID Workload Identity credentials')
+      console.log(`sending message ${body} to ${process.env.ORDER_QUEUE_NAME} on ${fullyQualifiedNamespace} using Microsoft Entra ID Workload Identity credentials`);
       
       if (!fullyQualifiedNamespace) {
         console.log('no hostname set for message queue. exiting.');
