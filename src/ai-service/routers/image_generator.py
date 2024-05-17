@@ -28,7 +28,7 @@ async def post_image(request: Request) -> JSONResponse:
         print("Calling OpenAI")
         
         api_version = os.environ.get("AZURE_OPENAI_API_VERSION")
-        endpoint = os.environ.get("AZURE_OPENAI_DALLE_ENDPOINT")
+        endpoint = os.environ.get("AZURE_OPENAI_DALLE_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT")
         model_deployment_name = os.environ.get("AZURE_OPENAI_DALLE_DEPLOYMENT_NAME")
         
         token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
