@@ -5,7 +5,7 @@ pytest==7.3.1
 httpx
 pyyaml
 semantic-kernel==0.4.2.dev0
-azure.identity==1.16.0
+azure.identity==1.16.1
 requests==2.32.0
 
 openai==1.23.2
