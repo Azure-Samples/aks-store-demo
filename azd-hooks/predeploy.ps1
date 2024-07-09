@@ -77,11 +77,9 @@ orderService:
 
 # Add Azure Service Bus to order-service if provided
 if ($env:AZURE_SERVICE_BUS_HOST) {
-  $queuePassword = az keyvault secret show --name $env:AZURE_SERVICE_BUS_SENDER_KEY --vault-name $env:AZURE_KEY_VAULT_NAME --query value -o tsv
 @"
   queueHost: ${env:AZURE_SERVICE_BUS_HOST}
 "@ | Out-File -Append custom-values.yaml
-
 
   # If Azure identity does not exists, use the Azure Service Bus credentials
   if (-not $env:AZURE_IDENTITY_CLIENT_ID -and -not $env:AZURE_IDENTITY_NAME) {
@@ -92,6 +90,7 @@ if ($env:AZURE_SERVICE_BUS_HOST) {
   queueUsername: ${env:AZURE_SERVICE_BUS_SENDER_NAME}
   queuePassword: $queuePassword
 "@ | Out-File -Path custom-values.yaml -Append -Encoding utf8
+  }
 }
 
 ###########################################################
