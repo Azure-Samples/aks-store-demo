@@ -3,15 +3,20 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: tfsec
+name: Scan Terraform code
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - main
+    paths:
+      - "infra/terraform/**"
   pull_request:
-    branches: [ "main" ]
-  schedule:
-    - cron: '42 7 * * 5'
+    branches: 
+      - main
+    paths:
+      - "infra/terraform/**"
+  workflow_dispatch:
 
 jobs:
   tfsec:

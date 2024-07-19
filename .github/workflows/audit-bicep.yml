@@ -1,15 +1,15 @@
-name: Validate AZD template
+name: Scan Bicep code
 on:
   push:
     branches: 
       - main
     paths:
-      - "infra/**"
+      - "infra/bicep/**"
   pull_request:
     branches: 
       - main
     paths:
-      - "infra/**"
+      - "infra/bicep/**"
   workflow_dispatch:
 
 jobs:
