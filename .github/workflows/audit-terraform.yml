@@ -29,15 +29,21 @@ jobs:
 
     steps:
       - name: Clone repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-sarif-action@21ded20e8ca120cd9d3d6ab04ef746477542a608
+      - name: Run Trivy vulnerability scanner in IaC mode for Terraform
+        uses: aquasecurity/trivy-action@b2933f565dbc598b29947660e66259e3c7bc8561 # 0.20.0
         with:
-          sarif_file: tfsec.sarif
+          scan-type: 'config'
+          scan-ref: './infra/terraform'
+          hide-progress: true
+          format: 'sarif'
+          output: 'trivy-terraform-results.sarif'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@e14ec90e52a057614c707baecf2ed88a81b68bc9 # v2
         with:
-          # Path to SARIF file relative to the root of the repository
-          sarif_file: tfsec.sarif
+          sarif_file: 'trivy-terraform-results.sarif'

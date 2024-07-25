@@ -8,6 +8,12 @@ variable "location" {
   type = string
 }
 
+variable "aks_node_pool_vm_size" {
+  description = "value of azure kubernetes service vmss sku"
+  type        = string
+  default     = "Standard_DS2_v2"
+}
+
 variable "kv_rbac_enabled" {
   description = "value of keyvault rbac enabled. when set to true, key vault will use azure role-based access control"
   type        = bool
@@ -15,8 +21,9 @@ variable "kv_rbac_enabled" {
 }
 
 variable "ai_location" {
-  description = "value of azure region for deploying azure ai service"
+  description = "value of azure region for deploying azure ai service. check this doc for availability: https://learn.microsoft.com/azure/ai-services/openai/concepts/models#provisioned-deployment-model-availability"
   type        = string
+  default     = ""
 }
 
 variable "openai_model_name" {
@@ -71,6 +78,13 @@ variable "cosmosdb_account_kind" {
   #   error_message = "Valid values for var: cosmosdb_account_kind are (MongoDB, GlobalDocumentDB)."
   # }
 }
+
+variable "cosmosdb_failover_location" {
+  description = "value of azure cosmosdb failover location. check this doc for region pair listings: https://learn.microsoft.com/azure/reliability/cross-region-replication-azure"
+  type        = string
+  default     = ""
+}
+
 
 variable "deploy_azure_container_registry" {
   description = "value of setting to deploy azure container registry. this string value will be used to set the local boolean variable"

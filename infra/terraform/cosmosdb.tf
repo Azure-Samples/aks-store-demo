@@ -7,7 +7,7 @@ resource "azurerm_cosmosdb_account" "example" {
   kind                               = local.cosmosdb_account_kind
   access_key_metadata_writes_enabled = !local.deploy_azure_workload_identity
   minimal_tls_version                = "Tls12"
-  automatic_failover_enabled         = false
+  automatic_failover_enabled         = true
 
   dynamic "capabilities" {
     for_each = local.cosmosdb_account_kind == "MongoDB" ? ["EnableAggregationPipeline", "mongoEnableDocLevelTTL", "MongoDBv3.4", "EnableMongo"] : ["EnableAggregationPipeline"]
@@ -23,13 +23,13 @@ resource "azurerm_cosmosdb_account" "example" {
   }
 
   geo_location {
-    location          = "eastus"
-    failover_priority = 1
+    location          = azurerm_resource_group.example.location
+    failover_priority = 0 # primary location
   }
 
   geo_location {
-    location          = "westus"
-    failover_priority = 0
+    location          = local.cosmosdb_failover_location
+    failover_priority = 1 # secondary location
   }
 }
 
@@ -72,7 +72,7 @@ resource "azurerm_cosmosdb_sql_container" "example" {
   resource_group_name   = azurerm_cosmosdb_account.example[0].resource_group_name
   account_name          = azurerm_cosmosdb_account.example[0].name
   database_name         = azurerm_cosmosdb_sql_database.example[0].name
-  partition_key_path    = "/storeId"
+  partition_key_paths   = ["/storeId"]
   partition_key_version = 1
   throughput            = 400
 }
