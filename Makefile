@@ -203,8 +203,8 @@ ENVTEST ?= $(LOCALBIN)/setup-envtest
 KIND ?= $(LOCALBIN)/kind
 
 # tool versions
-KUSTOMIZE_VERSION ?= v5.1.1
-KIND_VERSION ?= v0.20.0
+KUSTOMIZE_VERSION ?= v5.4.3
+KIND_VERSION ?= v0.23.0
 
 # kustomize 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
