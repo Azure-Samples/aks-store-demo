@@ -1,6 +1,12 @@
 #!/bin/bash
 
-az aks get-credentials --resource-group ${AZURE_RESOURCE_GROUP} --name ${AZURE_AKS_CLUSTER_NAME} --overwrite-existing
+##########################################################
+# Check kubelogin and install if not exists
+##########################################################
+if ! command -v kubelogin &> /dev/null; then
+  echo "kubelogin could not be found. Installing kubelogin..."
+  az aks install-cli
+fi
 
 ##########################################################
 # Create the custom-values.yaml file
