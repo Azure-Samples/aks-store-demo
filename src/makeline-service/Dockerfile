@@ -1,5 +1,5 @@
 # Use an official Golang runtime as a parent image
-FROM golang:1.20.5-alpine as builder
+FROM golang:1.22.5-alpine AS builder
 
 # Set the working directory to /app
 WORKDIR /app
@@ -14,7 +14,7 @@ COPY . /app
 RUN go build -ldflags "-X main.version=$APP_VERSION" -o main .
 
 # Run the app on alpine
-FROM alpine:latest as runner
+FROM alpine:latest AS runner
 
 ARG APP_VERSION=0.1.0
 

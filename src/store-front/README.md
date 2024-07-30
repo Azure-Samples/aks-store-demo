@@ -7,6 +7,7 @@ This is a Vue.js app that simulates a store front. It is meant to be used in con
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/download/)
+- [Vue CLI Service](https://cli.vuejs.org/guide/cli-service.html)
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 

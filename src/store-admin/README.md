@@ -7,6 +7,7 @@ This is a Vue.js app that simulates a store admin portal where users can manuall
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/download/)
+- [Vue CLI Service](https://cli.vuejs.org/guide/cli-service.html)
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [OpenAI API Key](https://beta.openai.com/docs/developer-quickstart/your-api-keys)
