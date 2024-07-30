@@ -14,12 +14,30 @@ resource "azurerm_kubernetes_cluster" "example" {
 
   default_node_pool {
     name       = "system"
-    vm_size    = "Standard_D4s_v4"
+    vm_size    = local.aks_node_pool_vm_size
     node_count = 3
 
     upgrade_settings {
       max_surge = "10%"
     }
+  }
+
+  azure_active_directory_role_based_access_control {
+    managed            = true
+    azure_rbac_enabled = true
+  }
+
+  api_server_access_profile {
+    authorized_ip_ranges = [
+      "${data.http.ifconfig.response_body}/32"
+    ]
+  }
+
+  network_profile {
+    network_plugin      = "azure"
+    network_plugin_mode = "overlay"
+    network_policy      = "cilium"
+    network_data_plane  = "cilium"
   }
 
   identity {
@@ -40,12 +58,9 @@ resource "azurerm_kubernetes_cluster" "example" {
     }
   }
 
-  dynamic "oms_agent" {
-    for_each = local.deploy_observability_tools ? [1] : []
-    content {
-      log_analytics_workspace_id      = azurerm_log_analytics_workspace.example[0].id
-      msi_auth_for_monitoring_enabled = true
-    }
+  oms_agent {
+    log_analytics_workspace_id      = azurerm_log_analytics_workspace.example.id
+    msi_auth_for_monitoring_enabled = true
   }
 
   lifecycle {
@@ -55,6 +70,12 @@ resource "azurerm_kubernetes_cluster" "example" {
       microsoft_defender
     ]
   }
+}
+
+resource "azurerm_role_assignment" "aks_cluster_admin" {
+  principal_id         = data.azurerm_client_config.current.object_id
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  scope                = azurerm_kubernetes_cluster.example.id
 }
 
 resource "azurerm_role_assignment" "example" {

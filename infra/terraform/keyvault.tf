@@ -7,6 +7,16 @@ resource "azurerm_key_vault" "example" {
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "standard"
   enable_rbac_authorization   = var.kv_rbac_enabled
+  purge_protection_enabled    = true
+  soft_delete_retention_days  = 7
+
+  network_acls {
+    default_action = "Deny"
+    bypass         = "AzureServices"
+    ip_rules = [
+      "${data.http.ifconfig.response_body}/32"
+    ]
+  }
 
   dynamic "access_policy" {
     for_each = var.kv_rbac_enabled ? [] : [1]
