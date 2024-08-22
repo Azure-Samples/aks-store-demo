@@ -1,3 +1,4 @@
+# This file is used at https://learn.microsoft.com/en-us/azure/aks/app-routing
 ---
 apiVersion: apps/v1
 kind: Deployment
