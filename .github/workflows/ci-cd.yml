@@ -1,5 +1,4 @@
 name: CI/CD Pipeline
-
 on:
   push:
     branches:
@@ -8,35 +7,29 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     
     - name: Checkout code
       uses: actions/checkout@v2
-
       
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.12'
-
       
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r src/ai-service/requirements.txt
-
+        pip install -r src/order-service/requirements.txt
       
     - name: Build Docker image
       run: |
-        docker build -t grupo5sd/projeto:${{ github.sha }} .
+        docker build -t grupo5sd/projeto:${{ github.sha }} -f src/order-service/Dockerfile .
         echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
         docker push grupo5sd/projeto:${{ github.sha }}
-
       
     - name: Deploy to k3s
       run: |
