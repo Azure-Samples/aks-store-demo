@@ -17,7 +17,8 @@ jobs:
       uses: docker/setup-buildx-action@v1
 
     - name: Log in to DockerHub
-      run: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      run: |
+        echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
     - name: Build and push Docker images
       run: |
