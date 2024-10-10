@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'src/virtual-worker/**'
+      - 'simulators/virtual-worker/**'
 
   workflow_dispatch:
 
@@ -51,8 +51,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: src/virtual-worker
-          file: src/virtual-worker/Dockerfile
+          context: simulators/virtual-worker
+          file: simulators/virtual-worker/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |

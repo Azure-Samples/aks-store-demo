@@ -95,7 +95,7 @@ services:
     networks:
       - backend_services
   virtual-customer:
-    build: ../virtual-customer
+    build: ../../simulators/virtual-customer
     container_name: 'virtual-customer'
     restart: always
     environment:

@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'src/product-service/**'
+      - 'services/product-service/**'
 
   workflow_dispatch:
 
@@ -51,8 +51,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: src/product-service
-          file: src/product-service/Dockerfile
+          context: services/product-service
+          file: services/product-service/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |

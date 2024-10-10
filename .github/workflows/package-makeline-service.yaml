@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'src/makeline-service/**'
+      - 'services/makeline-service/**'
 
   workflow_dispatch:
 
@@ -51,8 +51,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: src/makeline-service
-          file: src/makeline-service/Dockerfile
+          context: services/makeline-service
+          file: services/makeline-service/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |

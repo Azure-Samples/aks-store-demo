@@ -1,6 +1,6 @@
 # store-admin
 
-This is a Vue.js app that simulates a store admin portal where users can manually process orders, and manage products. It is meant to be used in conjunction with the [product-service](../product-service/) and [makeline-service](../makeline-service). If you have access to OpenAI or Azure OpenAI API keys, you can also deploy the  [ai-service](../ai-service) to help you generate product descriptions. You should also run the [virtual-customer](../virtual-customer) to simulate customers placing orders to have some order data to work with.
+This is a Vue.js app that simulates a store admin portal where users can manually process orders, and manage products. It is meant to be used in conjunction with the [product-service](../product-service/) and [makeline-service](../makeline-service). If you have access to OpenAI or Azure OpenAI API keys, you can also deploy the  [ai-service](../ai-service) to help you generate product descriptions. You should also run the [virtual-customer](../../simulators/virtual-customer) to simulate customers placing orders to have some order data to work with.
 
 ## Running the app locally
 

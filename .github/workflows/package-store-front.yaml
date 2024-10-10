@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'src/store-front/**'
+      - 'services/store-front/**'
 
   workflow_dispatch:
 
@@ -51,8 +51,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: src/store-front
-          file: src/store-front/Dockerfile
+          context: services/store-front
+          file: services/store-front/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |

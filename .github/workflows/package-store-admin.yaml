@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'src/store-admin/**'
+      - 'services/store-admin/**'
 
   workflow_dispatch:
 
@@ -51,8 +51,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: src/store-admin
-          file: src/store-admin/Dockerfile
+          context: services/store-admin
+          file: services/store-admin/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |

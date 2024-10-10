@@ -19,7 +19,7 @@ services:
     networks:
       - backend_services
   order-service:
-    build: src/order-service
+    build: services/order-service
     container_name: 'order-service'
     restart: always
     ports:
@@ -42,7 +42,7 @@ services:
       rabbitmq:
         condition: service_healthy
   product-service:
-    build: src/product-service
+    build: services/product-service
     container_name: 'product-service'
     restart: always
     ports:
@@ -57,7 +57,7 @@ services:
     networks:
       - backend_services
   store-front:
-    build: src/store-front
+    build: services/store-front
     container_name: 'store-front'
     restart: always
     ports:

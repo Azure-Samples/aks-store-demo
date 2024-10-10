@@ -101,7 +101,7 @@ Configure your Azure OpenAI or OpenAI API keys in [`docker-compose.yml`](./docke
 
 ```yaml
   ai-service:
-    build: src/ai-service
+    build: services/ai-service
     container_name: 'ai-service'
     ...
     environment:
@@ -117,7 +117,7 @@ Alternatively, if you do not have access to Azure OpenAI or OpenAI API keys, you
 
 ```yaml
 #  ai-service:
-#    build: src/ai-service
+#    build: services/ai-service
 #    container_name: 'ai-service'
 ...
 #    networks:

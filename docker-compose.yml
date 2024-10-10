@@ -32,7 +32,7 @@ services:
     networks:
       - backend_services
   order-service:
-    build: src/order-service
+    build: services/order-service
     container_name: 'order-service'
     restart: always
     ports:
@@ -55,7 +55,7 @@ services:
       rabbitmq:
         condition: service_healthy
   makeline-service:
-    build: src/makeline-service
+    build: services/makeline-service
     container_name: 'makeline-service'
     restart: always
     ports:
@@ -81,7 +81,7 @@ services:
       mongodb:
         condition: service_healthy
   product-service:
-    build: src/product-service
+    build: services/product-service
     container_name: 'product-service'
     restart: always
     ports:
@@ -96,7 +96,7 @@ services:
     networks:
       - backend_services
   store-front:
-    build: src/store-front
+    build: services/store-front
     container_name: 'store-front'
     restart: always
     ports:
@@ -115,7 +115,7 @@ services:
       - product-service
       - order-service
   store-admin:
-    build: src/store-admin
+    build: services/store-admin
     container_name: 'store-admin'
     restart: always
     ports:
@@ -134,7 +134,7 @@ services:
       - product-service
       - makeline-service
   virtual-customer:
-    build: src/virtual-customer
+    build: simulators/virtual-customer
     container_name: 'virtual-customer'
     restart: always
     environment:
@@ -146,7 +146,7 @@ services:
       order-service:
         condition: service_healthy
   virtual-worker:
-    build: src/virtual-worker
+    build: simulators/virtual-worker
     container_name: 'virtual-worker'
     restart: always
     environment:
@@ -158,7 +158,7 @@ services:
       makeline-service:
         condition: service_healthy
   ai-service:
-    build: src/ai-service
+    build: services/ai-service
     container_name: 'ai-service'
     restart: always
     ports:

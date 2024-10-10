@@ -227,7 +227,7 @@ export ORDER_DB_PASSWORD=$COSMOSDBPASSWORD
 
 ## Running the app locally
 
-The app relies on RabbitMQ and MongoDB. Additionally, to simulate orders, you will need to run the [order-service](../order-service) with the [virtual-customer](../virtual-customer) app. A docker-compose file is provided to make this easy.
+The app relies on RabbitMQ and MongoDB. Additionally, to simulate orders, you will need to run the [order-service](../order-service) with the [virtual-customer](../../simulators/virtual-customer) app. A docker-compose file is provided to make this easy.
 
 To run the necessary services, clone the repo, open a terminal, and navigate to the `makeline-service` directory. Then run the following command:
 

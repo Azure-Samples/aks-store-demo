@@ -56,7 +56,7 @@ services:
       rabbitmq:
         condition: service_healthy
   virtual-customer:
-    build: ../virtual-customer
+    build: ../../simulators/virtual-customer
     container_name: 'virtual-customer'
     restart: always
     environment:

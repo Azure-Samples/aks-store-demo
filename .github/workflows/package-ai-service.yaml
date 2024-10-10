@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'src/ai-service/**'
+      - 'services/ai-service/**'
 
   workflow_dispatch:
 
@@ -51,8 +51,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: src/ai-service
-          file: src/ai-service/Dockerfile
+          context: services/ai-service
+          file: services/ai-service/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |

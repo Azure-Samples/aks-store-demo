@@ -12,7 +12,7 @@ This is a Rust app that simulates order completion. It is meant to be used in co
 
 ### Running the app
 
-This app relies on the [makeline-service](../makeline-service) and the mongodb instance running. A docker-compose file is provided to make this easy. The docker-compose file will also start the RabbitMQ, MongoDB, [order-service](../order-service), and [virtual-customer](../virtual-customer) services to simulate incoming orders. 
+This app relies on the [makeline-service](../makeline-service) and the mongodb instance running. A docker-compose file is provided to make this easy. The docker-compose file will also start the RabbitMQ, MongoDB, [order-service](../order-service), and [virtual-customer](../../simulators/virtual-customer) services to simulate incoming orders. 
 
 To run the necessary services, clone the repo, open a terminal, and navigate to the `virtual-worker` directory. Then run the following command:
 
