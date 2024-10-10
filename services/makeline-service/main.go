@@ -191,31 +191,6 @@ func initDatabase(apiType string) (*OrderService, error) {
 	dbName := getEnvVar("ORDER_DB_NAME")
 
 	switch apiType {
-	case AZURE_COSMOS_DB_SQL_API:
-		containerName := getEnvVar("ORDER_DB_CONTAINER_NAME")
-		dbPartitionKey := getEnvVar("ORDER_DB_PARTITION_KEY")
-		dbPartitionValue := getEnvVar("ORDER_DB_PARTITION_VALUE")
-
-		// check if USE_WORKLOAD_IDENTITY_AUTH is set
-		useWorkloadIdentityAuth := os.Getenv("USE_WORKLOAD_IDENTITY_AUTH")
-		if useWorkloadIdentityAuth == "" {
-			useWorkloadIdentityAuth = "false"
-		}
-
-		if useWorkloadIdentityAuth == "true" {
-			cosmosRepo, err := NewCosmosDBOrderRepoWithManagedIdentity(dbURI, dbName, containerName, PartitionKey{dbPartitionKey, dbPartitionValue})
-			if err != nil {
-				return nil, err
-			}
-			return NewOrderService(cosmosRepo), nil
-		} else {
-			dbPassword := os.Getenv("ORDER_DB_PASSWORD")
-			cosmosRepo, err := NewCosmosDBOrderRepo(dbURI, dbName, containerName, dbPassword, PartitionKey{dbPartitionKey, dbPartitionValue})
-			if err != nil {
-				return nil, err
-			}
-			return NewOrderService(cosmosRepo), nil
-		}
 	default:
 		collectionName := getEnvVar("ORDER_DB_COLLECTION_NAME")
 		dbUsername := os.Getenv("ORDER_DB_USERNAME")
