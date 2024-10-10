@@ -157,25 +157,25 @@ services:
     depends_on:
       makeline-service:
         condition: service_healthy
-  ai-service:
-    build: src/ai-service
-    container_name: 'ai-service'
-    restart: always
-    ports:
-      - 5001:5001
-    healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://ai-service:5001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    environment:
-      - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
-      - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
-      - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
-      - OPENAI_API_KEY= # required if using OpenAI and not required if using Azure OpenAI with Azure AD 
-      - OPENAI_ORG_ID= # required if using OpenAI
-    networks:
-      - backend_services
+#  ai-service:
+#    build: src/ai-service
+#    container_name: 'ai-service'
+#    restart: always
+#    ports:
+#      - 5001:5001
+#    healthcheck:
+#      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://ai-service:5001/health"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 5
+#    environment:
+#      - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
+#      - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
+#      - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
+#      - OPENAI_API_KEY= # required if using OpenAI and not required if using Azure OpenAI with Azure AD 
+#      - OPENAI_ORG_ID= # required if using OpenAI
+#    networks:
+#      - backend_services
 networks:
   backend_services:
     driver: bridge
