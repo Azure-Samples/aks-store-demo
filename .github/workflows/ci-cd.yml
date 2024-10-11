@@ -24,3 +24,8 @@ jobs:
       run: |
         docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/grupo5sd/projeto .
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/grupo5sd/projeto
+
+# para abrir os servicoes pegas no ip e porta do store front do projeto dado pela prof e usas este comando 
+
+#kubectl delete -f aks-store-demo\aks-store-all-in-one.yaml
+#kubectl apply -f aks-store-demo\aks-store-all-in-one.yaml
