@@ -24,6 +24,7 @@ jobs:
       run: |
           docker build -t src/order-service:${{ github.sha }} ./src
           docker push src/order-service:${{ github.sha }}
+          
     - name: Deploy to k3s
       run: |
         kubectl apply -f k3s/deployment.yaml
