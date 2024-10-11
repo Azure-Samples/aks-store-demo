@@ -26,7 +26,7 @@ jobs:
           docker push src/order-service:${{ github.sha }}
 
     - name: Deploy to k3s
-      run: | 
+      run: |  
         kubectl apply -f k3s/deployment.yaml
 
 # para abrir os servicoes pegas no ip e porta do store front do projeto dado pela prof e usas este comando 
