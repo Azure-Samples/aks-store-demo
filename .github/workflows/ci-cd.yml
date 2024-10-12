@@ -43,3 +43,4 @@ jobs:
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest
+  # teste 22
