@@ -1,36 +1,45 @@
-name: CI/CD Pipeline
 
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Log in to DockerHub
-      run: |
-        echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-    - name: Build Docker image
-      run: |
-          docker build -t src/order-service:${{ github.sha }} ./src
-          docker push src/order-service:${{ github.sha }}
-
-    - name: Deploy to k3s
-      run: |  
-        kubectl apply -f k3s/deployment.yaml
 
 # para abrir os servicoes pegas no ip e porta do store front do projeto dado pela prof e usas este comando 
 #para ver a porta fazes-- kubectl get service
 
 #kubectl delete -f aks-store-demo\aks-store-all-in-one.yaml
 #kubectl apply -f aks-store-demo\aks-store-all-in-one.yaml
+
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout do código fonte
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Configura o Docker
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    # Logar no DockerHub (DockerHub credentials devem ser configuradas nos Secrets do GitHub)
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # Construir a imagem Docker e tagueá-la
+    - name: Build and Tag Docker Image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest .
+    
+    # Empurrar a imagem para o DockerHub
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest
