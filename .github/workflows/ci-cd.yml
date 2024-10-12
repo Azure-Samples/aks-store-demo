@@ -37,10 +37,10 @@ jobs:
     # Construir a imagem Docker e tagueá-la
     - name: Build and Tag Docker Image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest .
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f ../../src/order-service  
     
     # Empurrar a imagem para o DockerHub
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest
-  # teste 22
+  # teste 23
