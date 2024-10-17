@@ -6,6 +6,7 @@
 #kubectl delete -f aks-store-demo\aks-store-all-in-one.yaml
 #kubectl apply -f aks-store-demo\aks-store-all-in-one.yaml
 
+
 name: Build and Push Docker Image
 
 on:
