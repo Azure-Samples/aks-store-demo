@@ -38,13 +38,7 @@ jobs:
     - name: Build and Tag Docker Image
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/order-service/Dockerfile src/order-service
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/makeline-service/Dockerfile src/makeline-service
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/product-service/Dockerfile src/product-service
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/store-admin/Dockerfile src/store-admin
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/store-front/Dockerfile src/store-front
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/virtual-customer/Dockerfile src/virtual-customer
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/virtual-worker/Dockerfile src/virtual-worker
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/ai-service/Dockerfile src/ai-service
+       
 
         
   #fazer para outros serviços
