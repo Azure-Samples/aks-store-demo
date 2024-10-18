@@ -76,3 +76,4 @@ jobs:
         
       - name: Sync the application
         run: argocd app sync aks-store  # Update this
+  
