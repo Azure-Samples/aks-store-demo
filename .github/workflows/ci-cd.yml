@@ -6,6 +6,7 @@
 #kubectl delete -f aks-store-demo\aks-store-all-in-one.yaml
 #kubectl apply -f aks-store-demo\aks-store-all-in-one.yaml
 
+# kubectl port-forward -n argocd svc/argocd-server 8080:443
 
 name: Build and Push Docker Image
 
@@ -49,3 +50,29 @@ jobs:
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest
   # teste 24
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+        
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
+
+        
+      - name: Install Argo CD CLI
+        run: |
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+          rm argocd-linux-amd64
+
+        
+      - name: Login to Argo CD
+        run: argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+
+        
+      - name: Sync the application
+        run: argocd app sync aks-store  # Update this
