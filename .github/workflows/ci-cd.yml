@@ -49,7 +49,7 @@ jobs:
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest
-  # teste 24
+  # teste 29
 
   deploy:
     runs-on: ubuntu-latest
