@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::localwasmtime::WasmProduct;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Product {
@@ -14,7 +14,6 @@ pub struct Product {
 pub struct ProductInfo {
     pub product_id: i32,
 }
-
 
 impl Into<WasmProduct> for Product {
     fn into(self) -> WasmProduct {

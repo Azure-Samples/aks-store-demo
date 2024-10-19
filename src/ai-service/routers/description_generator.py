@@ -35,23 +35,30 @@ async def post_description(request: Request) -> JSONResponse:
         if useLocalLLM:
             print("Calling local LLM")
             
-            prompt = f"Describe this pet store product using joyful, playful, and enticing language.\nProduct name: {name}\ntags: {tags}\ndescription:\""
-            temperature = 0.5
-            top_p = 0.0
+            prompt = f"<|user|>Describe this pet store product using joyful, playful, and enticing language.\nProduct name: {name}\ntags: {tags}<|end|><|assistant|>\""
+            temperature = 1.0
+            top_p = 1
+            max_length = 150
+            repetition_penalty = 1.0
 
             url = endpoint
             payload = {
                 "prompt": prompt,
-                "temperature": temperature,
-                "top_p": top_p
+                "return_full_text": "false",
+                "clean_up_tokenization_spaces": "true",
+                "generate_kwargs": {
+                    "temperature": temperature,
+                    "max_length": max_length,
+                    "repetition_penalty": repetition_penalty,
+                    "top_p": top_p
+                }
             }
             headers = {"Content-Type": "application/json"}
             response = requests.request("POST", url, headers=headers, json=payload)
             
             # convert response.text to json
-            result = json.loads(response.text)
+            result = json.loads(response.content)
             result = result["Result"]
-            result = result.split("description:")[1]
             
             # remove all double quotes
             if "\"" in result:

@@ -24,36 +24,36 @@ spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-      - name: rabbitmq
-        image: mcr.microsoft.com/mirror/docker/library/rabbitmq:3.10-management-alpine
-        ports:
-        - containerPort: 5672
-          name: rabbitmq-amqp
-        - containerPort: 15672
-          name: rabbitmq-http
-        env:
-        - name: RABBITMQ_DEFAULT_USER
-          value: "username"
-        - name: RABBITMQ_DEFAULT_PASS
-          value: "password"
-        resources:
-          requests:
-            cpu: 10m
-            memory: 128Mi
-          limits:
-            cpu: 250m
-            memory: 256Mi
-        volumeMounts:
-        - name: rabbitmq-enabled-plugins
-          mountPath: /etc/rabbitmq/enabled_plugins
-          subPath: enabled_plugins
+        - name: rabbitmq
+          image: mcr.microsoft.com/mirror/docker/library/rabbitmq:3.10-management-alpine
+          ports:
+            - containerPort: 5672
+              name: rabbitmq-amqp
+            - containerPort: 15672
+              name: rabbitmq-http
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: "username"
+            - name: RABBITMQ_DEFAULT_PASS
+              value: "password"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: rabbitmq-enabled-plugins
+              mountPath: /etc/rabbitmq/enabled_plugins
+              subPath: enabled_plugins
       volumes:
-      - name: rabbitmq-enabled-plugins
-        configMap:
-          name: rabbitmq-enabled-plugins
-          items:
-          - key: rabbitmq_enabled_plugins
-            path: enabled_plugins
+        - name: rabbitmq-enabled-plugins
+          configMap:
+            name: rabbitmq-enabled-plugins
+            items:
+              - key: rabbitmq_enabled_plugins
+                path: enabled_plugins
 ---
 apiVersion: v1
 kind: Service
