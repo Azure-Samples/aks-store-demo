@@ -71,7 +71,7 @@ jobs:
 
         
       - name: Login to Argo CD
-        run: argocd login 10.2.15.143:30242 --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+        run: argocd login localhost:8080 --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
 
 
 
