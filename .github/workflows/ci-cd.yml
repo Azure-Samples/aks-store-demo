@@ -71,7 +71,8 @@ jobs:
 
         
       - name: Login to Argo CD
-        run: argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+        run: argocd login https://127.0.0.1:8080 --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+
 
         
       - name: Sync the application
