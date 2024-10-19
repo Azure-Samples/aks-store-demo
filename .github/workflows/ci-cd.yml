@@ -71,8 +71,7 @@ jobs:
 
         
       - name: Login to Argo CD
-        run: argocd login 10.2.15.144:31321 --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
-
+        run: argocd login 10.43.154.198:443 --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
 
         
       - name: Sync the application
