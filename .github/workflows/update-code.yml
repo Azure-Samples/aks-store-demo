@@ -38,7 +38,7 @@ jobs:
       - name: Configure kubectl to use local cluster
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+            echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
 
       - name: Deploy to Kubernetes
         run: |
