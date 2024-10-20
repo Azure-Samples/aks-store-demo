@@ -28,7 +28,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./Projeto/aks-store-demo
-          file: ./Projeto/aks-store-demo/Dockerfile
+          context: ./src/ai-service
+          file: ./src/ai-service/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/aks-store-demo:latest
