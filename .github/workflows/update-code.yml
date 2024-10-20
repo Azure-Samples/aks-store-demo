@@ -1,4 +1,4 @@
-name: Update Code and Send Image to DockerHub automatically
+name: Build and Push gRPC Product Service
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./src/ai-service
-          file: ./src/ai-service/Dockerfile
+          context: ./src/product-service
+          file: ./src/product-service/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aks-store-demo:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aks-store-demo/product-service:latest

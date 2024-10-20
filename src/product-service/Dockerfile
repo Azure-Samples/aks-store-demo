@@ -1,31 +1,17 @@
-FROM rust:1.80.0 AS builder
+# Use a base Python image
+FROM python:3.9-slim
 
-RUN USER=root cargo new --bin product-service
+# Install the necessary dependencies
+RUN pip install grpcio grpcio-tools
 
-# Create a new directory for our application
-WORKDIR /product-service
+# Copy the service files
+COPY . /app
 
-# Copy the source files to the container
-ADD . ./
-
-# Build the application
-RUN cargo build --release
-
-# Create a new stage and copy the binary from the builder stage
-FROM debian:bookworm-slim AS runner
+# Set the working directory
 WORKDIR /app
 
-# Set the build argument for the app version number
-ARG APP_VERSION=0.1.0
+# Generate Python files from the Protobuf
+RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. product_service.proto
 
-# Not ideal but needed to execute health checks in docker-compose
-RUN apt-get update && apt-get install -y wget libssl-dev && rm -rf /var/lib/apt/lists/*
-
-# Copy the binary from the builder stage
-COPY --from=builder /product-service/target/release/product-service /app
-
-# Set the environment variable for the app version number
-ENV APP_VERSION=$APP_VERSION
-
-# Run the application
-CMD ["./product-service"]
+# Run the gRPC server
+CMD ["python", "server.py"]
