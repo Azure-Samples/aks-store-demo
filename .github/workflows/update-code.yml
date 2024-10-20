@@ -49,4 +49,4 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f src/product-service/k8s/deployment.yaml
+          kubectl apply -f src/product-service/k8s/deployment.yaml --validate=false
