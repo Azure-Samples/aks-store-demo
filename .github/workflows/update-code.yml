@@ -30,6 +30,14 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/aks-store-demo-product-service:latest
 
+  deploy:
+    runs-on: self-hosted
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
         with:
@@ -37,8 +45,8 @@ jobs:
 
       - name: Configure kubectl to use local cluster
         run: |
-          mkdir -p $HOME/.kube
-            echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > "$HOME/.kube/config"
 
       - name: Deploy to Kubernetes
         run: |
