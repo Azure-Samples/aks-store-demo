@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  update-code:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,23 @@ jobs:
           file: ./src/product-service/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/aks-store-demo-product-service:latest
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: "latest"
+
+      - name: Configure kubectl to use local cluster
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f src/product-service/k8s/deployment.yaml
