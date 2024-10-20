@@ -28,4 +28,4 @@ jobs:
           context: ./src/product-service
           file: ./src/product-service/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aks-store-demo/product-service:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aks-store-demo-product-service:latest
