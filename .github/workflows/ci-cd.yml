@@ -39,7 +39,7 @@ jobs:
     # Construir a imagem Docker e tagueá-la
     - name: Build and Tag Docker Image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/order-service/Dockerfile src/order-service
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest -f src/store-front/Dockerfile src/store-front
        
 
         
@@ -63,20 +63,8 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > $HOME/.kube/config
 
         
-     # Passo para instalar o Argo CD CLI (se ainda não estiver instalado)
-      - name: Install Argo CD CLI
-        run: |
-          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-          rm argocd-linux-amd64
-
-    # Passo para fazer login no Argo CD
       - name: Login to Argo CD
-        run: |
-          argocd login localhost:8080 --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
-
-
-
+        run: argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
         
       - name: Sync the application
         run: argocd app sync aks-store  # Update this
