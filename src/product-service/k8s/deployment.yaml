@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: product-service
-  labels:
-    app: product-service
 spec:
   replicas: 1
   selector:
@@ -16,6 +14,8 @@ spec:
     spec:
       containers:
         - name: product-service
-          image: azure-samples/aks-store-demo-product-service
+          image: ghcr.io/azure-samples/aks-store-demo-product-service:latest
           ports:
             - containerPort: 50051
+      imagePullSecrets:
+        - name: ghcr-secret
