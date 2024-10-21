@@ -49,13 +49,13 @@ jobs:
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/ask-store-demo:latest
-  # teste 29
+  # teste 29  catnip
 
   # deploy:
   #   runs-on: ubuntu-latest
   #   needs: build
 
-  #   steps:
+  #   steps: 
         
   #     - name: Set up Kubeconfig
   #       run: |
