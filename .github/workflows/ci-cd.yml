@@ -66,8 +66,7 @@ jobs:
           pwd
           cat kustomize/base/store-front.yaml
           pwd
-          sed -i "s+image: grupo5sd/ask-store-demo:.*+image:grupo5sd/ask-store-demo::${{ github.run_number }}+g" kustomize/base/store-front.yaml 
-
+          sed -i "s+image: grupo5sd/ask-store-demo:.*+image:grupo5sd/ask-store-demo:app-${{ github.run_number }}+g" kustomize/base/store-front.yaml
           cat kustomize/base/store-front.yaml
           git add .
           git commit -m 'Done  by Github Actions   Job changemanifest: ${{ github.run_number }}'
