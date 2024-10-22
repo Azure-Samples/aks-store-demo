@@ -74,11 +74,12 @@ jobs:
           sed -i "s+image: grupo5sd/ask-store-demo/store-front:.*+image: grupo5sd/ask-store-demo/store-front:${{ github.run_number }}+g" kustomize/base/store-front.yaml
       
       - name: Debug após a modificação
+        run: cat kustomize/base/store-front.yaml
+        
+      - name: Commit changes
         run: |
-            cat kustomize/base/store-front.yaml
             git add .
-            git commit -m 'Done  by Github Actions   Job changemanifest: ${{ github.run_number }}'
+            git commit -m "Done by Github Actions Job changemanifest: ${{ github.run_number }}"
             git push origin main
-            - name: Commit changes
 
       
