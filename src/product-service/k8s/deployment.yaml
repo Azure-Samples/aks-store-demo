@@ -14,8 +14,6 @@ spec:
     spec:
       containers:
         - name: product-service
-          image: ghcr.io/azure-samples/aks-store-demo/product-service:latest
+          image: docker.io/aks-store-demo-product-service:latest
           ports:
             - containerPort: 50051
-      imagePullSecrets:
-        - name: ghcr-secret
