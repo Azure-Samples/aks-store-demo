@@ -28,4 +28,4 @@ jobs:
           context: ./src/product-service
           file: ./src/product-service/Dockerfile
           push: true
-          tags: ghcr.io/azure-samples/aks-store-demo-product-service:latest
+          tags: ghcr.io/azure-samples/aks-store-demo/product-service:latest
