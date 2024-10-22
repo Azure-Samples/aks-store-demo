@@ -66,9 +66,19 @@ jobs:
           pwd
           cat kustomize/base/store-front.yaml
           pwd
-          sed -i "s+image: grupo5sd/ask-store-demo:.*+image:grupo5sd/ask-store-demo:app-${{ github.run_number }}+g" kustomize/base/store-front.yaml
-          cat kustomize/base/store-front.yaml
-          git add .
-          git commit -m 'Done  by Github Actions   Job changemanifest: ${{ github.run_number }}'
-          git push origin main
- 
+      - name: Debug antes da modificação
+        run: cat kustomize/base/store-front.yaml
+        
+      - name: Modificar a imagem
+        run: |
+          sed -i "s+image: grupo5sd/ask-store-demo/store-front:.*+image: grupo5sd/ask-store-demo/store-front:${{ github.run_number }}+g" kustomize/base/store-front.yaml
+      
+      - name: Debug após a modificação
+        run: |
+            cat kustomize/base/store-front.yaml
+            git add .
+            git commit -m 'Done  by Github Actions   Job changemanifest: ${{ github.run_number }}'
+            git push origin main
+            - name: Commit changes
+
+      
