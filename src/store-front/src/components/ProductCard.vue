@@ -2,7 +2,7 @@
   <div class="product-card">
     <img :src="product.image" alt="Product Image">
     <router-link :to="`/product/${product.id}`">
-      <h2>{{ product.name }}</h2>
+      <h2>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa{{ product.name }} </h2>
     </router-link>
       <p>{{ product.description }}</p>
       <div class="product-details">
