@@ -28,4 +28,4 @@ jobs:
           context: ./src/product-service
           file: ./src/product-service/Dockerfile
           push: true
-          tags: ghcr.io/azure-samples/aks-store-demo/product-service:latest
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/azure-samples/aks-store-demo/product-service:latest
