@@ -71,7 +71,7 @@ jobs:
         
       - name: Modificar a imagem
         run: |
-          sed -i "s+image: grupo5sd/ask-store-demo/store-front:.*+image: grupo5sd/ask-store-demo/store-front:${{ github.run_number }}+g" kustomize/base/store-front.yaml
+          sed -i "s+image: grupo5sd/ask-store-demo:.*+image: grupo5sd/ask-store-demo:app-${{ github.run_number }}+g" kustomize/base/store-front.yaml
       
       - name: Debug após a modificação
         run: cat kustomize/base/store-front.yaml
