@@ -1,4 +1,13 @@
-import time  # Certifique-se de ter importado a biblioteca time
+import json
+import os
+from datetime import datetime  # Corrigido: importação do datetime
+import time
+from random import randint, uniform
+import requests
+import grpc
+import mensagem_pb2
+import mensagem_pb2_grpc
+
 
 def main():
     # Adicione uma mensagem de log única
