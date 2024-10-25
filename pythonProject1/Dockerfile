@@ -4,8 +4,7 @@ FROM python:3.9
 WORKDIR /app
 COPY . /app
 
-# Instale as dependências
-RUN pip install --no-cache-dir -r requirements.txt
+# Instale os pacotes manualmente para debug
 RUN pip install grpcio grpcio-tools
 
 # Comando para rodar a aplicação
