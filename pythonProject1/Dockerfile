@@ -1,11 +1,17 @@
+# Escolha a imagem base do Python
 FROM python:3.9
 
-# Copie o código da aplicação para o diretório de trabalho
+# Defina o diretório de trabalho
 WORKDIR /app
-COPY . /app
 
-# Instale os pacotes manualmente para debug
-RUN pip install grpcio grpcio-tools
+# Copie o arquivo requirements.txt para a imagem
+COPY requirements.txt .
+
+# Instale as dependências do requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copie o restante do código da aplicação
+COPY . .
 
 # Comando para rodar a aplicação
 CMD ["python", "GRPc.py"]
