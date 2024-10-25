@@ -14,7 +14,7 @@ def main():
     print(f"[INFO] Serviço virtual-customer iniciado às {datetime.now()}")
 
     # Configurações de ambiente
-    order_service_url = os.getenv("ORDER_SERVICE_URL", "http://localhost:3000")
+    order_service_url = os.getenv("ORDER_SERVICE_URL", "http://10.2.15.143:30298/")
     orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "1"))
 
     if orders_per_hour == 0:
