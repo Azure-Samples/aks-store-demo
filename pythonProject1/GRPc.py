@@ -33,20 +33,18 @@ def main():
     while True:
         order_counter += 1
 
-        # Geração de dados do pedido
-        #customer_id = str(random.randint(1000000000, 2147483647))
-        customer_id = str(2147483447)
-        #number_of_items = random.randint(1, 5)
-        number_of_items = 4
+        #Geração de dados do pedido
+        customer_id = str(random.randint(1000000000, 2147483647))
+       
+        number_of_items = random.randint(1, 5)
+        
 
         items = [
             {
-                #"productId": random.randint(1, 10),
-                #"quantity": random.randint(1, 5),
-                #"price": round(random.uniform(1.0, 100.0), 2)
-                "productId": 3,
-                "quantity": 3,
-                "price": 59.00
+                "productId": random.randint(1, 10),
+                "quantity": random.randint(1, 5),
+                "price": round(random.uniform(1.0, 100.0), 2)
+                
             }
             for _ in range(number_of_items)
         ]
