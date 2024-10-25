@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: grpc-server
-        image: seu-usuario/seu-servico-grpc:latest
+        image: grupo5sd/virtual_client:app-3
         ports:
         - containerPort: 50051
