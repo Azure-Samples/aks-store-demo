@@ -1,14 +1,9 @@
-import json
-import os
-from datetime import datetime, time
-from random import random
-import requests
-import grpc
-import mensagem_pb2
-import mensagem_pb2_grpc
-
+import time  # Certifique-se de ter importado a biblioteca time
 
 def main():
+    # Adicione uma mensagem de log única
+    print(f"[INFO] Serviço virtual-customer iniciado às {datetime.now()}")
+
     # Configurações de ambiente
     order_service_url = os.getenv("ORDER_SERVICE_URL", "http://localhost:3000")
     orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "1"))
@@ -62,14 +57,14 @@ def main():
             elapsed_time = (datetime.now() - start_time).total_seconds()
             if response.ok:
                 print(
-                    f"Pedido {order_counter} enviado em {elapsed_time:.2f} segundos "
+                    f"[INFO] Pedido {order_counter} enviado em {elapsed_time:.2f} segundos "
                     f"com status {response.status_code}. {serialized_order}"
                 )
             else:
-                print(f"Falha ao enviar o pedido: {response.status_code} - {response.text}")
+                print(f"[ERROR] Falha ao enviar o pedido: {response.status_code} - {response.text}")
 
         except requests.RequestException as e:
-            print(f"Erro ao enviar o pedido: {e}")
+            print(f"[ERROR] Erro ao enviar o pedido: {e}")
 
         # Pausa entre os envios
         time.sleep(order_submission_interval)
