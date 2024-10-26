@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: virtual-customer
-  template:
+  template: 
     metadata:
       labels:
         app: virtual-customer
