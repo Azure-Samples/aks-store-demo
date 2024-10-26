@@ -10,7 +10,7 @@ def main():
 
     # Configurações de ambiente
     order_service_url = os.getenv("ORDER_SERVICE_URL", "http://localhost:3000")
-    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "10"))
+    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "100"))
 
     if orders_per_hour == 0:
         print("[ERROR] ORDERS_PER_HOUR não pode ser zero.")
