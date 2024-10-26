@@ -1,16 +1,11 @@
 import json
 import os
-from datetime import datetime  # Corrigido: importação do datetime
+from datetime import datetime
 import time
-from random import randint, uniform
+import random
 import requests
-import grpc
-import mensagem_pb2
-import mensagem_pb2_grpc
-
 
 def main():
-    # Adicione uma mensagem de log única
     print(f"[INFO] Serviço virtual-customer iniciado às {datetime.now()}")
 
     # Configurações de ambiente
@@ -18,14 +13,11 @@ def main():
     orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "1"))
 
     if orders_per_hour == 0:
-        print("Por favor, defina a variável de ambiente ORDERS_PER_HOUR")
+        print("[ERROR] ORDERS_PER_HOUR não pode ser zero.")
         return
 
-    print(f"Pedidos a serem enviados por hora: {orders_per_hour}")
-
-    # Cálculo do intervalo entre os envios em segundos
     order_submission_interval = 3600 / orders_per_hour
-    print(f"Intervalo entre pedidos: {order_submission_interval} segundos")
+    print(f"[INFO] Intervalo entre pedidos: {order_submission_interval} segundos")
 
     order_counter = 0
     start_time = datetime.now()
@@ -33,18 +25,15 @@ def main():
     while True:
         order_counter += 1
 
-        #Geração de dados do pedido
+        # Geração de dados do pedido
         customer_id = str(random.randint(1000000000, 2147483647))
-       
         number_of_items = random.randint(1, 5)
-        
 
         items = [
             {
                 "productId": random.randint(1, 10),
                 "quantity": random.randint(1, 5),
                 "price": round(random.uniform(1.0, 100.0), 2)
-                
             }
             for _ in range(number_of_items)
         ]
@@ -54,10 +43,9 @@ def main():
             "items": items
         }
 
-        # Serialização para JSON
         serialized_order = json.dumps(order)
+        print(f"[DEBUG] Pedido gerado: {serialized_order}")
 
-        # Envio do pedido ao serviço remoto
         try:
             response = requests.post(
                 order_service_url,
@@ -65,20 +53,14 @@ def main():
                 data=serialized_order
             )
 
-            # Processamento da resposta
             elapsed_time = (datetime.now() - start_time).total_seconds()
             if response.ok:
-                print(
-                    f"[INFO] Pedido {order_counter} enviado em {elapsed_time:.2f} segundos "
-                    f"com status {response.status_code}. {serialized_order}"
-                )
+                print(f"[INFO] Pedido {order_counter} enviado em {elapsed_time:.2f} segundos com status {response.status_code}")
             else:
-                print(f"[ERROR] Falha ao enviar o pedido: {response.status_code} - {response.text}")
-
+                print(f"[ERROR] Erro ao enviar o pedido: {response.status_code} - {response.text}")
         except requests.RequestException as e:
-            print(f"[ERROR] Erro ao enviar o pedido: {e}")
+            print(f"[ERROR] Erro de requisição: {e}")
 
-        # Pausa entre os envios
         time.sleep(order_submission_interval)
 
 if __name__ == "__main__":
