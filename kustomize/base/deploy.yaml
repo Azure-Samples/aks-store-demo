@@ -1,19 +1,19 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: grpc-service
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: grpc-service
-  template:
-    metadata:
-      labels:
-        app: grpc-service
-    spec:
-      containers:
-      - name: grpc-server
-        image: grupo5sd/virtual_client:app-3
-        ports:
-        - containerPort: 50051
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: grpc-service
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: grpc-service
+#   template:
+#     metadata:
+#       labels:
+#         app: grpc-service
+#     spec:
+#       containers:
+#       - name: grpc-server
+#         image: grupo5sd/virtual_client:app-3
+#         ports:
+#         - containerPort: 50051
