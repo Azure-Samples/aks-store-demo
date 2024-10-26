@@ -17,7 +17,7 @@ spec:
       containers:
       - name: virtual-customer
         #image: ghcr.io/azure-samples/aks-store-demo/store-front:latest
-        image: grupo5sd/virtual_client:app-90
+        image: grupo5sd/virtual_client:app-91
         env:
         - name: ORDER_SERVICE_URL
           value: http://order-service:3000/
