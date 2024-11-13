@@ -20,7 +20,7 @@ spec:
         image: grupo5sd/virtual_client:app-100
         env:
         - name: ORDER_SERVICE_URL
-          value: http://order-service:3000/
+          value: "http://10.2.15.167:3000" 
         - name: ORDERS_PER_HOUR
           value: "30000"
         resources:
