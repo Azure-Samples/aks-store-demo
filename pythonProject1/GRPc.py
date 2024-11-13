@@ -11,7 +11,7 @@ def main():
     # Configurações de ambiente
     order_service_url = "http://10.2.15.167:3000"
 
-    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "500"))
+    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "3000"))
 
     if orders_per_hour == 0:
         print("[ERROR] ORDERS_PER_HOUR não pode ser zero.")
