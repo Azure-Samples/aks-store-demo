@@ -9,8 +9,9 @@ def main():
     print(f"[INFO] Serviço virtual-customer iniciado às {datetime.now()}")
 
     # Configurações de ambiente
-    order_service_url = os.getenv("ORDER_SERVICE_URL", "http://localhost:3000")
-    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "5000"))
+    order_service_url = "http://10.2.15.167:3000"
+
+    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "500"))
 
     if orders_per_hour == 0:
         print("[ERROR] ORDERS_PER_HOUR não pode ser zero.")
