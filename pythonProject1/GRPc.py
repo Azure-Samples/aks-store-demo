@@ -9,7 +9,7 @@ def main():
     print(f"[INFO] Serviço virtual-customer iniciado às {datetime.now()}")
 
     # Configurações de ambiente
-    order_service_url = "http://10.2.15.167:3000"
+    order_service_url = "http://order-service:3000/"
 
     orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "300"))
 
