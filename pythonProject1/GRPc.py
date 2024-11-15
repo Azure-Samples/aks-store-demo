@@ -27,14 +27,14 @@ def main():
         order_counter += 1
 
         # Geração de dados do pedido
-        customer_id = str(random.randint(1000000000, 1000000001))
+        customer_id = str(random.randint(1000000001, 999999999))
         number_of_items = random.randint(4, 10)
  
         items = [
             {
                 "productId": random.randint(1, 10),
                 "quantity": random.randint(1, 5),
-                "price": round(random.uniform(1.0, 100.0), 2)
+                "price": round(random.uniform(1.0, 10.0), 2)
             }
             for _ in range(number_of_items)
         ]
