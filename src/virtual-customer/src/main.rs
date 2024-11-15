@@ -58,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .map(|_| {
                     let product_id = rand::thread_rng().gen_range(1..10);
                     let quantity = rand::thread_rng().gen_range(1..5);
-                    let price = rand::thread_rng().gen_range(1.0..100.0);
+                    let price = rand::thread_rng().gen_range(1.0..10.0);
 
                     Item {
                         product_id,
