@@ -22,7 +22,7 @@ spec:
         - name: ORDER_SERVICE_URL
           value: "http://10.2.15.167:3000" 
         - name: ORDERS_PER_HOUR
-          value: "30000"
+          value: "300"
         resources:
           requests:
             cpu: 1m
