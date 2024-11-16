@@ -29,7 +29,7 @@ def main():
         # Geração de dados do pedido
         customer_id = str(random.randint(1000000001, 999999999))
         number_of_items = random.randint(4, 10)
- 
+  
         items = [
             {
                 "productId": random.randint(1, 10),
