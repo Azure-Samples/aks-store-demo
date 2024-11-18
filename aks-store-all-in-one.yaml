@@ -315,7 +315,7 @@ spec:
             memory: 1Mi
           limits:
             cpu: 2m
-            memory: 10Mi
+            memory: 20Mi
         readinessProbe:
           httpGet:
             path: /health
@@ -438,7 +438,7 @@ spec:
         - name: VUE_APP_PRODUCT_SERVICE_URL
           value: "http://product-service:3002/"
         - name: VUE_APP_MAKELINE_SERVICE_URL
-          value: "http://makeline-service.myappproject.svc.cluster.local:3001/order/fetch"
+          value: "http://makeline-service:3001/"
         resources:
           requests:
             cpu: 1m
@@ -498,12 +498,12 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: virtual-customer
-        image: grupo5sd/virtual_client:app-126
+        image:  grupo5sd/virtual_client:app-127
         env:
         - name: ORDER_SERVICE_URL
           value: http://order-service:3000/
         - name: ORDERS_PER_HOUR
-          value: "1000"
+          value: "100"
         resources:
           requests:
             cpu: 1m
@@ -533,9 +533,9 @@ spec:
         image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest
         env:
         - name: MAKELINE_SERVICE_URL
-          value: http://makeline-service.myappproject.svc.cluster.local:3001/order/fetch
+          value: http://makeline-service:3001
         - name: ORDERS_PER_HOUR
-          value: "1000"
+          value: "100"
         resources:
           requests:
             cpu: 1m
