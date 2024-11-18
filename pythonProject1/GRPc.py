@@ -43,6 +43,7 @@ def main():
             "customerId": customer_id,
             "items": items
         }
+        print(f"Pedido do cliente: {customer_id}")
 
         serialized_order = json.dumps(order)
         print(f"[DEBUG] Pedido gerado: {serialized_order}")
@@ -51,7 +52,8 @@ def main():
             response = requests.post(
                 order_service_url,
                 headers={"Content-Type": "application/json"},
-                data=serialized_order
+                data=serialized_order,
+                timeout=10  # Timeout de 10 segundos
             )
 
             elapsed_time = (datetime.now() - start_time).total_seconds()
@@ -59,8 +61,10 @@ def main():
                 print(f"[INFO] Pedido {order_counter} enviado em {elapsed_time:.2f} segundos com status {response.status_code}")
             else:
                 print(f"[ERROR] Erro ao enviar o pedido: {response.status_code} - {response.text}")
+                print(f"[DEBUG] Cabeçalhos da resposta: {response.headers}")
         except requests.RequestException as e:
             print(f"[ERROR] Erro de requisição: {e}")
+
 
         time.sleep(order_submission_interval)
 
