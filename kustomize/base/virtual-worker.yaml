@@ -19,9 +19,9 @@ spec:
         image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest
         env:
         - name: MAKELINE_SERVICE_URL
-          value: http://makeline-service:3001
+          value: http://makeline-service.myappproject.svc.cluster.local:3001/order/fetch
         - name: ORDERS_PER_HOUR
-          value: "100"
+          value: "1000"
         resources:
           requests:
             cpu: 1m

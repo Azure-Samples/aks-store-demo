@@ -24,7 +24,7 @@ spec:
         - name: VUE_APP_PRODUCT_SERVICE_URL
           value: "http://product-service:3002/"
         - name: VUE_APP_MAKELINE_SERVICE_URL
-          value: "http://makeline-service:3001/"
+          value: "http://makeline-service.myappproject.svc.cluster.local:3001/order/fetch"
         - name: VUE_APP_AI_SERVICE_URL
           value: "http://ai-service:5001/"
         resources:

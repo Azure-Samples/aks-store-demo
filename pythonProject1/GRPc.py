@@ -11,7 +11,7 @@ def main():
     # Configurações de ambiente
     order_service_url = "http://order-service:3000/"
 
-    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "100"))
+    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "1000"))
 
     if orders_per_hour == 0:
         print("[ERROR] ORDERS_PER_HOUR não pode ser zero.")
@@ -27,7 +27,7 @@ def main():
         order_counter += 1
 
         # Geração de dados do pedido
-        customer_id = str(random.randint(888888888, 1000000001))
+        customer_id = str(random.randint(10, 100))
         number_of_items = random.randint(4, 10)
   
         items = [
