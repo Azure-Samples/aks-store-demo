@@ -1,0 +1,181 @@
+services:
+  mongodb:
+    image: mongo:6.0.6
+    container_name: 'mongo'
+    restart: always
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - backend_services
+  rabbitmq:
+    image: rabbitmq:3.13.2-management-alpine
+    container_name: 'rabbitmq'
+    restart: always
+    environment:
+      - "RABBITMQ_DEFAULT_USER=username"
+      - "RABBITMQ_DEFAULT_PASS=password"
+    ports:
+      - 15672:15672
+      - 5672:5672
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./rabbitmq_enabled_plugins:/etc/rabbitmq/enabled_plugins
+    networks:
+      - backend_services
+  order-service:
+    build: src/order-service
+    container_name: 'order-service'
+    restart: always
+    ports:
+      - 3000:3000
+      - "50051:50051"
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://order-service:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - ORDER_QUEUE_HOSTNAME=rabbitmq
+      - ORDER_QUEUE_PORT=5672
+      - ORDER_QUEUE_USERNAME=username
+      - ORDER_QUEUE_PASSWORD=password
+      - ORDER_QUEUE_NAME=orders
+      - ORDER_QUEUE_RECONNECT_LIMIT=3
+    networks:
+      - backend_services
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+  makeline-service:
+    build: src/makeline-service
+    container_name: 'makeline-service'
+    restart: always
+    ports:
+      - 3001:3001
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://makeline-service:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - ORDER_QUEUE_URI=amqp://rabbitmq:5672
+      - ORDER_QUEUE_USERNAME=username
+      - ORDER_QUEUE_PASSWORD=password
+      - ORDER_QUEUE_NAME=orders
+      - ORDER_DB_URI=mongodb://mongodb:27017
+      - ORDER_DB_NAME=orderdb
+      - ORDER_DB_COLLECTION_NAME=orders
+    networks:
+      - backend_services
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+  product-service:
+    build: src/product-service
+    container_name: 'product-service'
+    restart: always
+    ports:
+      - 3002:3002
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://product-service:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - AI_SERVICE_URL=http://ai-service:5001/
+    networks:
+      - backend_services
+  store-front:
+    build: src/store-front
+    container_name: 'store-front'
+    restart: always
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://store-front:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - VUE_APP_PRODUCT_SERVICE_URL=http://product-service:3002/
+      - VUE_APP_ORDER_SERVICE_URL=http://order-service:3000/
+    networks:
+      - backend_services
+    depends_on:
+      - product-service
+      - order-service
+  store-admin:
+    build: src/store-admin
+    container_name: 'store-admin'
+    restart: always
+    ports:
+      - 8081:8081
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://store-admin:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - VUE_APP_PRODUCT_SERVICE_URL=http://product-service:3002/
+      - VUE_APP_MAKELINE_SERVICE_URL=http://makeline-service:3001/
+    networks:
+      - backend_services
+    depends_on:
+      - product-service
+      - makeline-service
+  virtual-customer:
+    build: src/virtual-customer
+    container_name: 'virtual-customer'
+    restart: always
+    environment:
+      GRPC_SERVER_ADDRESS: order-service:50051
+    networks:
+      - backend_services
+    depends_on:
+      order-service:
+        condition: service_healthy
+  virtual-worker:
+    build: src/virtual-worker
+    container_name: 'virtual-worker'
+    restart: always
+    environment:
+      - MAKELINE_SERVICE_URL=http://makeline-service:3001
+      - ORDERS_PER_HOUR=400
+    networks:
+      - backend_services
+    depends_on:
+      makeline-service:
+        condition: service_healthy
+  # ai-service:
+  #   build: src/ai-service
+  #   container_name: 'ai-service'
+  #   restart: always
+  #   ports:
+  #     - 5001:5001
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://ai-service:5001/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #   environment:
+  #     - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
+  #     - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
+  #     - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
+  #     - OPENAI_API_KEY= # required if using OpenAI and not required if using Azure OpenAI with Azure AD 
+  #     - OPENAI_ORG_ID= # required if using OpenAI
+  #   networks:
+  #     - backend_services
+networks:
+  backend_services:
+    driver: bridge

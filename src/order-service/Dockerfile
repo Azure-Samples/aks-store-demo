@@ -18,6 +18,7 @@ COPY . .
 
 # Expose the port the app listens on
 EXPOSE 3000
+EXPOSE 50051
 
 # Set the environment variable for the app version number
 ENV APP_VERSION=$APP_VERSION
