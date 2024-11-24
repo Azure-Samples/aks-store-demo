@@ -39,8 +39,11 @@ jobs:
     # Construir a imagem Docker e tagueá-la
     - name: Build and Tag Docker Image
       run: |
+
         docker build -t ${{ secrets.DOCKER_USERNAME }}/virtual_client:app-${{ github.run_number }} -f src/virtual-customer/Dockerfile src/virtual-customer
         docker build -t ${{ secrets.DOCKER_USERNAME }}/virtual_client:latest -f src/virtual-customer/Dockerfile src/virtual-customer
+
+
         
   #fazer para outros serviços
     
@@ -81,3 +84,5 @@ jobs:
             git add .
             git commit -m "Done by Github Actions Job changemanifest: ${{ github.run_number }}"
             git push origin main
+
+
