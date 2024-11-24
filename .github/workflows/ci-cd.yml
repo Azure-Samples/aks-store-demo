@@ -47,7 +47,8 @@ jobs:
     # Empurrar a imagem para o DockerHub
     - name: Push Docker Image
       run: |
-       docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client:latest docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client:app-${{ github.run_number }}
+       docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client:latest 
+       docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client:app-${{ github.run_number }}
 
   modifygit:
     needs: build
