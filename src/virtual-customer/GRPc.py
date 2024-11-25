@@ -43,9 +43,9 @@ def main():
         order_counter += 1
 
         # Geração de dados do pedido
-        customer_id = str(random.randint(10, 100))
+        customer_id = str(random.randint(1, 100))
         number_of_items = random.randint(1, 5)
-        print("olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        
         items = [
             {
                 "productId": random.randint(1, 10),
@@ -74,7 +74,7 @@ def main():
             elapsed_time = (datetime.now() - start_time).total_seconds()
 
             if response.resposta:
-                print(f"[INFO] Pedido {order_counter} enviado em {elapsed_time:.2f} segundos com resposta: {response.resposta}")
+                print(f"[INFOMATION] Pedido {order_counter} enviado em {elapsed_time:.2f} segundos com resposta: {response.resposta}")
             else:
                 print(f"[ERROR] Erro ao enviar o pedido.")
                 print(f"[DEBUG] Resposta: {response.resposta}")
