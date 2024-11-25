@@ -5,7 +5,7 @@ import grpc
 import mensagem_pb2
 import mensagem_pb2_grpc
 from datetime import datetime
-#from prometheus_client import start_http_server, Summary, Counter, Gauge
+from prometheus_client import start_http_server, Summary, Counter, Gauge
 import time
 
 def main():
