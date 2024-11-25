@@ -16,9 +16,10 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: order-service
-        image: ghcr.io/azure-samples/aks-store-demo/order-service:latest
+        image: pitacd/order-service:latest
         ports:
         - containerPort: 3000
+        - containerPort: 50051
         env:
         - name: ORDER_QUEUE_HOSTNAME
           value: "rabbitmq"
@@ -82,5 +83,8 @@ spec:
   - name: http
     port: 3000
     targetPort: 3000
+  - name: grpc
+    port: 50051
+    targetPort: 50051
   selector:
     app: order-service
