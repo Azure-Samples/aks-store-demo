@@ -63,35 +63,4 @@ jobs:
        docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client:latest 
        docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client:app-${{ github.run_number }}
 
-  modifygit:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        name: changing the deployment of git repo
-        with:
-          repository: 'TiagoNoite/aks-store-demo'
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: modify the image
-        run: |
-          git config user.email tiagonoitemenezes@gmail.com
-          git config user.name TiagoNoite
-          pwd
-          cat kustomize/base/virtual-customer.yaml
-          pwd
-      - name: Debug antes da modificação
-        run: cat kustomize/base/virtual-customer.yaml
-        
-      - name: Modificar a imagem
-        run: |
-          sed -i "s+image: grupo5sd/virtual_client:.*+image: grupo5sd/virtual_client:app-${{ github.run_number }}+g" kustomize/base/virtual-customer.yaml
-      
-      - name: Debug após a modificação
-        run: cat kustomize/base/virtual-customer.yaml
-        
-      - name: Commit changes
-        run: |
-            git add .
-            git commit -m "Done by Github Actions Job changemanifest: ${{ github.run_number }}"
-            git push origin main
-
+  
