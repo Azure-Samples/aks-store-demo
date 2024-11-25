@@ -95,8 +95,3 @@ jobs:
             git commit -m "Done by Github Actions Job changemanifest: ${{ github.run_number }}"
             git push origin main
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 1d9c26e848a9fc0bef62ccc7c0cfb021d055ea35
