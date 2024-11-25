@@ -19,7 +19,7 @@ def main():
     start_http_server(PROMETHEUS_PORT)
     print(f"[INFO] Servidor de métricas Prometheus iniciado na porta {PROMETHEUS_PORT}")
 
-    print("olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    
     # Configurações de ambiente
     grpc_server_address = "order-service:50051"  # This is the gRPC server address (not HTTP)
 
@@ -45,7 +45,7 @@ def main():
         # Geração de dados do pedido
         customer_id = str(random.randint(10, 100))
         number_of_items = random.randint(1, 5)
-
+        print("olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         items = [
             {
                 "productId": random.randint(1, 10),
