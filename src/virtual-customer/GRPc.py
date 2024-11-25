@@ -12,11 +12,11 @@ def main():
     print(f"[INFO] Serviço virtual-customer iniciado às {datetime.now()}")
 
     # Define as métricas usadas para medir o prometheus
-    #REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
-    #ORDER_COUNTER = Counter('orders_total', 'Total number of orders processed')
-    #ORDER_SIZE_GAUGE = Gauge('order_size_items', 'Number of items in an order')
-    #PROMETHEUS_PORT = 8000  # Escolha uma porta
-    #start_http_server(PROMETHEUS_PORT)
+    REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
+    ORDER_COUNTER = Counter('orders_total', 'Total number of orders processed')
+    ORDER_SIZE_GAUGE = Gauge('order_size_items', 'Number of items in an order')
+    PROMETHEUS_PORT = 8000  # Escolha uma porta
+    start_http_server(PROMETHEUS_PORT)
     print(f"[INFO] Servidor de métricas Prometheus iniciado na porta {PROMETHEUS_PORT}")
 
 
@@ -61,8 +61,8 @@ def main():
         }
         print(f"Pedido do cliente: {customer_id}")
 
-        #ORDER_COUNTER.inc()  # Incrementa o contador de pedidos
-        #ORDER_SIZE_GAUGE.set(len(items))  # Define o tamanho do pedido
+        ORDER_COUNTER.inc()  # Incrementa o contador de pedidos
+        ORDER_SIZE_GAUGE.set(len(items))  # Define o tamanho do pedido
 
         # Prepare the request for gRPC
         request = mensagem_pb2.MensagemRequest(conteudo=str(order))
@@ -87,3 +87,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+ 
