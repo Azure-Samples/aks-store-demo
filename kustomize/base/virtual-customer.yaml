@@ -2,13 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: virtual-customer
-  namespace: myappproject
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: virtual-customer
-  template: 
+  template:
     metadata:
       labels:
         app: virtual-customer
@@ -20,13 +19,11 @@ spec:
         image: grupo5sd/virtual_client:latest
         env:
         - name: ORDER_SERVICE_URL
-          value: "http://order-service:3000/"
-        - name: ORDERS_PER_HOUR
-          value: "100"
+          value: http://order-service:3000/
         resources:
           requests:
             cpu: 1m
-            memory: 1Mi
+            memory: 20Mi
           limits:
             cpu: 1m
-            memory: 5Mi
+            memory: 50Mi
