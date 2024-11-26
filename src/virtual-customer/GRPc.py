@@ -18,7 +18,7 @@ def main():
     PROMETHEUS_PORT = 8000  # Escolha uma porta
     start_http_server(PROMETHEUS_PORT)
     print(f"[INFO] Servidor de métricas Prometheus iniciado na porta {PROMETHEUS_PORT}")
-
+ 
     
     # Configurações de ambiente
     grpc_server_address = "order-service:50051"  # This is the gRPC server address (not HTTP)
