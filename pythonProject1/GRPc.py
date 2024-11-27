@@ -18,12 +18,12 @@ def main():
     PROMETHEUS_PORT = 8000  # Escolha uma porta
     start_http_server(PROMETHEUS_PORT)
     print(f"[INFO] Servidor de métricas Prometheus iniciado na porta {PROMETHEUS_PORT}")
-
+ 
     
     # Configurações de ambiente
     grpc_server_address = "order-service:50051"  # This is the gRPC server address (not HTTP)
 
-    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "1000"))
+    orders_per_hour = int(os.getenv("ORDERS_PER_HOUR", "3600"))
 
     if orders_per_hour == 0:
         print("[ERROR] ORDERS_PER_HOUR não pode ser zero.")
@@ -69,6 +69,7 @@ def main():
 
         try:
             # Call the gRPC method
+            print(f"pedido enviada: {order} ")
             response = stub.EnviarMensagem(request)
 
             elapsed_time = (datetime.now() - start_time).total_seconds()
