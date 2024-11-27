@@ -1,5 +1,5 @@
 # Use the official Python image as the base image
-FROM python:3.12.4-alpine
+FROM python:3.12.7-alpine
 
 # Install the required system packages
 RUN apk update && \
