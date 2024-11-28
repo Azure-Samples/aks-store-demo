@@ -1,4 +1,4 @@
 kustomize:
   images:
   - pitacd/order-service:86
-  - grupo5sd/virtual_client:app-163
+  - grupo5sd/virtual_client:app-164
