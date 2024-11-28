@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: virtual-customer old
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: virtual-customer old
+  template:
+    metadata:
+      labels:
+        app: virtual-customer old
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: virtual-customer old
+        image:  ghcr.io/azure-samples/aks-store-demo/virtual-customer:latest
+        env:
+        - name: ORDER_SERVICE_URL
+          value: http://order-service:3000/
+        resources:
+          requests:
+            cpu: 1m
+            memory: 20Mi
+          limits:
+            cpu: 1m
+            memory: 50Mi
