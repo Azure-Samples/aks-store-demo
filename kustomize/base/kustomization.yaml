@@ -9,4 +9,5 @@ resources:
 - store-admin.yaml
 - store-front.yaml
 - virtual-customer.yaml
+- virtual-customer-old.yaml
 - virtual-worker.yaml
