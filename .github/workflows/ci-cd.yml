@@ -22,10 +22,10 @@ name: Build and Push Docker Image
 
 on:
   push:
+    
+  pull_request:
     branches:
       - main
-  pull_request:
-
 jobs:
   build:
     runs-on: ubuntu-latest
