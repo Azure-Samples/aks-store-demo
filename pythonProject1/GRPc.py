@@ -7,7 +7,7 @@ import mensagem_pb2_grpc
 from datetime import datetime
 from prometheus_client import start_http_server, Summary, Counter, Gauge
 import time
- 
+  
 def main():
     print(f"[INFO] Serviço virtual-customer iniciado às {datetime.now()}")
 
