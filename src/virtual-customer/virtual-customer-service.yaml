@@ -9,5 +9,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80               # Porta interna do serviço
-      targetPort: 8080       # Porta do contêiner que o serviço irá expor
+      targetPort: 8000       # Porta do contêiner que o serviço irá expor
   type: ClusterIP            # Tipo do serviço para comunicação interna no cluster
