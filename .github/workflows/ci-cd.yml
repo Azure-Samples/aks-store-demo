@@ -33,6 +33,9 @@ jobs:
         docker build -t ${{ secrets.DOCKER_USERNAME }}/virtual_client:app-${{ github.run_number }} -f src/virtual-customer/Dockerfile src/virtual-customer
         docker build -t ${{ secrets.DOCKER_USERNAME }}/virtual_client:latest -f src/virtual-customer/Dockerfile src/virtual-customer
 
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/virtual_client_old:app-${{ github.run_number }} -f src/virtual-customer-old/Dockerfile src/virtual-customer-old
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/virtual_customer_old:latest -f src/virtual-customer-old/Dockerfile src/virtual-customer-old
+
 
         
   #fazer para outros serviços
@@ -42,5 +45,8 @@ jobs:
       run: |
        docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client:latest 
        docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client:app-${{ github.run_number }}
+
+       docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client_old:latest 
+       docker push ${{ secrets.DOCKER_USERNAME}}/virtual_client_old:app-${{ github.run_number }}
 
   
