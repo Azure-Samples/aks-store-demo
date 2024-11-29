@@ -10,7 +10,7 @@ import time
 
 def main():
     print(f"[INFO] Serviço virtual-customer iniciado às {datetime.now()}")
-
+   
     # Define as métricas usadas para medir o prometheus
     REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
     ORDER_COUNTER = Counter('orders_total', 'Total number of orders processed')
