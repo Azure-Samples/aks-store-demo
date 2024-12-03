@@ -15,21 +15,21 @@ spec:
     kustomize:
       images:
         - >-
-          ghcr.io/azure-samples/aks-store-demo/ai-service=ghcr.io/pauldotyu/aks-store-demo/ai-service:1.6.0
+          ghcr.io/azure-samples/aks-store-demo/ai-service=ghcr.io/pauldotyu/aks-store-demo/ai-service:v1.6.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/makeline-service=ghcr.io/pauldotyu/aks-store-demo/makeline-service:1.6.0
+          ghcr.io/azure-samples/aks-store-demo/makeline-service=ghcr.io/pauldotyu/aks-store-demo/makeline-service:v1.6.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/order-service=ghcr.io/pauldotyu/aks-store-demo/order-service:1.6.0
+          ghcr.io/azure-samples/aks-store-demo/order-service=ghcr.io/pauldotyu/aks-store-demo/order-service:v1.6.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/product-service=ghcr.io/pauldotyu/aks-store-demo/product-service:1.6.0
+          ghcr.io/azure-samples/aks-store-demo/product-service=ghcr.io/pauldotyu/aks-store-demo/product-service:v1.6.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/store-admin=ghcr.io/pauldotyu/aks-store-demo/store-admin:1.6.0
+          ghcr.io/azure-samples/aks-store-demo/store-admin=ghcr.io/pauldotyu/aks-store-demo/store-admin:v1.6.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/store-front=ghcr.io/pauldotyu/aks-store-demo/store-front:1.6.0
+          ghcr.io/azure-samples/aks-store-demo/store-front=ghcr.io/pauldotyu/aks-store-demo/store-front:v1.6.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/virtual-customer=ghcr.io/pauldotyu/aks-store-demo/virtual-customer:1.6.0
+          ghcr.io/azure-samples/aks-store-demo/virtual-customer=ghcr.io/pauldotyu/aks-store-demo/virtual-customer:v1.6.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/virtual-worker=ghcr.io/pauldotyu/aks-store-demo/virtual-worker:1.6.0
+          ghcr.io/azure-samples/aks-store-demo/virtual-worker=ghcr.io/pauldotyu/aks-store-demo/virtual-worker:v1.6.0
       namespace: pets
   sources: []
   project: default
