@@ -12,6 +12,7 @@ param clusterName string
 param logAnalyticsId string
 param logAnalyticsName string
 
+
 resource grafana 'Microsoft.Dashboard/grafana@2022-08-01' = {
   name: name
   location: location
