@@ -3,6 +3,7 @@ from fastapi import APIRouter, Request, status
 from fastapi.responses import Response, JSONResponse
 import requests
 import json
+import os
 from routers.LLM import get_llm 
 
 # initialize the model that would be used for the app
@@ -34,35 +35,69 @@ async def post_description(request: Request) -> JSONResponse:
 
         if useLocalLLM:
             print("Calling local LLM")
-            
-            prompt = f"<|user|>Describe this pet store product using joyful, playful, and enticing language.\nProduct name: {name}\ntags: {tags}<|end|><|assistant|>\""
+
             temperature = 1.0
             top_p = 1
-            max_length = 150
+            max_length = 200
             repetition_penalty = 1.0
+            length_penalty = 1.0
 
-            url = endpoint
-            payload = {
-                "prompt": prompt,
-                "return_full_text": "false",
-                "clean_up_tokenization_spaces": "true",
-                "generate_kwargs": {
+            # if url ends with v1/chat/completions then use openai 
+            if endpoint.endswith("v1/chat/completions"):
+                model_name = os.getenv("MODEL_NAME")
+                if not model_name:
+                    raise ValueError("MODEL_NAME environment variable is not set or is empty")
+                
+                prompt = f"Describe this pet store product using joyful, playful, and enticing language.\nProduct name: {name}\ntags: {tags}\""
+                payload = {
+                    "model": model_name,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
                     "temperature": temperature,
-                    "max_length": max_length,
-                    "repetition_penalty": repetition_penalty,
-                    "top_p": top_p
+                    "top_p": top_p,
+                    # "max_tokens": max_length,
+                    "length_penalty": length_penalty,
+                    "repetition_penalty": repetition_penalty
                 }
-            }
-            headers = {"Content-Type": "application/json"}
-            response = requests.request("POST", url, headers=headers, json=payload)
-            
-            # convert response.text to json
-            result = json.loads(response.content)
-            result = result["Result"]
+
+                headers = {"Content-Type": "application/json"}
+                response = requests.request("POST", endpoint, headers=headers, json=payload)            
+                
+                # convert response.text to json
+                result = json.loads(response.content)
+                result = result["choices"][0]["message"]["content"]
+            else:
+                prompt = f"<|user|>Describe this pet store product using joyful, playful, and enticing language.\nProduct name: {name}\ntags: {tags}<|end|><|assistant|>\""
+                
+                payload = {
+                    "prompt": prompt,
+                    "return_full_text": "false",
+                    "clean_up_tokenization_spaces": "true",
+                    "generate_kwargs": {
+                        "temperature": temperature,
+                        "max_length": max_length,
+                        "repetition_penalty": repetition_penalty,
+                        "top_p": top_p
+                    }
+                }
+                
+                headers = {"Content-Type": "application/json"}
+                response = requests.request("POST", endpoint, headers=headers, json=payload)            
+                
+                # convert response.text to json
+                result = json.loads(response.content)
+                result = result["Result"]
             
             # remove all double quotes
             if "\"" in result:
                 result = result.replace("\"", "")
+
+            # remove all leading and trailing whitespace
+            result = result.strip()
 
             # # if first character is a double quote, remove it
             # if result[0] == "\"":
