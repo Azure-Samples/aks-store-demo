@@ -28,7 +28,7 @@ jobs:
           key: ${{ runner.os }}-azd-${{ hashFiles('infra/**') }}-${{ env.BUST_CACHE }}-${{ github.sha }}
 
       - name: Install azd
-        uses: Azure/setup-azd@v0.1.0
+        uses: Azure/setup-azd@v2.1.0
 
       - name: Install Nodejs
         uses: actions/setup-node@v3
@@ -121,7 +121,7 @@ jobs:
           key: ${{ runner.os }}-azd-${{ hashFiles('infra/**') }}-${{ env.BUST_CACHE }}-${{ github.sha }}
 
       - name: Install azd
-        uses: Azure/setup-azd@v0.1.0
+        uses: Azure/setup-azd@v2.1.0
 
       - name: Install Nodejs
         uses: actions/setup-node@v3
