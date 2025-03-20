@@ -1,126 +1,161 @@
-from typing import Any, List, Dict
-from fastapi import APIRouter, Request, status
-from fastapi.responses import Response, JSONResponse
-import requests
-import json
+"""
+Description generation API endpoint.
+"""
 import os
-from routers.LLM import get_llm 
+import logging
+from typing import List
+from openai import AzureOpenAI, OpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from dotenv import load_dotenv
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
-# initialize the model that would be used for the app
-kernel, useLocalLLM, endpoint = get_llm()
-if not useLocalLLM:
-    # Import semantic skills from the "skills" directory
-    skills_directory: str = "skills"
-    productFunctions: dict = kernel.import_semantic_skill_from_directory(skills_directory, "ProductSkill")
-    descriptionFunction: Any = productFunctions["Description"]
+logger = logging.getLogger(__name__)
 
-# Define the description API router
-description: APIRouter = APIRouter(prefix="/generate", tags=["generate"])
+# Define the system prompt
+SYSTEM_PROMPT = (
+    "You are a helpful assistant that generates product descriptions "
+    "using a witty and engaging tone, but make sure to not include any "
+    "of the tags or the product name in the description."
+)
 
-# Define the Product class
-class Product:
-    def __init__(self, product: Dict[str, List]) -> None:
-        self.name: str = product["name"]
-        self.tags: List[str] = product["tags"]
+# Define the user prompt template
+USER_PROMPT_TEMPLATE = (
+    "Generate a product description for the product '{name}' "
+    "with the following tags: '{tags}'."
+)
 
-# Define the post_description endpoint
-@description.post("/description", summary="Get description for a product", operation_id="getDescription")
-async def post_description(request: Request) -> JSONResponse:
+class DescriptionRequest(BaseModel):
+    """Request model for the description generation endpoint."""
+    name: str
+    tags: List[str]
+
+# Create router with prefix
+description = APIRouter(
+    prefix="/generate",
+    tags=["generation"]
+)
+
+def _create_completion(client, model, prompt, system_prompt=SYSTEM_PROMPT):
+    """Create a chat completion using the provided client and model"""
+    return client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0,
+    )
+
+def _handle_local_llm(user_prompt):
+    """Handle local LLM completion"""
+    logger.info("Using local LLM")
+
+    local_llm_endpoint = os.environ.get("LOCAL_LLM_ENDPOINT")
+    if not local_llm_endpoint:
+        raise ValueError("LOCAL_LLM_ENDPOINT must be provided")
+
+    client = OpenAI(
+        api_key="EMPTY",
+        base_url=local_llm_endpoint,
+    )
+
+    models = client.models.list()
+    model = models.data[0].id
+
+    response = _create_completion(client, model, user_prompt)
+    return response.choices[0].message.content
+
+def _handle_openai(user_prompt):
+    """Handle OpenAI completion"""
+    api_key = os.environ.get("OPENAI_API_KEY")
+    org_id = os.environ.get("OPENAI_ORG_ID")
+
+    if not api_key or not org_id:
+        raise ValueError("OPENAI_API_KEY and OPENAI_ORG_ID must be provided")
+
+    logger.info("Using OpenAI")
+
+    client = OpenAI(
+        api_key=api_key,
+        organization=org_id,
+    )
+    response = _create_completion(client, "gpt-3.5-turbo", user_prompt)
+    return response.choices[0].message.content
+
+def _handle_azure_openai(user_prompt, use_azure_ad):
+    """Handle Azure OpenAI completion"""
+    deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NAME")
+    endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+
+    logger.info("Using Azure OpenAI: %s at %s", deployment, endpoint)
+
+    if not deployment or not endpoint:
+        raise ValueError(
+            "AZURE_OPENAI_DEPLOYMENT_NAME and AZURE_OPENAI_ENDPOINT must be provided"
+        )
+
+    api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
+
+    if use_azure_ad:
+        logger.info("Using Microsoft Entra authentication")
+        token_provider = get_bearer_token_provider(
+            DefaultAzureCredential(),
+            "https://cognitiveservices.azure.com/.default"
+        )
+
+        client = AzureOpenAI(
+            api_version=api_version,
+            azure_endpoint=endpoint,
+            azure_ad_token_provider=token_provider,
+        )
+    else:
+        logger.info("Using API key authentication")
+
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY must be provided")
+
+        client = AzureOpenAI(
+            api_version=api_version,
+            azure_endpoint=endpoint,
+            api_key=api_key,
+        )
+
+    response = _create_completion(client, deployment, user_prompt)
+    return response.choices[0].message.content
+
+@description.post("/description", operation_id="generate_description")
+async def generate_description(request: DescriptionRequest):
+    """
+    Generate a product description based on the product name and tags
+    """
     try:
-        # Parse the request body and create a Product object
-        body: dict = await request.json()
-        product: Product = Product(body)
-        name: str = product.name
-        tags: List = ",".join(product.tags)
+        # Format the user prompt with the product name and tags
+        user_prompt = USER_PROMPT_TEMPLATE.format(
+            name=request.name,
+            tags=", ".join(request.tags)
+        )
 
-        if useLocalLLM:
-            print("Calling local LLM")
+        env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+        if os.path.exists(env_path):
+            logger.info("Loading environment from: %s", env_path)
+            load_dotenv(dotenv_path=env_path, override=True)
 
-            temperature = 1.0
-            top_p = 1
-            max_length = 200
-            repetition_penalty = 1.0
-            length_penalty = 1.0
+        use_local_llm = os.environ.get("USE_LOCAL_LLM", "False").lower() == "true"
+        use_azure = os.environ.get("USE_AZURE_OPENAI", "False").lower() == "true"
+        use_azure_ad = os.environ.get("USE_AZURE_AD", "False").lower() == "true"
 
-            # if url ends with v1/chat/completions then use openai 
-            if endpoint.endswith("v1/chat/completions"):
-                model_name = os.getenv("MODEL_NAME")
-                if not model_name:
-                    raise ValueError("MODEL_NAME environment variable is not set or is empty")
-                
-                prompt = f"Describe this pet store product using joyful, playful, and enticing language.\nProduct name: {name}\ntags: {tags}\""
-                payload = {
-                    "model": model_name,
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ],
-                    "temperature": temperature,
-                    "top_p": top_p,
-                    # "max_tokens": max_length,
-                    "length_penalty": length_penalty,
-                    "repetition_penalty": repetition_penalty
-                }
-
-                headers = {"Content-Type": "application/json"}
-                response = requests.request("POST", endpoint, headers=headers, json=payload)            
-                
-                # convert response.text to json
-                result = json.loads(response.content)
-                result = result["choices"][0]["message"]["content"]
-            else:
-                prompt = f"<|user|>Describe this pet store product using joyful, playful, and enticing language.\nProduct name: {name}\ntags: {tags}<|end|><|assistant|>\""
-                
-                payload = {
-                    "prompt": prompt,
-                    "return_full_text": "false",
-                    "clean_up_tokenization_spaces": "true",
-                    "generate_kwargs": {
-                        "temperature": temperature,
-                        "max_length": max_length,
-                        "repetition_penalty": repetition_penalty,
-                        "top_p": top_p
-                    }
-                }
-                
-                headers = {"Content-Type": "application/json"}
-                response = requests.request("POST", endpoint, headers=headers, json=payload)            
-                
-                # convert response.text to json
-                result = json.loads(response.content)
-                result = result["Result"]
-            
-            # remove all double quotes
-            if "\"" in result:
-                result = result.replace("\"", "")
-
-            # remove all leading and trailing whitespace
-            result = result.strip()
-
-            # # if first character is a double quote, remove it
-            # if result[0] == "\"":
-            #     result = result[1:]
-            # # if last character is a double quote, remove it
-            # if result[-1] == "\"":
-            #     result = result[:-1]
-            
-            print(result)
+        if use_local_llm:
+            description_text = _handle_local_llm(user_prompt)
+        elif not use_azure:
+            description_text = _handle_openai(user_prompt)
         else:
-            print("Calling OpenAI")
-            # Create a new context and invoke the description function
-            context: Any = kernel.create_new_context()
-            context["name"] = name
-            context["tags"] = tags
-            result: str = await descriptionFunction.invoke_async(context=context)
-            if "error" in str(result).lower():
-                return Response(content=str(result), status_code=status.HTTP_401_UNAUTHORIZED)
-            print(result)
-            result = str(result).replace("\n", "")
+            description_text = _handle_azure_openai(user_prompt, use_azure_ad)
 
-        # Return the description as a JSON response
-        return JSONResponse(content={"description": result}, status_code=status.HTTP_200_OK)
+        return {"description": description_text}
     except Exception as e:
-        # Return an error message as a JSON response
-        return JSONResponse(content={"error": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error generating description: {str(e)}"
+        ) from e
