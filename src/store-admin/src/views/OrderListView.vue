@@ -1,10 +1,10 @@
 <template>
-  <div v-if="isLoading" class="loading-container">
+  <!-- <div v-if="isLoading" class="loading-container">
     <div class="loading-spinner"></div>
     <p>Fetching orders...</p>
-  </div>
+  </div> -->
 
-  <div v-else-if="hasOrders" class="order-table">
+  <div v-if="hasOrders" class="order-table">
     <!-- Column headers -->
     <div class="table-header">
       <div class="column-id">Order ID</div>
@@ -27,8 +27,12 @@
     </div>
   </div>
 
-  <div class="empty-list" v-else>
+  <!-- <div class="empty-list" v-else>
     <h3>No orders available</h3>
+  </div> -->
+  <div v-else class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Fetching orders...</p>
   </div>
 </template>
 
@@ -41,7 +45,7 @@ import type { Order } from '@/types'
 const orderStore = useOrderStore()
 const router = useRouter()
 
-const isLoading = computed(() => !orderStore.initialized)
+// const isLoading = computed(() => !orderStore.initialized)
 const orders = computed(() => orderStore.orders)
 const hasOrders = computed(() => orders.value.length > 0)
 
@@ -136,7 +140,7 @@ const routeToOrder = (orderId: string | number | undefined) => {
   text-align: right;
 }
 
-.empty-list {
+/* .empty-list {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -160,5 +164,5 @@ const routeToOrder = (orderId: string | number | undefined) => {
     grid-template-columns: 0.2fr 1fr 2.5fr 0.5fr;
     font-size: 0.9rem;
   }
-}
+} */
 </style>
