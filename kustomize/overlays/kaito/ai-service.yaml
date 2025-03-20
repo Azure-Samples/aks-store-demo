@@ -22,10 +22,8 @@ spec:
           env:
             - name: USE_LOCAL_LLM
               value: "True"
-            - name: AI_ENDPOINT
-              value: http://workspace-phi-3-5-mini/v1/chat/completions
-            - name: MODEL_NAME
-              value: phi-3.5-mini-instruct
+            - name: LOCAL_LLM_ENDPOINT
+              value: http://workspace-phi-3-5-mini/v1
           resources:
             requests:
               cpu: 20m
