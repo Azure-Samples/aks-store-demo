@@ -1,9 +1,9 @@
 <template>
   <nav>
     <div class="logo">
-      <a href="/">
-        <img src="/contoso-pet-store-logo.png" alt="Contoso Pet Store Logo">
-      </a>
+      <router-link to="/">
+        <img src="/contoso-pet-store-logo.png" alt="Contoso Pet Store Logo" />
+      </router-link>
       Admin Portal
     </div>
     <ul class="nav-links" :class="{ 'nav-links--open': isNavOpen }">
@@ -16,22 +16,17 @@
   </nav>
 </template>
 
-<script>
-export default {
-  name: 'TopNav',
-  data() {
-    return {
-      isNavOpen: false
-    }
-  },
-  methods: {
-    toggleNav() {
-      this.isNavOpen = !this.isNavOpen
-    },
-    closeNav() {
-      this.isNavOpen = false
-    }
-  }
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const isNavOpen = ref(false)
+
+function toggleNav(): void {
+  isNavOpen.value = !isNavOpen.value
+}
+
+function closeNav(): void {
+  isNavOpen.value = false
 }
 </script>
 
