@@ -1,249 +1,173 @@
 targetScope = 'subscription'
 
-@minLength(1)
-@maxLength(64)
-@description('Name of the the environment which is used to generate a short unique hash used in all resources.')
-param environmentName string
+@description('value of the current user for rbac assignments')
+param currentUserObjectId string
 
 @minLength(1)
-@description('Primary location for all resources')
+@description('value of azure location to deploy resources')
 param location string
 
-// Optional parameters to override the default azd resource naming conventions. Update the main.parameters.json file to provide values. e.g.,:
-// "resourceGroupName": {
-//      "value": "myGroupName"
-// }
-param k8s_namespace string = 'pets'
-param resourceGroupName string = ''
-param openAiServiceName string = ''
-param openAiModelName string = 'gpt-35-turbo'
-param identityName string = ''
-param kubernetesName string = ''
-param keyVaultName string = ''
-param servicebusName string = ''
-param logAnalyticsName string = ''
-param monitorAccountName string = ''
-param containerRegistryName string = ''
+@minLength(5)
+@maxLength(25)
+@description('value of azure resource group name suffix')
+param resourceGroupNameSuffix string
 
-@description('Deploy an Azure Container Registry or not')
-param deployAcr bool = false
+@description('value of azure kubernetes node pool vm size')
+param aksNodePoolVMSize string = 'Standard_DS2_v2'
 
-@allowed([
-  'MongoDB'
-  'GlobalDocumentDB'
-])
-param cosmosdbAccountKind string = 'MongoDB'
+@description('value of the kubernetes namespace')
+param k8sNamespace string = 'pets'
 
-@description('Id of the user or app to assign application roles')
-param principalId string = ''
+@description('value to determine if observability tools should be deployed')
+param deployObservabilityTools bool = false
 
-var abbrs = loadJsonContent('./abbreviations.json')
-var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
-var tags = { 'azd-env-name': environmentName }
+@description('value to determine if azure container registry should be deployed')
+param deployAzureContainerRegistry bool = false
 
-// the node pool base configuration
-var nodePoolBase = {
-  name: 'system'
-  count: 3
-  vmSize: 'Standard_D4s_v4'
-}
+@description('value to determine if azure servicebus should be deployed')
+param deployAzureServiceBus bool = false
 
-// the openai deployments to create
-var openAiDeployment = [
-  {
-    name: openAiModelName
-    sku: {
-      name: 'Standard'
-      capacity: 30
-    }
-    model: {
-      format: 'OpenAI'
-      name: openAiModelName
-      version: '0613'
-    }
-  }
-]
+@description('value to determine if azure cosmosdb should be deployed')
+param deployAzureCosmosDB bool = false
 
-// organize resources in a resource group
+@description('value of azure cosmosdb account kind')
+param cosmosDBAccountKind string = 'GlobalDocumentDB'
+
+@description('value to determine if azure openai should be deployed')
+param deployAzureOpenAI bool = false
+
+@description('value of azure location for azure openai resources')
+param azureOpenAILocation string
+
+@description('value of azure openai model name')
+param chatCompletionModelName string = 'gpt-35-turbo'
+
+@description('value of azure openai model version')
+param chatCompletionModelVersion string = '0125'
+
+@description('value of azure openai model capacity')
+param chatCompletionModelCapacity int = 8
+
+@description('value to determine if azure openai dall-e model should be deployed')
+param deployImageGenerationModel bool = false
+
+@description('value of azure openai dall-e model name')
+param imageGenerationModelName string = 'dall-e-3'
+
+@description('value of azure openai dall-e model version')
+param imageGenerationModelVersion string = '3.0'
+
+@description('value of azure openai dall-e model capacity')
+param imageGenerationModelCapacity int = 1
+
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
+  name: 'rg-${resourceGroupNameSuffix}'
   location: location
-  tags: tags
 }
 
-// create the openai resources
-module openAi './core/ai/cognitiveservices.bicep' = {
-  name: 'openai'
+// generate a unique string based on the resource group id
+// this is used to ensure that each resource name is unique
+var resource_name_suffix = uniqueString(rg.id)
+
+module observability 'observability.bicep' = if (deployObservabilityTools) {
   scope: rg
+  name: 'observabilityDeployment'
   params: {
-    name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
-    location: location
-    tags: tags
-    deployments: openAiDeployment
+    name: resource_name_suffix
   }
 }
 
-// create the identity and assign roles
-module identity './app/identity.bicep' = {
-  name: 'identity'
+module aks 'kubernetes.bicep' = {
   scope: rg
+  name: 'aksDeployment'
   params: {
-    name: !empty(identityName) ? identityName : '${abbrs.managedIdentityUserAssignedIdentities}${resourceToken}'
-    location: location
-    tags: tags
-    principalId: principalId
-    AZURE_AKS_NAMESPACE: k8s_namespace
-    clusterName: kubernetes.outputs.clusterName
+    nameSuffix: resource_name_suffix
+    vmSku: aksNodePoolVMSize
+    deployAcr: deployAzureContainerRegistry
+    monitoringWorkspaceResourceId: deployObservabilityTools ? observability.outputs.logWorkspaceResourceId : ''
+    currentUserObjectId: currentUserObjectId
   }
 }
 
-// create the kunbernetes cluster
-module kubernetes './app/aks-managed-cluster.bicep' = {
-  name: 'kubernetes'
+module servicebus 'servicebus.bicep' = if (deployAzureServiceBus) {
   scope: rg
+  name: 'servicebusDeployment'
   params: {
-    name: !empty(kubernetesName) ? kubernetesName : '${abbrs.containerServiceManagedClusters}${resourceToken}'
-    location: location
-    tags: tags
-    networkPlugin: 'kubenet'
-    systemPoolConfig: union(
-      { name: 'npsystem', mode: 'System' },
-      nodePoolBase
-    )
-    dnsPrefix: !empty(kubernetesName) ? kubernetesName : '${abbrs.containerServiceManagedClusters}${resourceToken}'
+    nameSuffix: resource_name_suffix
+    currentUserObjectId: currentUserObjectId
   }
 }
 
-// store secrets in a keyvault
-module keyVault './core/security/keyvault.bicep' = {
-  name: 'keyvault'
+module cosmosdb 'cosmosdb.bicep' = if (deployAzureCosmosDB) {
   scope: rg
+  name: 'cosmosdbDeployment'
   params: {
-    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
-    location: location
-    tags: tags
-    principalId: principalId
+    nameSuffix: resource_name_suffix
+    accountKind: cosmosDBAccountKind
+    identityPrincipalId: workloadidentity.outputs.principalId
   }
 }
 
-// create the cosmosdb
-module cosmos './app/db.bicep' = {
-  name: 'cosmos'
+module openai 'openai.bicep' = if (deployAzureOpenAI) {
   scope: rg
+  name: 'openaiDeployment'
   params: {
-    resourceToken: resourceToken
-    location: location
-    tags: tags
-    kind: cosmosdbAccountKind
-    keyVaultName: keyVault.outputs.name
+    nameSuffix: resource_name_suffix
+    location: azureOpenAILocation
+    chatCompletionModelName: chatCompletionModelName
+    chatCompletionModelVersion: chatCompletionModelVersion
+    chatCompletionModelCapacity: chatCompletionModelCapacity
+    deployImageGenerationModel: deployImageGenerationModel
+    imageGenerationModelName: imageGenerationModelName
+    imageGenerationModelVersion: imageGenerationModelVersion
+    imageGenerationModelCapacity: imageGenerationModelCapacity
+    currentUserObjectId: currentUserObjectId
   }
 }
 
-
-// create the service bus
-module serviceBus './app/servicebus.bicep' = {
-  name: 'servicebus'
+module workloadidentity 'workloadidentity.bicep' = {
   scope: rg
+  name: 'workloadIdentityDeployment'
   params: {
-    name: !empty(servicebusName) ? servicebusName : '${abbrs.serviceBusNamespaces}${resourceToken}'
-    location: location
-    tags: tags
-    keyVaultName: keyVault.outputs.name
+    nameSuffix: resource_name_suffix
+    federatedCredentials: [
+      {
+        audiences: ['api://AzureADTokenExchange']
+        issuer: aks.outputs.oidcIssuerUrl
+        partialSubject: 'system:serviceaccount:${k8sNamespace}'
+      }
+    ]
   }
 }
 
-// get keys from the openAi and cosmosdb
-module getKeys './app/get-keys.bicep' = {
-  name: 'get-keys'
-  scope: rg
-  params:{
-    keyVaultName: keyVault.outputs.name
-    openAiName: openAi.outputs.name
-    cosmosAccountName: cosmos.outputs.name
-  }
-}
-
-// create the monitor workspace
-module monitor './app/monitor.bicep' = {
-  name: 'monitor'
-  scope: rg
-  params: {
-    name: !empty(monitorAccountName) ? monitorAccountName : 'amon-${resourceToken}'
-    location: location
-    tags: tags
-  }
-}
-
-// create the log analytics workspace
-module logAnalytics './core/monitor/loganalytics.bicep' = {
-  name: 'log-analytics'
-  scope: rg
-  params: {
-    name: !empty(logAnalyticsName) ? logAnalyticsName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
-    location: location
-    tags: tags
-  }
-}
-
-// create observability
-module observability './app/observability.bicep' = {
-  name: 'observability'
-  scope: rg
-  params: {
-    name: 'amg-${resourceToken}'
-    principalId: principalId
-    clusterId: kubernetes.outputs.clusterId
-    clusterName: kubernetes.outputs.clusterName
-    logAnalyticsName: logAnalytics.outputs.name
-    logAnalyticsId: logAnalytics.outputs.id
-    monitorName: monitor.outputs.name
-    monitorId: monitor.outputs.id
-    location: location
-    tags: tags
-  }
-}
-
-// create the container if the deployAcr is true
-module containerRegistry './core/host/container-registry.bicep' = if(deployAcr) {
-  name: 'container-registry'
-  scope: rg
-  params: {
-    name: !empty(containerRegistryName) ? containerRegistryName : '${abbrs.containerRegistryRegistries}${resourceToken}'
-    location: location
-    tags: tags
-    sku: {
-      name: 'Premium'
-    }
-  }
-}
-
-// acr pull role assignment
-module acrPullRoleAssignment './core/security/registry-access.bicep' = if(deployAcr) {
-  name: 'acr-pull-role-assignment'
-  scope: rg
-  params: {
-    containerRegistryName: deployAcr ? containerRegistry.outputs.name : ''
-    principalId: kubernetes.outputs.clusterIdentity.objectId
-  }
-}
-
-// outputs data
+output AZURE_RESOURCENAME_SUFFIX string = resource_name_suffix
 output AZURE_RESOURCE_GROUP string = rg.name
-output AZURE_AKS_CLUSTER_NAME string = kubernetes.outputs.clusterName
-output AZURE_OPENAI_MODEL_NAME string = openAiModelName
-output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
-output AZURE_IDENTITY_CLIENT_ID string = identity.outputs.clientId
-output AZURE_SERVICE_BUS_HOST string = '${serviceBus.outputs.serviceBusNamespaceName}.servicebus.windows.net'
-output AZURE_SERVICE_BUS_URI string = 'amqps://${serviceBus.outputs.serviceBusNamespaceName}.servicebus.windows.net'
-output AZURE_SERVICE_BUS_LISTENER_NAME string = serviceBus.outputs.serviceBusListenerName
-output AZURE_SERVICE_BUS_LISTENER_KEY string = serviceBus.outputs.serviceBusListenerKey
-output AZURE_SERVICE_BUS_SENDER_NAME string = serviceBus.outputs.serviceBusSenderName
-output AZURE_SERVICE_BUS_SENDER_KEY string = serviceBus.outputs.serviceBusSenderKey
-output AZURE_COSMOS_DATABASE_NAME string = cosmos.outputs.name
-output AZURE_COSMOS_DATABASE_URI string = cosmos.outputs.endpoint
-output AZURE_COSMOS_DATABASE_KEY string = getKeys.outputs.cosmosKey
-output AZURE_AKS_NAMESPACE string = k8s_namespace
-output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
-output AZURE_DATABASE_API string = cosmosdbAccountKind == 'MongoDB' ? 'mongodb': 'cosmosdbsql'
-output AZURE_REGISTRY_NAME string = deployAcr ? containerRegistry.outputs.name : ''
-output AZURE_REGISTRY_URI string = deployAcr ? containerRegistry.outputs.loginServer : 'ghcr.io/azure-samples'
+output AZURE_AKS_CLUSTER_NAME string = aks.outputs.name
+output AZURE_AKS_NAMESPACE string = k8sNamespace
+output AZURE_AKS_CLUSTER_ID string = aks.outputs.id
+output AZURE_AKS_OIDC_ISSUER_URL string = aks.outputs.oidcIssuerUrl
+output AZURE_OPENAI_ENDPOINT string = openai.outputs.endpoint
+output AZURE_OPENAI_MODEL_NAME string = chatCompletionModelName
+output AZURE_OPENAI_DALL_E_MODEL_NAME string = imageGenerationModelName
+output AZURE_OPENAI_DALL_E_ENDPOINT string = deployImageGenerationModel ? openai.outputs.endpoint : ''
+output AZURE_IDENTITY_NAME string = workloadidentity.outputs.name
+output AZURE_IDENTITY_CLIENT_ID string = workloadidentity.outputs.clientId
+output AZURE_SERVICE_BUS_HOST string = deployAzureServiceBus ? '${servicebus.outputs.name}.servicebus.windows.net' : ''
+output AZURE_SERVICE_BUS_URI string = deployAzureServiceBus
+  ? 'amqps://${servicebus.outputs.name}.servicebus.windows.net'
+  : ''
+output AZURE_COSMOS_DATABASE_NAME string = deployAzureCosmosDB ? cosmosdb.outputs.name : ''
+output AZURE_COSMOS_DATABASE_URI string = deployAzureCosmosDB && cosmosDBAccountKind == 'MongoDB'
+  ? 'mongodb://${cosmosdb.outputs.name}.mongo.cosmos.azure.com:10255/?retryWrites=false'
+  : deployAzureCosmosDB && cosmosDBAccountKind == 'GlobalDocumentDB'
+      ? 'https://${cosmosdb.outputs.name}.documents.azure.com:443/'
+      : ''
+output AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL string = deployAzureCosmosDB
+  ? 'https://management.azure.com${cosmosdb.outputs.id}/listConnectionStrings?api-version=2021-04-15'
+  : ''
+output AZURE_DATABASE_API string = cosmosDBAccountKind == 'MongoDB' ? 'mongodb' : 'cosmosdbsql'
+output AZURE_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
+output AZURE_REGISTRY_URI string = deployAzureContainerRegistry
+  ? aks.outputs.registryLoginServer
+  : 'ghcr.io/azure-samples'
+output AZURE_TENANT_ID string = tenant().tenantId

@@ -30,7 +30,6 @@ fi
 # Add base images
 ##########################################################
 cat << EOF >> custom-values.yaml
-namespace: ${AZURE_AKS_NAMESPACE}
 productService:
   image:
     repository: ${AZURE_REGISTRY_URI}/aks-store-demo/product-service
@@ -49,26 +48,19 @@ virtualWorker:
 EOF
 
 ###########################################################
-# Add ai-servie if Azure OpenAI endpoint is provided
+# Add ai-service if Azure OpenAI endpoint is provided
 ###########################################################
 
 if [ -n "${AZURE_OPENAI_ENDPOINT}" ]; then
   cat << EOF >> custom-values.yaml
 aiService:
   image:
-      repository: ${AZURE_REGISTRY_URI}/aks-store-demo/ai-service
+    repository: ${AZURE_REGISTRY_URI}/aks-store-demo/ai-service
   create: true
   modelDeploymentName: ${AZURE_OPENAI_MODEL_NAME}
   openAiEndpoint: ${AZURE_OPENAI_ENDPOINT}
   useAzureOpenAi: true
 EOF
-
-  # If Azure identity does not exists, use the Azure OpenAI API key
-  if [ -z "${AZURE_IDENTITY_CLIENT_ID}" ] && [ -z "${AZURE_IDENTITY_NAME}" ]; then
-    cat << EOF >> custom-values.yaml
-  openAiKey: $(az keyvault secret show --name ${AZURE_OPENAI_KEY} --vault-name ${AZURE_KEY_VAULT_NAME} --query value -o tsv)
-EOF
-  fi
 
   # If DALL-E model endpoint and name exists
   if [ -n "${AZURE_OPENAI_DALL_E_ENDPOINT}" ] && [ -n "${AZURE_OPENAI_DALL_E_MODEL_NAME}" ]; then
@@ -94,16 +86,6 @@ if [ -n "${AZURE_SERVICE_BUS_HOST}" ]; then
   cat << EOF >> custom-values.yaml
   queueHost: ${AZURE_SERVICE_BUS_HOST}
 EOF
-
-  # If Azure identity does not exists, use the Azure Service Bus credentials
-  if [ -z "${AZURE_IDENTITY_CLIENT_ID}" ] && [ -z "${AZURE_IDENTITY_NAME}" ]; then
-    cat << EOF >> custom-values.yaml
-  queuePort: "5671"
-  queueTransport: "tls"
-  queueUsername: ${AZURE_SERVICE_BUS_SENDER_NAME}
-  queuePassword: $(az keyvault secret show --name ${AZURE_SERVICE_BUS_SENDER_KEY} --vault-name ${AZURE_KEY_VAULT_NAME} --query value -o tsv)
-EOF
-  fi
 fi
 
 ###########################################################
@@ -121,13 +103,7 @@ if [ -n "${AZURE_SERVICE_BUS_URI}" ]; then
   # If Azure identity exists just set the Azure Service Bus Hostname
   if [ -n "${AZURE_IDENTITY_CLIENT_ID}" ] && [ -n "${AZURE_IDENTITY_NAME}" ]; then
     cat << EOF >> custom-values.yaml
-    orderQueueHost: ${AZURE_SERVICE_BUS_HOST}
-EOF
-  else
-    cat << EOF >> custom-values.yaml
-  orderQueueUri: ${AZURE_SERVICE_BUS_URI}
-  orderQueueUsername: ${AZURE_SERVICE_BUS_LISTENER_NAME}
-  orderQueuePassword: $(az keyvault secret show --name ${AZURE_SERVICE_BUS_LISTENER_KEY} --vault-name ${AZURE_KEY_VAULT_NAME} --query value -o tsv)
+  orderQueueHost: ${AZURE_SERVICE_BUS_HOST}
 EOF
   fi
 fi
@@ -137,15 +113,8 @@ if [ -n "${AZURE_COSMOS_DATABASE_URI}" ]; then
   cat << EOF >> custom-values.yaml
   orderDBApi: ${AZURE_DATABASE_API}
   orderDBUri: ${AZURE_COSMOS_DATABASE_URI}
+  orderDBListConnectionStringsUrl: ${AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL}
 EOF
-
-  # If Azure identity does not exists, use the Azure Cosmos DB credentials
-  if [ -z "${AZURE_IDENTITY_CLIENT_ID}" ] && [ -z "${AZURE_IDENTITY_NAME}" ]; then
-    cat << EOF >> custom-values.yaml
-  orderDBUsername: ${AZURE_COSMOS_DATABASE_NAME}
-  orderDBPassword: $(az keyvault secret show --name ${AZURE_COSMOS_DATABASE_KEY} --vault-name ${AZURE_KEY_VAULT_NAME} --query value -o tsv)
-EOF
-  fi
 fi
 
 ###########################################################
