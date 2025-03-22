@@ -2,7 +2,7 @@ version: "3.7"
 services:
   rabbitmq:
     image: rabbitmq:3.11.17-management-alpine
-    container_name: 'rabbitmq'
+    container_name: rabbitmq
     restart: always
     environment:
       - "RABBITMQ_DEFAULT_USER=username"
