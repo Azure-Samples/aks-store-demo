@@ -1,0 +1,26 @@
+version: "3.7"
+services:
+  ai-service:
+    build: ../ai-service
+    container_name: ai-service
+    restart: always
+    ports:
+      - 5001:5001
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://ai-service:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
+      - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
+      - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
+      - OPENAI_API_KEY= # always required
+      - AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI DALL-E
+      - AZURE_OPENAI_API_VERSION=2024-02-15-preview # required if using Azure OpenAI
+      - AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI DALL-E
+    networks:
+      - backend_services
+networks:
+  backend_services:
+    driver: bridge

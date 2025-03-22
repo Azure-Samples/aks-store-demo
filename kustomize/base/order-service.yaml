@@ -64,11 +64,7 @@ spec:
         - name: wait-for-rabbitmq
           image: busybox
           command:
-            [
-              "sh",
-              "-c",
-              "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;",
-            ]
+            ["sh", "-c", "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;"]
           resources:
             requests:
               cpu: 1m
