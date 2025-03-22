@@ -61,8 +61,15 @@ module registry 'br/public:avm/res/container-registry/registry:0.9.1' = if (depl
   name: 'registryDeployment'
   params: {
     name: 'acr${nameSuffix}'
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
+    networkRuleSetIpRules: [
+      {
+        action: 'Allow'
+        ipMask: currentIpAddress
+      }
+    ]
     networkRuleBypassOptions: 'AzureServices'
+    networkRuleSetDefaultAction: 'Deny'
     roleAssignments: [
       {
         principalId: managedCluster.outputs.?kubeletIdentityObjectId!
@@ -365,5 +372,5 @@ resource prometheusNodeRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGrou
 output id string = managedCluster.outputs.resourceId
 output name string = managedCluster.outputs.name
 output oidcIssuerUrl string = managedCluster.outputs.?oidcIssuerUrl!
-output registryName string = deployAcr ? registry.outputs.resourceId : ''
+output registryName string = deployAcr ? registry.outputs.name : ''
 output registryLoginServer string = deployAcr ? registry.outputs.loginServer : ''
