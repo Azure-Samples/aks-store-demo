@@ -47,7 +47,13 @@
         "golang.go",
         "Vue.volar",
         "rust-lang.rust-analyzer",
-        "ms-python.python"
+        "ms-python.python",
+        "ms-kubernetes-tools.vscode-aks-tools",
+        "ms-azuretools.vscode-bicep",
+        "hashicorp.terraform",
+        "ms-playwright.playwright",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-azureresourcegroups"
       ]
     }
   }
