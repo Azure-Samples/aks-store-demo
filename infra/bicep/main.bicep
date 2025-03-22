@@ -7,10 +7,10 @@ param currentUserObjectId string
 @description('value of azure location to deploy resources')
 param location string
 
-@minLength(5)
-@maxLength(25)
-@description('value of azure resource group name suffix')
-param resourceGroupNameSuffix string
+@minLength(3)
+@maxLength(10)
+@description('value of environment name which will be used to prefix resources')
+param appEnvironment string
 
 @description('value of azure kubernetes node pool vm size')
 param aksNodePoolVMSize string = 'Standard_DS2_v2'
@@ -19,25 +19,26 @@ param aksNodePoolVMSize string = 'Standard_DS2_v2'
 param k8sNamespace string = 'pets'
 
 @description('value to determine if observability tools should be deployed')
-param deployObservabilityTools bool = false
+param deployObservabilityTools bool = true
 
 @description('value to determine if azure container registry should be deployed')
-param deployAzureContainerRegistry bool = false
+param deployAzureContainerRegistry bool = true
 
 @description('value to determine if azure servicebus should be deployed')
-param deployAzureServiceBus bool = false
+param deployAzureServiceBus bool = true
 
 @description('value to determine if azure cosmosdb should be deployed')
-param deployAzureCosmosDB bool = false
+param deployAzureCosmosDB bool = true
 
+@allowed(['GlobalDocumentDB', 'MongoDB'])
 @description('value of azure cosmosdb account kind')
 param cosmosDBAccountKind string = 'GlobalDocumentDB'
 
 @description('value to determine if azure openai should be deployed')
-param deployAzureOpenAI bool = false
+param deployAzureOpenAI bool = true
 
-@description('value of azure location for azure openai resources')
-param azureOpenAILocation string
+@description('value of azure location for azure openai resources. defaults to location but you can override it')
+param azureOpenAILocation string = location
 
 @description('value of azure openai model name')
 param chatCompletionModelName string = 'gpt-35-turbo'
@@ -60,20 +61,24 @@ param imageGenerationModelVersion string = '3.0'
 @description('value of azure openai dall-e model capacity')
 param imageGenerationModelCapacity int = 1
 
-resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: 'rg-${resourceGroupNameSuffix}'
-  location: location
-}
+@description('value of the current IP address for network access')
+param currentIpAddress string
 
 // generate a unique string based on the resource group id
 // this is used to ensure that each resource name is unique
-var resource_name_suffix = uniqueString(rg.id)
+var name = '${appEnvironment}${take(uniqueString(subscription().id, appEnvironment), 4)}'
+
+resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: 'rg-${name}'
+  location: location
+}
 
 module observability 'observability.bicep' = if (deployObservabilityTools) {
   scope: rg
   name: 'observabilityDeployment'
   params: {
-    name: resource_name_suffix
+    nameSuffix: name
+    currentUserObjectId: currentUserObjectId
   }
 }
 
@@ -81,47 +86,14 @@ module aks 'kubernetes.bicep' = {
   scope: rg
   name: 'aksDeployment'
   params: {
-    nameSuffix: resource_name_suffix
+    location: location
+    nameSuffix: name
     vmSku: aksNodePoolVMSize
     deployAcr: deployAzureContainerRegistry
-    monitoringWorkspaceResourceId: deployObservabilityTools ? observability.outputs.logWorkspaceResourceId : ''
+    logsWorkspaceResourceId: deployObservabilityTools ? observability.outputs.logsWorkspaceResourceId : ''
+    metricsWorkspaceResourceId: deployObservabilityTools ? observability.outputs.metricsWorkspaceResourceId : ''
     currentUserObjectId: currentUserObjectId
-  }
-}
-
-module servicebus 'servicebus.bicep' = if (deployAzureServiceBus) {
-  scope: rg
-  name: 'servicebusDeployment'
-  params: {
-    nameSuffix: resource_name_suffix
-    currentUserObjectId: currentUserObjectId
-  }
-}
-
-module cosmosdb 'cosmosdb.bicep' = if (deployAzureCosmosDB) {
-  scope: rg
-  name: 'cosmosdbDeployment'
-  params: {
-    nameSuffix: resource_name_suffix
-    accountKind: cosmosDBAccountKind
-    identityPrincipalId: workloadidentity.outputs.principalId
-  }
-}
-
-module openai 'openai.bicep' = if (deployAzureOpenAI) {
-  scope: rg
-  name: 'openaiDeployment'
-  params: {
-    nameSuffix: resource_name_suffix
-    location: azureOpenAILocation
-    chatCompletionModelName: chatCompletionModelName
-    chatCompletionModelVersion: chatCompletionModelVersion
-    chatCompletionModelCapacity: chatCompletionModelCapacity
-    deployImageGenerationModel: deployImageGenerationModel
-    imageGenerationModelName: imageGenerationModelName
-    imageGenerationModelVersion: imageGenerationModelVersion
-    imageGenerationModelCapacity: imageGenerationModelCapacity
-    currentUserObjectId: currentUserObjectId
+    currentIpAddress: currentIpAddress
   }
 }
 
@@ -129,7 +101,7 @@ module workloadidentity 'workloadidentity.bicep' = {
   scope: rg
   name: 'workloadIdentityDeployment'
   params: {
-    nameSuffix: resource_name_suffix
+    nameSuffix: name
     federatedCredentials: [
       {
         audiences: ['api://AzureADTokenExchange']
@@ -140,16 +112,67 @@ module workloadidentity 'workloadidentity.bicep' = {
   }
 }
 
-output AZURE_RESOURCENAME_SUFFIX string = resource_name_suffix
+module servicebus 'servicebus.bicep' = if (deployAzureServiceBus) {
+  scope: rg
+  name: 'servicebusDeployment'
+  params: {
+    nameSuffix: name
+    currentUserObjectId: currentUserObjectId
+    currentIpAddress: currentIpAddress
+    servicePrincipalId: workloadidentity.outputs.principalId
+  }
+}
+
+module cosmosdb 'cosmosdb.bicep' = if (deployAzureCosmosDB) {
+  scope: rg
+  name: 'cosmosdbDeployment'
+  params: {
+    nameSuffix: name
+    accountKind: cosmosDBAccountKind
+    identityPrincipalId: workloadidentity.outputs.principalId
+    currentIpAddress: currentIpAddress
+    servicePrincipalId: workloadidentity.outputs.principalId
+  }
+}
+
+var chatCompletionModel = {
+  name: chatCompletionModelName
+  version: chatCompletionModelVersion
+  capacity: chatCompletionModelCapacity
+}
+var imageGenerationModel = {
+  name: imageGenerationModelName
+  version: imageGenerationModelVersion
+  capacity: imageGenerationModelCapacity
+}
+var modelDeployments = concat([chatCompletionModel], deployImageGenerationModel ? [imageGenerationModel] : [])
+module openai 'openai.bicep' = if (deployAzureOpenAI) {
+  scope: rg
+  name: 'openaiDeployment'
+  params: {
+    nameSuffix: name
+    location: azureOpenAILocation
+    currentUserObjectId: currentUserObjectId
+    currentIpAddress: currentIpAddress
+    servicePrincipalId: workloadidentity.outputs.principalId
+    modelDeployments: modelDeployments
+  }
+}
+
+output AZURE_RESOURCENAME_SUFFIX string = name
 output AZURE_RESOURCE_GROUP string = rg.name
 output AZURE_AKS_CLUSTER_NAME string = aks.outputs.name
 output AZURE_AKS_NAMESPACE string = k8sNamespace
 output AZURE_AKS_CLUSTER_ID string = aks.outputs.id
 output AZURE_AKS_OIDC_ISSUER_URL string = aks.outputs.oidcIssuerUrl
-output AZURE_OPENAI_ENDPOINT string = openai.outputs.endpoint
-output AZURE_OPENAI_MODEL_NAME string = chatCompletionModelName
-output AZURE_OPENAI_DALL_E_MODEL_NAME string = imageGenerationModelName
-output AZURE_OPENAI_DALL_E_ENDPOINT string = deployImageGenerationModel ? openai.outputs.endpoint : ''
+output AZURE_OPENAI_ENDPOINT string = deployAzureOpenAI ? openai.outputs.endpoint : ''
+output AZURE_OPENAI_MODEL_NAME string = deployAzureOpenAI ? chatCompletionModelName : ''
+output AZURE_OPENAI_DALL_E_MODEL_NAME string = deployAzureOpenAI && deployImageGenerationModel
+  ? imageGenerationModelName
+  : ''
+output AZURE_OPENAI_DALL_E_ENDPOINT string = deployAzureOpenAI && deployImageGenerationModel
+  ? openai.outputs.endpoint
+  : ''
 output AZURE_IDENTITY_NAME string = workloadidentity.outputs.name
 output AZURE_IDENTITY_CLIENT_ID string = workloadidentity.outputs.clientId
 output AZURE_SERVICE_BUS_HOST string = deployAzureServiceBus ? '${servicebus.outputs.name}.servicebus.windows.net' : ''
@@ -163,7 +186,7 @@ output AZURE_COSMOS_DATABASE_URI string = deployAzureCosmosDB && cosmosDBAccount
       ? 'https://${cosmosdb.outputs.name}.documents.azure.com:443/'
       : ''
 output AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL string = deployAzureCosmosDB
-  ? 'https://management.azure.com${cosmosdb.outputs.id}/listConnectionStrings?api-version=2021-04-15'
+  ? '${environment().resourceManager}${cosmosdb.outputs.id}/listConnectionStrings?api-version=2021-04-15'
   : ''
 output AZURE_DATABASE_API string = cosmosDBAccountKind == 'MongoDB' ? 'mongodb' : 'cosmosdbsql'
 output AZURE_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''

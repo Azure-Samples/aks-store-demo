@@ -2,6 +2,8 @@
 param nameSuffix string
 param accountKind string
 param identityPrincipalId string
+param currentIpAddress string
+param servicePrincipalId string
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/document-db/database-account
 module databaseAccount 'br/public:avm/res/document-db/database-account:0.11.3' = {
@@ -9,13 +11,12 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:0.11.3' =
   params: {
     name: 'db-${nameSuffix}'
     minimumTlsVersion: 'Tls12'
-    networkRestrictions: {
-      networkAclBypass: 'AzureServices'
-    }
-    capabilitiesToAdd: [
-      'EnableMongo'
-    ]
     serverVersion: '4.2'
+    capabilitiesToAdd: accountKind == 'MongoDB'
+      ? [
+          'EnableMongo'
+        ]
+      : []
     mongodbDatabases: accountKind == 'MongoDB'
       ? [
           {
@@ -25,6 +26,18 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:0.11.3' =
               {
                 name: 'orders'
                 throughput: 400
+                indexes: [
+                  {
+                    key: {
+                      keys: [
+                        '_id'
+                      ]
+                    }
+                  }
+                ]
+                shardKey: {
+                  _id: 'Hash'
+                }
               }
             ]
           }
@@ -64,6 +77,21 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:0.11.3' =
           identityPrincipalId
         ]
       : []
+    networkRestrictions: {
+      publicNetworkAccess: 'Enabled'
+      networkAclBypass: 'AzureServices'
+      ipRules: [
+        '0.0.0.0'
+        currentIpAddress
+      ]
+    }
+    roleAssignments: [
+      {
+        principalId: servicePrincipalId
+        roleDefinitionIdOrName: 'DocumentDB Account Contributor'
+        principalType: 'ServicePrincipal'
+      }
+    ]
   }
 }
 
