@@ -3,9 +3,12 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "currentUserObjectId": {
-      "value": "${AZURE_PRINCIPAL_ID}"
+      "value": "${CURRENT_USER_OBJECT_ID}"
     },
-    "resourceGroupNameSuffix": {
+    "currentIpAddress": {
+      "value": "${CURRENT_IP_ADDRESS}"
+    },
+    "appEnvironment": {
       "value": "${AZURE_ENV_NAME}"
     },
     "location": {

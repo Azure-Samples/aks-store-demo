@@ -1,12 +1,15 @@
 @minLength(3)
 param nameSuffix string
 param currentUserObjectId string
+param currentIpAddress string
+param servicePrincipalId string
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/service-bus/namespace
-module namespace 'br/public:avm/res/service-bus/namespace:0.13.2' = {
+module serviceBusNamespace 'br/public:avm/res/service-bus/namespace:0.13.2' = {
   name: 'namespaceDeployment'
   params: {
     name: 'sb-${nameSuffix}'
+    disableLocalAuth: true
     skuObject: {
       name: 'Standard'
     }
@@ -15,17 +18,32 @@ module namespace 'br/public:avm/res/service-bus/namespace:0.13.2' = {
         name: 'orders'
       }
     ]
+    networkRuleSets: {
+      ipRules: [
+        {
+          action: 'Allow'
+          ipMask: '0.0.0.0'
+        }
+        {
+          action: 'Allow'
+          ipMask: currentIpAddress
+        }
+      ]
+      trustedServiceAccessEnabled: true
+    }
+    roleAssignments: [
+      {
+        principalId: currentUserObjectId
+        roleDefinitionIdOrName: 'Azure Service Bus Data Owner'
+        principalType: 'User'
+      }
+      {
+        principalId: servicePrincipalId
+        roleDefinitionIdOrName: 'Azure Service Bus Data Owner'
+        principalType: 'ServicePrincipal'
+      }
+    ]
   }
 }
 
-var azureServiceBusDataOwnerRoleDefinitionId = '090c5cfd-751d-490a-894a-3ce6f1109419'
-resource azureServiceBusDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(subscription().id, resourceGroup().id, currentUserObjectId, azureServiceBusDataOwnerRoleDefinitionId)
-  properties: {
-    principalId: currentUserObjectId
-    principalType: 'User'
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureServiceBusDataOwnerRoleDefinitionId)
-  }
-}
-
-output name string = namespace.outputs.name
+output name string = serviceBusNamespace.outputs.name
