@@ -16,7 +16,16 @@ The app does not rely on any other services, so you can run it locally without a
 
 ### Running the app
 
-To run the app, clone the repo, open a terminal, and navigate to the `product-service` directory. Then run the following command:
+To run the app, clone the repo, open a terminal, and navigate to the `product-service` directory.
+
+If you are testing the proxy for ai-service, you will need to run the ai-service container then set the `AI_SERVICE_URL` environment variable to the URL of the ai-service.
+
+```bash
+export AI_SERVICE_URL=http://ai-service:5001/
+docker compose up
+```
+
+Then run the following command:
 
 ```bash
 cargo run
