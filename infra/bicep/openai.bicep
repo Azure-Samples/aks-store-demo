@@ -30,16 +30,16 @@ module cognitiveServicesAccount 'br/public:avm/res/cognitive-services/account:0.
       }
     ]
     disableLocalAuth: true
-    networkAcls: {
-      ipRules: [
-        {
-          action: 'Allow'
-          value: currentIpAddress
-        }
-      ]
-      defaultAction: 'Deny'
-      bypass: 'AzureServices'
-    }
+    // networkAcls: {
+    //   ipRules: [
+    //     {
+    //       action: 'Allow'
+    //       value: currentIpAddress
+    //     }
+    //   ]
+    //   defaultAction: 'Deny'
+    //   bypass: 'AzureServices'
+    // }
     roleAssignments: [
       {
         principalId: currentUserObjectId

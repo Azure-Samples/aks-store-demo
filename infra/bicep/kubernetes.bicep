@@ -43,9 +43,10 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
     managedIdentities: {
       systemAssigned: true
     }
-    authorizedIPRanges: [
-      currentIpAddress
-    ]
+    publicNetworkAccess: 'Enabled'
+    // authorizedIPRanges: [
+    //   currentIpAddress
+    // ]
     roleAssignments: [
       {
         principalId: currentUserObjectId
@@ -64,14 +65,13 @@ module registry 'br/public:avm/res/container-registry/registry:0.9.1' = if (depl
     acrSku: 'Premium'
     exportPolicyStatus: 'enabled'
     publicNetworkAccess: 'Enabled'
-    networkRuleSetIpRules: [
-      {
-        value: currentIpAddress
-        action: 'Allow'
-      }
-    ]
-    networkRuleBypassOptions: 'AzureServices'
-    networkRuleSetDefaultAction: 'Deny'
+    // networkRuleSetIpRules: [
+    //   {
+    //     value: currentIpAddress
+    //     action: 'Allow'
+    //   }
+    // ]
+    // networkRuleBypassOptions: 'AzureServices'
     roleAssignments: [
       {
         principalId: managedCluster.outputs.?kubeletIdentityObjectId!

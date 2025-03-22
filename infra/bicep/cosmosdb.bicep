@@ -77,14 +77,14 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:0.11.3' =
           identityPrincipalId
         ]
       : []
-    networkRestrictions: {
-      publicNetworkAccess: 'Enabled'
-      networkAclBypass: 'AzureServices'
-      ipRules: [
-        '0.0.0.0'
-        currentIpAddress
-      ]
-    }
+    // networkRestrictions: {
+    //   publicNetworkAccess: 'Enabled'
+    //   networkAclBypass: 'AzureServices'
+    //   ipRules: [
+    //     '0.0.0.0'
+    //     currentIpAddress
+    //   ]
+    // }
     roleAssignments: [
       {
         principalId: servicePrincipalId

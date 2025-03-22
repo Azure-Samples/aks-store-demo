@@ -18,19 +18,19 @@ module serviceBusNamespace 'br/public:avm/res/service-bus/namespace:0.13.2' = {
         name: 'orders'
       }
     ]
-    networkRuleSets: {
-      ipRules: [
-        {
-          action: 'Allow'
-          ipMask: '0.0.0.0'
-        }
-        {
-          action: 'Allow'
-          ipMask: currentIpAddress
-        }
-      ]
-      trustedServiceAccessEnabled: true
-    }
+    // networkRuleSets: {
+    //   ipRules: [
+    //     {
+    //       action: 'Allow'
+    //       ipMask: '0.0.0.0'
+    //     }
+    //     {
+    //       action: 'Allow'
+    //       ipMask: currentIpAddress
+    //     }
+    //   ]
+    //   trustedServiceAccessEnabled: true
+    // }
     roleAssignments: [
       {
         principalId: currentUserObjectId
