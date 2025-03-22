@@ -61,11 +61,13 @@ module registry 'br/public:avm/res/container-registry/registry:0.9.1' = if (depl
   name: 'registryDeployment'
   params: {
     name: 'acr${nameSuffix}'
+    acrSku: 'Premium'
+    exportPolicyStatus: 'enabled'
     publicNetworkAccess: 'Enabled'
     networkRuleSetIpRules: [
       {
+        value: currentIpAddress
         action: 'Allow'
-        ipMask: currentIpAddress
       }
     ]
     networkRuleBypassOptions: 'AzureServices'
