@@ -4,7 +4,7 @@
       "type": "debugpy",
       "request": "launch",
       "name": "Launch FastAPI App",
-      "python": "${workspaceFolder}/.venv/bin/python",
+      "python": "${workspaceFolder}/.venv/bin/python3",
       "module": "uvicorn",
       "args": [
         "main:app",
@@ -15,7 +15,7 @@
       ],
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env.example",
-      "preLaunchTask": "Create and activate virtual environment"
+      "preLaunchTask": "Install dependencies"
     }
   ]
 }
