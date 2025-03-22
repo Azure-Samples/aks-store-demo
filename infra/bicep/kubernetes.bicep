@@ -49,7 +49,7 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
     roleAssignments: [
       {
         principalId: currentUserObjectId
-        roleDefinitionIdOrName: 'Azure Kubernetes Service Cluster Admin Role'
+        roleDefinitionIdOrName: 'Azure Kubernetes Service RBAC Cluster Admin'
         principalType: 'User'
       }
     ]
