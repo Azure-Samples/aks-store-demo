@@ -13,9 +13,9 @@ module "sb" {
     orders = {}
   }
 
-  network_rule_config = {
-    cidr_or_ip_rules = ["${chomp(data.http.current_ip.response_body)}/32"]
-  }
+  # network_rule_config = {
+  #   cidr_or_ip_rules = ["${chomp(data.http.current_ip.response_body)}/32"]
+  # }
 }
 
 module "avm-res-authorization-roleassignment-sb" {
