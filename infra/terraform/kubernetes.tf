@@ -21,10 +21,13 @@ resource "azurerm_kubernetes_cluster" "example" {
       max_surge = "10%"
     }
   }
+  local_account_disabled = true
+  role_based_access_control_enabled = true
+  azure_policy_enabled = true
 
   azure_active_directory_role_based_access_control {
-    managed            = true
     azure_rbac_enabled = true
+    tenant_id = data.azurerm_client_config.current.tenant_id
   }
 
   api_server_access_profile {
@@ -44,7 +47,7 @@ resource "azurerm_kubernetes_cluster" "example" {
     type = "SystemAssigned"
   }
 
-  node_os_channel_upgrade   = "SecurityPatch"
+  automatic_upgrade_channel = "node-image"
   oidc_issuer_enabled       = local.deploy_azure_workload_identity
   workload_identity_enabled = local.deploy_azure_workload_identity
 

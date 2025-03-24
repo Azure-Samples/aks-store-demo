@@ -19,9 +19,11 @@ resource "azurerm_cognitive_deployment" "gpt" {
     name    = var.openai_model_name
     version = var.openai_model_version
   }
+  dynamic_throttling_enabled = true
 
-  scale {
-    type     = "Standard"
+
+  sku {
+    name     = "Standard"
     capacity = var.openai_model_capacity
   }
 }
@@ -36,9 +38,10 @@ resource "azurerm_cognitive_deployment" "dalle" {
     name    = var.openai_dalle_model_name
     version = var.openai_dalle_model_version
   }
+  dynamic_throttling_enabled = true
 
-  scale {
-    type     = "Standard"
+  sku {
+    name     = "Standard"
     capacity = var.openai_dalle_model_capacity
   }
 }

@@ -29,13 +29,13 @@ variable "ai_location" {
 variable "openai_model_name" {
   description = "value of azure openai model name"
   type        = string
-  default     = "gpt-35-turbo"
+  default     = "o3-mini"
 }
 
 variable "openai_model_version" {
   description = "value of azure openai model version"
   type        = string
-  default     = "0613"
+  default     = "2025-01-31"
 }
 
 variable "openai_model_capacity" {
