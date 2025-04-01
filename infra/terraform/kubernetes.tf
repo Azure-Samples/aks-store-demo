@@ -21,20 +21,20 @@ resource "azurerm_kubernetes_cluster" "example" {
       max_surge = "10%"
     }
   }
-  local_account_disabled = true
+  local_account_disabled = false
   role_based_access_control_enabled = true
   azure_policy_enabled = true
 
-  azure_active_directory_role_based_access_control {
-    azure_rbac_enabled = true
-    tenant_id = data.azurerm_client_config.current.tenant_id
-  }
+  # azure_active_directory_role_based_access_control {
+  #   azure_rbac_enabled = false
+  #   tenant_id = data.azurerm_client_config.current.tenant_id
+  # }
 
-  api_server_access_profile {
-    authorized_ip_ranges = [
-      "${data.http.ifconfig.response_body}/32"
-    ]
-  }
+  # api_server_access_profile {
+  #   authorized_ip_ranges = [
+  #     "${data.http.ifconfig.response_body}/32"
+  #   ]
+  # }
 
   network_profile {
     network_plugin      = "azure"
