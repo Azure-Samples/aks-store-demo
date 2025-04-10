@@ -1,4 +1,5 @@
 resource "azurerm_log_analytics_workspace" "example" {
+  count               = local.deploy_observability_tools ? 1 : 0
   name                = "logs-${local.name}"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -302,14 +303,14 @@ resource "azurerm_monitor_data_collection_rule" "example_msci" {
 
   destinations {
     log_analytics {
-      workspace_resource_id = azurerm_log_analytics_workspace.example.id
-      name                  = azurerm_log_analytics_workspace.example.name
+      workspace_resource_id = azurerm_log_analytics_workspace.example[0].id
+      name                  = azurerm_log_analytics_workspace.example[0].name
     }
   }
 
   data_flow {
     streams      = ["Microsoft-ContainerInsights-Group-Default"]
-    destinations = [azurerm_log_analytics_workspace.example.name]
+    destinations = [azurerm_log_analytics_workspace.example[0].name]
   }
 }
 
