@@ -240,11 +240,6 @@ spec:
           ports:
             - containerPort: 8080
               name: store-front
-          env:
-            - name: VUE_APP_ORDER_SERVICE_URL
-              value: "http://order-service:3000/"
-            - name: VUE_APP_PRODUCT_SERVICE_URL
-              value: "http://product-service:3002/"
           resources:
             requests:
               cpu: 1m
