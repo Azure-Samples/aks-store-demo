@@ -15,7 +15,7 @@ resource "azurerm_monitor_workspace" "example" {
 
 resource "azurerm_dashboard_grafana" "example" {
   count                 = local.deploy_observability_tools ? 1 : 0
-  name                  = "grafana-${local.name}"
+  name                  = "grafana-${substr(local.name, 0, 15)}"
   resource_group_name   = azurerm_resource_group.example.name
   location              = azurerm_resource_group.example.location
   grafana_major_version = "10"
