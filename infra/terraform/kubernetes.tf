@@ -11,7 +11,7 @@ module "acr" {
 // https://github.com/Azure/terraform-azurerm-avm-res-containerservice-managedcluster/
 module "aks" {
   source                    = "Azure/avm-res-containerservice-managedcluster/azurerm"
-  version                   = "0.1.5"
+  version                   = "0.1.7"
   name                      = "aks-${local.name}"
   resource_group_name       = azurerm_resource_group.example.name
   location                  = azurerm_resource_group.example.location
@@ -23,13 +23,13 @@ module "aks" {
   #   authorized_ip_ranges = ["${chomp(data.http.current_ip.response_body)}/32"]
   # }
 
+  // temporary workaround since azd has trouble connecting to the cluster when azure rbac is enabled
   azure_active_directory_role_based_access_control = {
     azure_rbac_enabled = true
     tenant_id          = data.azurerm_client_config.current.tenant_id
   }
-  // temporary workaround since azd has trouble connecting to the cluster when azure rbac is enabled
-  role_based_access_control_enabled = true
-  local_account_disabled            = false
+  # role_based_access_control_enabled = false
+  # local_account_disabled            = false
   // end workaround
 
   default_node_pool = {
@@ -58,7 +58,7 @@ module "aks" {
 
   monitor_metrics = local.deploy_observability_tools ? {} : null
   oms_agent = local.deploy_observability_tools ? {
-    log_analytics_workspace_id      = azurerm_log_analytics_workspace.example.id
+    log_analytics_workspace_id      = azurerm_log_analytics_workspace.example[0].id
     msi_auth_for_monitoring_enabled = true
   } : null
 }
