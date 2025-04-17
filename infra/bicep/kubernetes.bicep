@@ -7,6 +7,7 @@ param logsWorkspaceResourceId string
 param metricsWorkspaceResourceId string
 param currentUserObjectId string
 param currentIpAddress string
+param configureMonitorSettings bool = false
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/container-service/managed-cluster
 module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3' = {
@@ -29,13 +30,10 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
     enableOidcIssuerProfile: true
     enableWorkloadIdentity: true
     enableKeyvaultSecretsProvider: true
-    enableAzureMonitorProfileMetrics: logsWorkspaceResourceId != '' ? true : false
-    enableContainerInsights: logsWorkspaceResourceId != '' ? true : false
-    monitoringWorkspaceResourceId: logsWorkspaceResourceId
-    // temporary workaround since azd has trouble connecting to the cluster when azure rbac is enabled
-    disableLocalAccounts: false
-    enableRBAC: true
-    // end workaround
+    enableAzureMonitorProfileMetrics: configureMonitorSettings
+    enableContainerInsights: configureMonitorSettings
+    disablePrometheusMetricsScraping: !configureMonitorSettings
+    monitoringWorkspaceResourceId: configureMonitorSettings ? logsWorkspaceResourceId : null
     aadProfile: {
       aadProfileEnableAzureRBAC: true
       aadProfileManaged: true
@@ -90,7 +88,7 @@ resource managedClusterExisting 'Microsoft.ContainerService/managedClusters@2024
   ]
 }
 
-resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2022-06-01' = {
+resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2022-06-01' = if (configureMonitorSettings) {
   name: 'MSProm-${location}-aks-${nameSuffix}'
   location: location
   kind: 'Linux'
@@ -99,7 +97,7 @@ resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2022
   }
 }
 
-resource dataCollectionRuleAssociationEndpoint 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = {
+resource dataCollectionRuleAssociationEndpoint 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = if (configureMonitorSettings) {
   name: 'configurationAccessEndpoint'
   scope: managedClusterExisting
   properties: {
@@ -107,7 +105,7 @@ resource dataCollectionRuleAssociationEndpoint 'Microsoft.Insights/dataCollectio
   }
 }
 
-resource dataCollectionRuleMSCI 'Microsoft.Insights/dataCollectionRules@2022-06-01' = {
+resource dataCollectionRuleMSCI 'Microsoft.Insights/dataCollectionRules@2022-06-01' = if (configureMonitorSettings) {
   name: 'MSCI-${location}-aks-${nameSuffix}'
   location: location
   kind: 'Linux'
@@ -152,7 +150,7 @@ resource dataCollectionRuleMSCI 'Microsoft.Insights/dataCollectionRules@2022-06-
   }
 }
 
-resource dataCollectionRuleAssociationMSCI 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = {
+resource dataCollectionRuleAssociationMSCI 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = if (configureMonitorSettings) {
   name: 'MSCI-${location}-aks-${nameSuffix}'
   scope: managedClusterExisting
   properties: {
@@ -160,7 +158,7 @@ resource dataCollectionRuleAssociationMSCI 'Microsoft.Insights/dataCollectionRul
   }
 }
 
-resource dataCollectionRuleMSProm 'Microsoft.Insights/dataCollectionRules@2022-06-01' = {
+resource dataCollectionRuleMSProm 'Microsoft.Insights/dataCollectionRules@2022-06-01' = if (configureMonitorSettings) {
   name: 'MSProm-${location}-aks-${nameSuffix}'
   location: location
   kind: 'Linux'
@@ -197,7 +195,7 @@ resource dataCollectionRuleMSProm 'Microsoft.Insights/dataCollectionRules@2022-0
   }
 }
 
-resource dataCollectionRuleAssociationMSProm 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = {
+resource dataCollectionRuleAssociationMSProm 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = if (configureMonitorSettings) {
   name: 'MSProm-${location}-aks-${nameSuffix}'
   scope: managedClusterExisting
   properties: {
@@ -205,7 +203,7 @@ resource dataCollectionRuleAssociationMSProm 'Microsoft.Insights/dataCollectionR
   }
 }
 
-resource prometheusK8sRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGroups@2023-03-01' = {
+resource prometheusK8sRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGroups@2023-03-01' = if (configureMonitorSettings) {
   name: 'KubernetesRecordingRulesRuleGroup - aks-${nameSuffix}'
   location: location
   properties: {
@@ -310,7 +308,7 @@ resource prometheusK8sRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGroup
   }
 }
 
-resource prometheusNodeRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGroups@2023-03-01' = {
+resource prometheusNodeRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGroups@2023-03-01' = if (configureMonitorSettings) {
   name: 'NodeRecordingRulesRuleGroup - aks-${nameSuffix}'
   location: location
   properties: {
