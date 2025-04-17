@@ -94,10 +94,11 @@ module aks 'kubernetes.bicep' = {
     metricsWorkspaceResourceId: deployObservabilityTools ? observability.outputs.metricsWorkspaceResourceId : ''
     currentUserObjectId: currentUserObjectId
     currentIpAddress: currentIpAddress
+    configureMonitorSettings: deployObservabilityTools
   }
 }
 
-module workloadidentity 'workloadidentity.bicep' = {
+module workloadidentity 'workloadidentity.bicep' = if (deployAzureCosmosDB || deployAzureServiceBus || deployAzureOpenAI) {
   scope: rg
   name: 'workloadIdentityDeployment'
   params: {

@@ -18,19 +18,17 @@ module "aks" {
   node_os_channel_upgrade   = "SecurityPatch"
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
+  local_account_disabled    = true
 
   # api_server_access_profile = {
   #   authorized_ip_ranges = ["${chomp(data.http.current_ip.response_body)}/32"]
   # }
 
-  // temporary workaround since azd has trouble connecting to the cluster when azure rbac is enabled
   azure_active_directory_role_based_access_control = {
     azure_rbac_enabled = true
     tenant_id          = data.azurerm_client_config.current.tenant_id
   }
-  # role_based_access_control_enabled = false
-  # local_account_disabled            = false
-  // end workaround
+  local_account_disabled = true
 
   default_node_pool = {
     name       = "system"
