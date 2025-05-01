@@ -51,7 +51,7 @@ resource "random_pet" "example" {
 }
 
 data "http" "ifconfig" {
-  url = "http://ifconfig.me"
+  url = "http://ifconfig.me/ip"
 }
 
 data "azurerm_subscription" "current" {}
