@@ -28,7 +28,6 @@ module "aks" {
     azure_rbac_enabled = true
     tenant_id          = data.azurerm_client_config.current.tenant_id
   }
-  local_account_disabled = true
 
   default_node_pool = {
     name       = "system"
