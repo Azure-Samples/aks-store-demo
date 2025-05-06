@@ -1,0 +1,30 @@
+{
+  "go.useLanguageServer": true,
+  "go.toolsManagement.autoUpdate": true,
+  "go.gopath": "",
+  "go.goroot": "",
+  "go.toolsEnvVars": {},
+  "go.formatTool": "goimports",
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": [
+    "--fast"
+  ],
+  "go.testFlags": [
+    "-v"
+  ],
+  "go.testTimeout": "30s",
+  "go.coverOnSave": true,
+  "go.coverageDecorator": {
+    "type": "highlight",
+    "coveredHighlightColor": "rgba(64,128,128,0.5)",
+    "uncoveredHighlightColor": "rgba(128,64,64,0.25)"
+  },
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "go.toolsManagement.checkForUpdates": "local",
+  "go.installDependenciesWhenBuilding": true,
+}

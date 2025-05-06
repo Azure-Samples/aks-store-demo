@@ -29,7 +29,6 @@ managedIdentityClientId: $($env:AZURE_IDENTITY_CLIENT_ID)
 # Add base images
 ###########################################################
 @"
-namespace: ${env:AZURE_AKS_NAMESPACE}
 productService:
   image:
     repository: ${env:AZURE_REGISTRY_URI}/aks-store-demo/product-service
@@ -55,20 +54,12 @@ if ($env:AZURE_OPENAI_ENDPOINT) {
 @"
 aiService:
   image:
-      repository: ${env:AZURE_REGISTRY_URI}/aks-store-demo/ai-service
+    repository: ${env:AZURE_REGISTRY_URI}/aks-store-demo/ai-service
   create: true
   modelDeploymentName: ${env:AZURE_OPENAI_MODEL_NAME}
   openAiEndpoint: ${env:AZURE_OPENAI_ENDPOINT}
   useAzureOpenAi: if ($env:AZURE_OPENAI_ENDPOINT) { 'true' }
 "@ | Out-File -Path custom-values.yaml -Append -Encoding utf8
-
-  # If Azure identity does not exist, use the Azure OpenAI API key
-  if (($env:AZURE_IDENTITY_CLIENT_ID -eq $null) -and ($env:AZURE_IDENTITY_NAME -eq $null)) {
-    $openAiKey = az keyvault secret show --name $env:AZURE_OPENAI_KEY --vault-name $env:AZURE_KEY_VAULT_NAME --query value -o tsv
-    @"
-  openAiKey: $openAiKey
-"@ | Out-File -Path custom-values.yaml -Append -Encoding utf8
-  }
 }
 
 ###########################################################
@@ -85,17 +76,6 @@ if ($env:AZURE_SERVICE_BUS_HOST) {
 @"
   queueHost: ${env:AZURE_SERVICE_BUS_HOST}
 "@ | Out-File -Append custom-values.yaml
-
-  # If Azure identity does not exists, use the Azure Service Bus credentials
-  if (-not $env:AZURE_IDENTITY_CLIENT_ID -and -not $env:AZURE_IDENTITY_NAME) {
-    $queuePassword = az keyvault secret show --name $env:AZURE_SERVICE_BUS_SENDER_KEY --vault-name $env:AZURE_KEY_VAULT_NAME --query value -o tsv
-    @"
-  queuePort: "5671"
-  queueTransport: "tls"
-  queueUsername: ${env:AZURE_SERVICE_BUS_SENDER_NAME}
-  queuePassword: $queuePassword
-"@ | Out-File -Path custom-values.yaml -Append -Encoding utf8
-  }
 }
 
 ###########################################################
@@ -112,34 +92,18 @@ if ($env:AZURE_SERVICE_BUS_URI) {
   # If Azure identity exists just set the Azure Service Bus Hostname
   if ($env:AZURE_IDENTITY_CLIENT_ID -and $env:AZURE_IDENTITY_NAME) {
     @"
-    orderQueueHost: $($env:AZURE_SERVICE_BUS_HOST)
-"@ | Out-File -Path custom-values.yaml -Append -Encoding utf8
-  } else {
-  $orderQueuePassword = az keyvault secret show --name $env:AZURE_SERVICE_BUS_LISTENER_KEY --vault-name $env:AZURE_KEY_VAULT_NAME --query value -o tsv
-@"
-  orderQueueUri: ${env:AZURE_SERVICE_BUS_URI}
-  orderQueueUsername: ${env:AZURE_SERVICE_BUS_LISTENER_NAME}
-  orderQueuePassword: $orderQueuePassword
+  orderQueueHost: $($env:AZURE_SERVICE_BUS_HOST)
 "@ | Out-File -Path custom-values.yaml -Append -Encoding utf8
   }
 }
 
 # Add Azure Cosmos DB to makeline-service if provided
 if ($env:AZURE_COSMOS_DATABASE_URI) {
-  $orderDBPassword = az keyvault secret show --name $env:AZURE_COSMOS_DATABASE_KEY --vault-name $env:AZURE_KEY_VAULT_NAME --query value -o tsv
-@"
+  @"
   orderDBApi: ${env:AZURE_DATABASE_API}
   orderDBUri: ${env:AZURE_COSMOS_DATABASE_URI}
+  orderDBListConnectionStringsUrl: ${env:AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL}
 "@ | Out-File -Path custom-values.yaml -Append -Encoding utf8
-
-# If Azure identity does not exists, use the Azure Cosmos DB credentials
-  if (-not $env:AZURE_IDENTITY_CLIENT_ID -and -not $env:AZURE_IDENTITY_NAME) {
-    $orderDBPassword = az keyvault secret show --name $env:AZURE_COSMOS_DATABASE_KEY --vault-name $env:AZURE_KEY_VAULT_NAME --query value -o tsv
-    @"
-  orderDBUsername: ${env:AZURE_COSMOS_DATABASE_NAME}
-  orderDBPassword: $orderDBPassword
-"@ | Out-File -Path custom-values.yaml -Append -Encoding utf8
-  }
 }
 
 ###########################################################

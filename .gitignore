@@ -135,8 +135,8 @@ __pycache__/
 # Additional
 .DS_Store
 **/.DS_Store
-.vscode
-**/.vscode
+# .vscode
+# **/.vscode
 .azure
 .terraform
 test-results/
@@ -146,3 +146,5 @@ playwright/.cache/
 
 # custom helm values
 custom-values.yaml
+
+**/.terraform.lock.hcl

@@ -7,7 +7,7 @@ replicaCount: 1
 namespace: "dev"
 
 useRabbitMQ: true # when true, local rabbitmq container will be used
-useMongoDB:  true # when true, local mongodb container will be used
+useMongoDB: true # when true, local mongodb container will be used
 
 useAzureAd: false # when true, Azure AD auth will be used for ai-service, order-service, and makeline-service
 managedIdentityName: "" # name of the Azure AD identity to use for the service account
@@ -47,6 +47,7 @@ makelineService:
   orderQueueHost: ""
   orderDBApi: "mongodb"
   orderDBUri: "mongodb://mongodb:27017"
+  orderDBListConnectionStringsUrl: ""
   orderDBName: "orderdb"
   orderDBCollectionName: "orders"
   orderDBContainerName: "orders"
@@ -74,21 +75,27 @@ storeFront:
   serviceType: LoadBalancer
 
 virtualCustomer:
+  create: true
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/virtual-customer"
     tag: "latest"
+  ordersPerHour: 20
 
 virtualWorker:
+  create: true
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/virtual-worker"
     tag: "latest"
+  ordersPerHour: 10
 
 podAnnotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL

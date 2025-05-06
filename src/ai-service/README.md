@@ -20,7 +20,7 @@ To run the app, clone the repo, open a terminal, and navigate to the `ai-service
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 export USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
 export USE_AZURE_AD=True # set to True if you are using Azure OpenAI with Azure AD authentication
@@ -31,6 +31,10 @@ export AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI's DALL-E mo
 export AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI's DALL-E model
 export OPENAI_API_KEY= # always required if using OpenAI if using Azure OpenAI, consider use Workload Identity https://learn.microsoft.com/azure/aks/open-ai-secure-access-quickstart
 export OPENAI_ORG_ID= # required if using OpenAI
+export AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI's DALL-E model
+export AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI's DALL-E model
+export USE_LOCAL_LLM=False # set to True if you are using a local KAITO LLM model
+export LOCAL_LLM_ENDPOINT= # required if using a local KAITO LLM model (ex: http://<A_REACHABLE_IP>/v1)
 
 uvicorn main:app --host 127.0.0.1 --port 5001
 ```

@@ -1,8 +1,8 @@
-use actix_web::{error, web, Error, HttpResponse};
+use crate::localwasmtime::validate_product;
 use crate::model::Product;
 use crate::startup::AppState;
+use actix_web::{error, web, Error, HttpResponse};
 use futures_util::StreamExt;
-use crate::localwasmtime::validate_product;
 
 pub async fn update_product(
     data: web::Data<AppState>,
@@ -23,7 +23,7 @@ pub async fn update_product(
 
     // body is loaded, now we can deserialize serde-json
     let product = serde_json::from_slice::<Product>(&body)?;
-    
+
     match validate_product(&data.settings, &product) {
         Ok(validated_product) => {
             // replace product with same id
@@ -32,8 +32,6 @@ pub async fn update_product(
 
             Ok(HttpResponse::Ok().json(validated_product))
         }
-        Err(e) => {
-            Ok(HttpResponse::BadRequest().body(e.to_string()))
-        }
-    }  
+        Err(e) => Ok(HttpResponse::BadRequest().body(e.to_string())),
+    }
 }
