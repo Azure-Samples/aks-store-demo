@@ -21,7 +21,7 @@ resource "azurerm_cognitive_deployment" "gpt" {
   }
 
   scale {
-    type     = "Standard"
+    type     = var.openai_model_type
     capacity = var.openai_model_capacity
   }
 }
