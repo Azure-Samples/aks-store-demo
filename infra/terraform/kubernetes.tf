@@ -29,7 +29,7 @@ resource "azurerm_kubernetes_cluster" "example" {
 
   api_server_access_profile {
     authorized_ip_ranges = [
-      "${data.http.ifconfig.response_body}/32"
+      "${chomp(data.http.ifconfig.response_body)}/32"
     ]
   }
 

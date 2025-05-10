@@ -14,6 +14,11 @@ terraform {
       source  = "hashicorp/random"
       version = "=3.6.1"
     }
+
+    http = {
+      source  = "hashicorp/http"
+      version = "=3.4.3"
+    }
   }
 }
 
@@ -51,7 +56,7 @@ resource "random_pet" "example" {
 }
 
 data "http" "ifconfig" {
-  url = "http://ifconfig.me"
+  url = "http://ipv4.icanhazip.com"
 }
 
 data "azurerm_subscription" "current" {}
