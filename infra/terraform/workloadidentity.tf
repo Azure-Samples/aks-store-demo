@@ -6,7 +6,7 @@ resource "azurerm_user_assigned_identity" "example" {
 }
 
 resource "azurerm_federated_identity_credential" "example" {
-  count               = local.deploy_azure_openai && local.deploy_azure_workload_identity ? 1 : 0
+  count               = local.deploy_azure_workload_identity ? 1 : 0
   name                = azurerm_user_assigned_identity.example[0].name
   resource_group_name = azurerm_resource_group.example.name
   parent_id           = azurerm_user_assigned_identity.example[0].id
