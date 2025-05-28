@@ -68,43 +68,55 @@ variable "azure_openai_location" {
 }
 
 variable "chat_completion_model_name" {
-  description = "value of azure openai model name"
+  description = "value of chat completion model name"
   type        = string
-  default     = "gpt-35-turbo"
+  default     = "gpt-4o-mini"
 }
 
 variable "chat_completion_model_version" {
-  description = "value of azure openai model version"
+  description = "value of chat completion model version"
   type        = string
-  default     = "0125"
+  default     = "2024-07-18"
 }
 
 variable "chat_completion_model_capacity" {
-  description = "value of azure openai model capacity"
+  description = "value of chat completion model capacity"
   type        = number
   default     = 8
 }
 
+variable "chat_completion_model_type" {
+  description = "value of chat completion model type"
+  type        = string
+  default     = "GlobalStandard"
+}
+
 variable "deploy_image_generation_model" {
-  description = "value to determine if azure openai dall-e model should be deployed"
+  description = "value to determine if image generation model should be deployed"
   type        = string
   default     = "false"
 }
 
 variable "image_generation_model_name" {
-  description = "value of azure openai dall-e-3 model name"
+  description = "value of image generation model name"
   type        = string
   default     = "dall-e-3"
 }
 
 variable "image_generation_model_version" {
-  description = "value of azure openai dall-e-3 model version"
+  description = "value of image generation model version"
   type        = string
   default     = "3.0"
 }
 
 variable "image_generation_model_capacity" {
-  description = "value of azure openai dall-e-3 model capacity"
+  description = "value of image generation model capacity"
   type        = number
   default     = 1
+}
+
+variable "image_generation_model_type" {
+  description = "value of image generation model type"
+  type        = string
+  default     = "Standard"
 }

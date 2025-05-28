@@ -12,7 +12,7 @@ module "aoai" {
   local_auth_enabled    = false
 
   cognitive_deployments = {
-    "gpt-35-turbo" = {
+    "chat_completion" = {
       name = var.chat_completion_model_name
       model = {
         format  = "OpenAI"
@@ -20,12 +20,12 @@ module "aoai" {
         version = var.chat_completion_model_version
       }
       scale = {
-        type     = "Standard"
+        type     = var.chat_completion_model_type
         capacity = var.chat_completion_model_capacity
       }
     }
 
-    "dall-e-3" = local.deploy_image_generation_model ? {
+    "image_generation" = local.deploy_image_generation_model ? {
       name = var.image_generation_model_name
       model = {
         format  = "OpenAI"
@@ -33,7 +33,7 @@ module "aoai" {
         version = var.image_generation_model_version
       }
       scale = {
-        type     = "Standard"
+        type     = var.image_generation_model_type
         capacity = var.image_generation_model_capacity
       }
     } : null

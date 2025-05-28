@@ -41,10 +41,10 @@ param deployAzureOpenAI bool = true
 param azureOpenAILocation string = location
 
 @description('value of azure openai model name')
-param chatCompletionModelName string = 'gpt-35-turbo'
+param chatCompletionModelName string = 'gpt-4o-mini'
 
 @description('value of azure openai model version')
-param chatCompletionModelVersion string = '0125'
+param chatCompletionModelVersion string = '2024-07-18'
 
 @description('value of azure openai model capacity')
 param chatCompletionModelCapacity int = 8
