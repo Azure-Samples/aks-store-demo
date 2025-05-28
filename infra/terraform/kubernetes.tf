@@ -20,9 +20,9 @@ module "aks" {
   workload_identity_enabled = true
   local_account_disabled    = true
 
-  # api_server_access_profile = {
-  #   authorized_ip_ranges = ["${chomp(data.http.current_ip.response_body)}/32"]
-  # }
+  api_server_access_profile = {
+    authorized_ip_ranges = ["${chomp(data.http.current_ip.response_body)}/32"]
+  }
 
   azure_active_directory_role_based_access_control = {
     azure_rbac_enabled = true
