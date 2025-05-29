@@ -1,0 +1,6 @@
+# Ignore misconfigurations
+
+# https://avd.aquasec.com/misconfig/azure/container/avd-azu-0040/
+# This rule wants to set a property that is set conditionally in the code.
+# Not all deployments will have this to save on costs.
+AVD-AZU-0040
