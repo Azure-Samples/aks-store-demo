@@ -1,12 +1,14 @@
 IMAGE_VERSION ?= 0.0.1-beta
 RANDOM := $(shell bash -c 'echo $$RANDOM')
-LOC_NAME ?= northcentralus
+LOC_NAME ?= swedencentral
 RG_NAME ?= rg-store-demo-$(RANDOM)
 ACR_NAME ?= acrstoredemo$(RANDOM)
 AKS_NAME ?= aks-store-demo-$(RANDOM)
 AOAI_NAME ?= aoai-store-demo-$(RANDOM)
-GPT_35_TURBO_VERSION ?= 0613
-GPT_35_TURBO_CAPACITY ?= 30
+AOAI_MODEL_NAME ?= gpt-4o-mini
+AOAI_MODEL_VERSION ?= 2024-07-18
+AOAI_MODEL_CAPACITY ?= 8
+AOAI_MODEL_SKU ?= GlobalStandard
 BUILD_ORDER_SERVICE ?= false
 BUILD_MAKELINE_SERVICE ?= false
 BUILD_PRODUCT_SERVICE ?= false
@@ -59,7 +61,7 @@ provision-azure: ## Provision Azure Resources
 	@az aks create -n $(AKS_NAME) -g $(RG_NAME) --attach-acr $(ACR_NAME)
 	@az aks get-credentials -n $(AKS_NAME) -g $(RG_NAME)
 	@az cognitiveservices account create --name $(AOAI_NAME) -g $(RG_NAME) -l $(LOC_NAME) --kind OpenAI --sku S0 --custom-domain $(AOAI_NAME)
-	@az cognitiveservices account deployment create -n $(AOAI_NAME) -g $(RG_NAME) --deployment-name gpt-35-turbo --model-format OpenAI --model-name gpt-35-turbo --model-version $(GPT_35_TURBO_VERSION) --sku Standard --capacity $(GPT_35_TURBO_CAPACITY)
+	@az cognitiveservices account deployment create -n $(AOAI_NAME) -g $(RG_NAME) --deployment-name $(AOAI_MODEL_NAME) --model-format OpenAI --model-name $(AOAI_MODEL_NAME) --model-version $(AOAI_MODEL_VERSION) --sku $(AOAI_MODEL_SKU) --capacity $(AOAI_MODEL_CAPACITY)
 
 	@if [ "$(BUILD_ORDER_SERVICE)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t order-service:$(IMAGE_VERSION) ./src/order-service; \
@@ -135,7 +137,7 @@ deploy-azure-ai: deploy-azure kustomize ai-service.yaml ## Deploy ai-service to 
 	@# Set environment variables
 	@echo "USE_AZURE_OPENAI=True" > .env
 	@echo "USE_AZURE_AD=False" >> .env
-	@echo "AZURE_OPENAI_DEPLOYMENT_NAME=gpt-35-turbo" >> .env
+	@echo "AZURE_OPENAI_DEPLOYMENT_NAME=$(AOAI_MODEL_NAME)" >> .env
 	@echo "AZURE_OPENAI_ENDPOINT=$$(az cognitiveservices account show -n $(AOAI_NAME) -g $(RG_NAME) --query properties.endpoint -o tsv)" >> .env
 	@echo "OPENAI_API_KEY=$$(az cognitiveservices account keys list -n $(AOAI_NAME) -g $(RG_NAME) --query key1 -o tsv)" >> .env
 
