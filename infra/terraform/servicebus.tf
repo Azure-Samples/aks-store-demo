@@ -22,8 +22,11 @@ module "avm-res-authorization-roleassignment-sb" {
   count   = local.deploy_azure_servicebus ? 1 : 0
   source  = "Azure/avm-res-authorization-roleassignment/azurerm"
   version = "0.2.0"
-  users_by_object_id = {
-    current_user = data.azurerm_client_config.current.object_id
+  # users_by_object_id = {
+  #   current_user = data.azurerm_client_config.current.object_id
+  # }
+  groups_by_object_id = {
+    demo_group = azuread_group.example.object_id
   }
   role_definitions = {
     service_bus_data_owner_role = {
@@ -36,7 +39,7 @@ module "avm-res-authorization-roleassignment-sb" {
       role_assignments = {
         role_assignment_1 = {
           role_definition = "service_bus_data_owner_role"
-          users           = ["current_user"]
+          any_principals  = ["demo_group"]
         }
       }
     }

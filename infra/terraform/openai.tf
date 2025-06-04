@@ -44,8 +44,11 @@ module "aoai-role" {
   count   = local.deploy_azure_openai ? 1 : 0
   source  = "Azure/avm-res-authorization-roleassignment/azurerm"
   version = "0.2.0"
-  users_by_object_id = {
-    current_user = data.azurerm_client_config.current.object_id
+  # users_by_object_id = {
+  #   current_user = data.azurerm_client_config.current.object_id
+  # }
+  groups_by_object_id = {
+    "demo_group" = azuread_group.example.object_id
   }
   role_definitions = {
     cognitive_services_openai_user_role = {
@@ -58,7 +61,7 @@ module "aoai-role" {
       role_assignments = {
         role_assignment_1 = {
           role_definition = "cognitive_services_openai_user_role"
-          users           = ["current_user"]
+          any_principals  = ["demo_group"]
         }
       }
     }
