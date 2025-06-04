@@ -11,41 +11,47 @@ module "aoai" {
   sku_name              = "S0"
   local_auth_enabled    = false
 
-  cognitive_deployments = {
-    "chat_completion" = {
-      name = var.chat_completion_model_name
-      model = {
-        format  = "OpenAI"
-        name    = var.chat_completion_model_name
-        version = var.chat_completion_model_version
+  cognitive_deployments = merge(
+    {
+      "chat_completion" = {
+        name = var.chat_completion_model_name
+        model = {
+          format  = "OpenAI"
+          name    = var.chat_completion_model_name
+          version = var.chat_completion_model_version
+        }
+        scale = {
+          type     = var.chat_completion_model_type
+          capacity = var.chat_completion_model_capacity
+        }
       }
-      scale = {
-        type     = var.chat_completion_model_type
-        capacity = var.chat_completion_model_capacity
+    },
+    local.deploy_image_generation_model ? {
+      "image_generation" = {
+        name = var.image_generation_model_name
+        model = {
+          format  = "OpenAI"
+          name    = var.image_generation_model_name
+          version = var.image_generation_model_version
+        }
+        scale = {
+          type     = var.image_generation_model_type
+          capacity = var.image_generation_model_capacity
+        }
       }
-    }
-
-    "image_generation" = local.deploy_image_generation_model ? {
-      name = var.image_generation_model_name
-      model = {
-        format  = "OpenAI"
-        name    = var.image_generation_model_name
-        version = var.image_generation_model_version
-      }
-      scale = {
-        type     = var.image_generation_model_type
-        capacity = var.image_generation_model_capacity
-      }
-    } : null
-  }
+    } : {}
+  )
 }
 
 module "aoai-role" {
   count   = local.deploy_azure_openai ? 1 : 0
   source  = "Azure/avm-res-authorization-roleassignment/azurerm"
   version = "0.2.0"
-  users_by_object_id = {
-    current_user = data.azurerm_client_config.current.object_id
+  # users_by_object_id = {
+  #   current_user = data.azurerm_client_config.current.object_id
+  # }
+  groups_by_object_id = {
+    "demo_group" = azuread_group.example.object_id
   }
   role_definitions = {
     cognitive_services_openai_user_role = {
@@ -58,7 +64,7 @@ module "aoai-role" {
       role_assignments = {
         role_assignment_1 = {
           role_definition = "cognitive_services_openai_user_role"
-          users           = ["current_user"]
+          any_principals  = ["demo_group"]
         }
       }
     }

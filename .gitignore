@@ -146,5 +146,3 @@ playwright/.cache/
 
 # custom helm values
 custom-values.yaml
-
-**/.terraform.lock.hcl

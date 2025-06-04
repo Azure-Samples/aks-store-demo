@@ -82,3 +82,13 @@ resource "azurerm_resource_group" "example" {
   name     = "rg-${local.name}"
   location = var.location
 }
+
+resource "azuread_group" "example" {
+  display_name     = "AKS Store Demo App"
+  security_enabled = true
+}
+
+resource "azuread_group_member" "example" {
+  group_object_id  = azuread_group.example.object_id
+  member_object_id = data.azurerm_client_config.current.object_id
+}

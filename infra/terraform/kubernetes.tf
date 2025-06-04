@@ -64,8 +64,11 @@ module "aks" {
 module "aks-role" {
   source  = "Azure/avm-res-authorization-roleassignment/azurerm"
   version = "0.2.0"
-  users_by_object_id = {
-    current_user = data.azurerm_client_config.current.object_id
+  # users_by_object_id = {
+  #   current_user = data.azurerm_client_config.current.object_id
+  # }
+  groups_by_object_id = {
+    demo_group = azuread_group.example.object_id
   }
   role_definitions = {
     aks_cluster_admin_role = {
@@ -78,7 +81,7 @@ module "aks-role" {
       role_assignments = {
         role_assignment_1 = {
           role_definition = "aks_cluster_admin_role"
-          users           = ["current_user"]
+          groups          = ["demo_group"]
         }
       }
     }
