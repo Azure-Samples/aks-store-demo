@@ -187,11 +187,11 @@ func getEnvVar(varName string, fallbackVarNames ...string) string {
 
 // Initializes the database based on the API type
 func initDatabase(apiType string) (*OrderService, error) {
-	dbURI := getEnvVar("AZURE_COSMOS_RESOURCEENDPOINT", "ORDER_DB_URI")
 	dbName := getEnvVar("ORDER_DB_NAME")
 
 	switch apiType {
 	case AZURE_COSMOS_DB_SQL_API:
+		dbURI := getEnvVar("AZURE_COSMOS_RESOURCEENDPOINT", "ORDER_DB_URI")
 		containerName := getEnvVar("ORDER_DB_CONTAINER_NAME")
 		dbPartitionKey := getEnvVar("ORDER_DB_PARTITION_KEY")
 		dbPartitionValue := getEnvVar("ORDER_DB_PARTITION_VALUE")
@@ -218,12 +218,31 @@ func initDatabase(apiType string) (*OrderService, error) {
 		}
 	default:
 		collectionName := getEnvVar("ORDER_DB_COLLECTION_NAME")
-		dbUsername := os.Getenv("ORDER_DB_USERNAME")
-		dbPassword := os.Getenv("ORDER_DB_PASSWORD")
-		mongoRepo, err := NewMongoDBOrderRepo(dbURI, dbName, collectionName, dbUsername, dbPassword)
-		if err != nil {
-			return nil, err
+
+		// check if USE_WORKLOAD_IDENTITY_AUTH is set
+		useWorkloadIdentityAuth := os.Getenv("USE_WORKLOAD_IDENTITY_AUTH")
+		if useWorkloadIdentityAuth == "" {
+			useWorkloadIdentityAuth = "false"
 		}
-		return NewOrderService(mongoRepo), nil
+
+		if useWorkloadIdentityAuth == "true" {
+			log.Printf("Authenticating with Workload Identity")
+			dbListConnStringsURL := getEnvVar("ORDER_DB_LIST_CONNECTION_STRING_URL")
+			mongoRepo, err := NewMongoDBOrderRepoWithManagedIdentity(dbListConnStringsURL, dbName, collectionName)
+			if err != nil {
+				return nil, err
+			}
+			return NewOrderService(mongoRepo), nil
+		} else {
+			log.Printf("Authenticating with username and password")
+			dbURI := getEnvVar("AZURE_COSMOS_RESOURCEENDPOINT", "ORDER_DB_URI")
+			dbUsername := os.Getenv("ORDER_DB_USERNAME")
+			dbPassword := os.Getenv("ORDER_DB_PASSWORD")
+			mongoRepo, err := NewMongoDBOrderRepo(dbURI, dbName, collectionName, dbUsername, dbPassword)
+			if err != nil {
+				return nil, err
+			}
+			return NewOrderService(mongoRepo), nil
+		}
 	}
 }

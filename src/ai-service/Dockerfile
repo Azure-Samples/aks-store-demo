@@ -1,9 +1,5 @@
 # Use the official Python image as the base image
-FROM python:3.12.4-alpine
-
-# Install the required system packages
-RUN apk update && \
-    apk add --no-cache gcc musl-dev libffi-dev
+FROM python:3.12.7-alpine
 
 # Set the working directory to /app
 WORKDIR /app

@@ -1,6 +1,6 @@
 # store-front
 
-This is a Vue.js app that simulates a store front. It is meant to be used in conjunction with the [product-service](../product-service/) and [order-service](../order-service). The app is extremely simple in that it only has a cart and a order submission button. When the order submission button is clicked, the cart is emptied and the order is sent to the order service. Currently there is no order checkout pages to collect any customer information.  
+This is a Vue.js app that simulates a store front. It is meant to be used in conjunction with the [product-service](../product-service/) and [order-service](../order-service). The app is extremely simple in that it only has a cart and a order submission button. When the order submission button is clicked, the cart is emptied and the order is sent to the order service. Currently there is no order checkout pages to collect any customer information.
 
 ## Running the app locally
 
@@ -24,18 +24,18 @@ docker compose up
 With the services running, open a new terminal and navigate to the `store-front` directory. Then run the following commands:
 
 ```bash
-export VUE_APP_PRODUCT_SERVICE_URL=http://localhost:3002/
-export VUE_APP_ORDER_SERVICE_URL=http://localhost:3000/
+export VITE_PRODUCT_SERVICE_URL=http://localhost:3002/
+export VITE_ORDER_SERVICE_URL=http://localhost:3000/
 
 npm install
-npm run serve
+npm run dev
 ```
 
 When the app is running, you should see output similar to the following:
 
 ```text
   App running at:
-  - Local:   http://localhost:8080/ 
+  - Local:   http://localhost:8080/
   - Network: http://192.168.0.144:8080/
 
   Note that the development build is not optimized.

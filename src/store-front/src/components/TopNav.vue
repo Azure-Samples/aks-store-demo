@@ -1,37 +1,37 @@
 <template>
   <nav>
     <div class="logo">
-      <a href="/">
-        <img src="/contoso-pet-store-logo.png" alt="Contoso Pet Store Logo">
-      </a>
+      <router-link to="/">
+        <img src="/contoso-pet-store-logo.png" alt="Contoso Pet Store Logo" />
+      </router-link>
     </div>
     <button class="hamburger" @click="toggleNav">
       <span class="hamburger-icon"></span>
     </button>
     <ul class="nav-links" :class="{ 'nav-links--open': isNavOpen }">
       <li><router-link to="/" @click="closeNav">Products</router-link></li>
-      <li><router-link to="/cart" @click="closeNav">Cart ({{ cartItemCount }})</router-link></li>
+      <li>
+        <router-link to="/cart" @click="closeNav">Cart ({{ cartItemCount }})</router-link>
+      </li>
     </ul>
   </nav>
 </template>
 
-<script>
-export default {
-  name: 'TopNav',
-  props: ['cartItemCount'],
-  data() {
-    return {
-      isNavOpen: false
-    }
-  },
-  methods: {
-    toggleNav() {
-      this.isNavOpen = !this.isNavOpen
-    },
-    closeNav() {
-      this.isNavOpen = false
-    }
-  }
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useCartStore } from '@/stores'
+
+const cartStore = useCartStore()
+const isNavOpen = ref(false)
+
+const cartItemCount = computed(() => cartStore.count)
+
+const toggleNav = () => {
+  isNavOpen.value = !isNavOpen.value
+}
+
+const closeNav = () => {
+  isNavOpen.value = false
 }
 </script>
 

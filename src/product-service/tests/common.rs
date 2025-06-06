@@ -1,7 +1,7 @@
-use product_service::startup::run;
-use product_service::model::Product;
-use product_service::configuration::Settings;
 use env_logger::Env;
+use product_service::configuration::Settings;
+use product_service::model::Product;
+use product_service::startup::run;
 
 #[ctor::ctor]
 fn init() {
@@ -52,24 +52,18 @@ pub fn new_product_with_high_price() -> Product {
 
 pub async fn post_product(address: &str, product: &Product) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.post(address)
-        .json(product)
-        .send()
-        .await
-        .unwrap()
+    client.post(address).json(product).send().await.unwrap()
 }
 
 pub async fn get_products(address: &str) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.get(address)
-        .send()
-        .await
-        .unwrap()
+    client.get(address).send().await.unwrap()
 }
 
 pub async fn get_product(address: &str, id: i32) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.get(format!("{}/{}", address, id))
+    client
+        .get(format!("{}/{}", address, id))
         .send()
         .await
         .unwrap()
@@ -77,24 +71,22 @@ pub async fn get_product(address: &str, id: i32) -> reqwest::Response {
 
 pub async fn delete_product(address: &str, id: i32) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.delete(format!("{}/{}", address, id))
+    client
+        .delete(format!("{}/{}", address, id))
         .send()
         .await
         .unwrap()
 }
 
-pub async fn update_product(address: &str,  product: &Product) -> reqwest::Response {
+pub async fn update_product(address: &str, product: &Product) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.put(address)
-        .json(product)
-        .send()
-        .await
-        .unwrap()
+    client.put(address).json(product).send().await.unwrap()
 }
 
 pub async fn get_health_check(address: &str) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.get(format!("{}/health", address))
+    client
+        .get(format!("{}/health", address))
         .send()
         .await
         .unwrap()
@@ -102,7 +94,8 @@ pub async fn get_health_check(address: &str) -> reqwest::Response {
 
 pub async fn get_health_check_head(address: &str) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.head(format!("{}/health", address))
+    client
+        .head(format!("{}/health", address))
         .send()
         .await
         .unwrap()
@@ -110,7 +103,8 @@ pub async fn get_health_check_head(address: &str) -> reqwest::Response {
 
 pub async fn get_ai_health_check_head(address: &str) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.head(format!("{}/ai/health", address))
+    client
+        .head(format!("{}/ai/health", address))
         .send()
         .await
         .unwrap()
@@ -118,7 +112,8 @@ pub async fn get_ai_health_check_head(address: &str) -> reqwest::Response {
 
 pub async fn get_ai_health_check(address: &str) -> reqwest::Response {
     let client = reqwest::Client::new();
-    client.get(format!("{}/ai/health", address))
+    client
+        .get(format!("{}/ai/health", address))
         .send()
         .await
         .unwrap()

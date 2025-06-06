@@ -183,23 +183,23 @@ az cosmosdb mongodb database create --account-name $COSMOSDBNAME --name orderdb 
 az cosmosdb mongodb collection create --account-name $COSMOSDBNAME --database-name orderdb --name orders --resource-group $RGNAME
 ```
 
-If you are not using Workload Identity authentication, get the connection information for the Azure Service Bus queue and save the values to environment variables. Otherwise, skip this step.
+If you are not using Workload Identity authentication, get the password for the Azure CosmosDB account and save the values to environment variables. Otherwise, skip this step.
 
 ```bash
 COSMOSDBUSERNAME=$COSMOSDBNAME
 COSMOSDBPASSWORD=$(az cosmosdb keys list --name $COSMOSDBNAME --resource-group $RGNAME --query primaryMasterKey -o tsv)
-````
+```
 
 Finally, set the environment variables.
 
 ```bash
 # if database requires SQL API with Workload Identity
 # set the following environment variables
+export USE_WORKLOAD_IDENTITY_AUTH="true"
 export ORDER_DB_API=cosmosdbsql
 export ORDER_DB_URI=https://$COSMOSDBNAME.documents.azure.com:443/
 export ORDER_DB_NAME=orderdb
 export ORDER_DB_CONTAINER_NAME=orders
-export USE_WORKLOAD_IDENTITY_AUTH="true"
 export ORDER_DB_PARTITION_KEY=$COSMOSDBPARTITIONKEY
 export ORDER_DB_PARTITION_VALUE="pets"
 
@@ -212,6 +212,14 @@ export ORDER_DB_CONTAINER_NAME=orders
 export ORDER_DB_PASSWORD=$COSMOSDBPASSWORD
 export ORDER_DB_PARTITION_KEY=$COSMOSDBPARTITIONKEY
 export ORDER_DB_PARTITION_VALUE="pets"
+
+# if database requires MongoDB API with Workload Identity
+# set the following environment variables
+export USE_WORKLOAD_IDENTITY_AUTH=true
+export ORDER_DB_API=mongodb
+export ORDER_DB_LIST_CONNECTION_STRING_URL=https://management.azure.com$(az cosmosdb show -g $RGNAME -n $COSMOSDBNAME --query id -otsv)/listConnectionStrings?api-version=2021-04-15
+export ORDER_DB_NAME=orderdb
+export ORDER_DB_COLLECTION_NAME=orders
 
 # if database requires MongoDB API with account key
 # set the following environment variables

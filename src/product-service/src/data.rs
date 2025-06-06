@@ -1,5 +1,5 @@
-use crate::model::Product;
 use crate::configuration::Settings;
+use crate::model::Product;
 
 pub fn fetch_products(_settings: &Settings) -> Vec<Product> {
     vec![
