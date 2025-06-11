@@ -31,8 +31,8 @@ jobs:
           outputPath: reports/ps-rule-results.sarif
           summary: true
         continue-on-error: true
-
         env:
+          PSRULE_AZURE_BICEP_USE_AZURE_CLI: "true"
           PSRULE_CONFIGURATION_AZURE_BICEP_FILE_EXPANSION: "true"
           PSRULE_CONFIGURATION_AZURE_BICEP_FILE_EXPANSION_TIMEOUT: "30"
 
