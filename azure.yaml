@@ -61,7 +61,7 @@ services:
       helm:
         repositories:
           - name: aks-store-demo
-            url: https://pauldotyu.github.io/aks-store-demo
+            url: https://azure-samples.github.io/aks-store-demo
         releases:
           - name: demo
             chart: aks-store-demo/aks-store-demo-chart

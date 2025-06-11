@@ -40,6 +40,9 @@
     },
     "deployImageGenerationModel": {
       "value": "${DEPLOY_AZURE_OPENAI_DALL_E_MODEL=false}"
+    },
+    "source_registry": {
+      "value": "${SOURCE_REGISTRY}"
     }
   }
 }

@@ -45,8 +45,12 @@ jobs:
       - name: Turn on Helm support for AKS
         run: azd config set alpha.aks.helm on
 
+      - name: Set helm chart location
+        run: sed -i 's/azure-samples.github.io/${{ github.repository_owner }}.github.io/' azure.yaml
+
       - name: Provision and deploy
-        run: azd up --no-prompt
+        run: |
+          azd up --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
           AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}

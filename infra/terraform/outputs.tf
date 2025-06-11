@@ -76,7 +76,7 @@ output "AZURE_REGISTRY_NAME" {
 }
 
 output "AZURE_REGISTRY_URI" {
-  value = local.deploy_azure_container_registry ? module.acr[0].resource.login_server : "ghcr.io/pauldotyu"
+  value = local.deploy_azure_container_registry ? module.acr[0].resource.login_server : var.source_registry
 }
 
 output "AZURE_TENANT_ID" {

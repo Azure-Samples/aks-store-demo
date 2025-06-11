@@ -64,6 +64,9 @@ param imageGenerationModelCapacity int = 1
 @description('value of the current IP address for network access')
 param currentIpAddress string
 
+@description('value of source registry to use for image imports')
+param sourceRegistry string = 'ghcr.io/azure-samples'
+
 // generate a unique string based on the resource group id
 // this is used to ensure that each resource name is unique
 var name = '${appEnvironment}${take(uniqueString(subscription().id, appEnvironment), 4)}'
@@ -193,5 +196,5 @@ output AZURE_DATABASE_API string = cosmosDBAccountKind == 'MongoDB' ? 'mongodb' 
 output AZURE_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
 output AZURE_REGISTRY_URI string = deployAzureContainerRegistry
   ? aks.outputs.registryLoginServer
-  : 'ghcr.io/azure-samples'
+  : sourceRegistry
 output AZURE_TENANT_ID string = tenant().tenantId

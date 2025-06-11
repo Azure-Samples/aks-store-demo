@@ -120,3 +120,9 @@ variable "image_generation_model_type" {
   type        = string
   default     = "Standard"
 }
+
+variable "source_registry" {
+  description = "value of source registry to use for image imports"
+  type        = string
+  default     = "ghcr.io/azure-samples"
+}

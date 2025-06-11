@@ -10,9 +10,17 @@ if [ "$DEPLOY_AZURE_CONTAINER_REGISTRY" == "true" ] && [ "$BUILD_CONTAINERS" == 
   done
 elif [ "$DEPLOY_AZURE_CONTAINER_REGISTRY" == "true" ] && ([ -z "$BUILD_CONTAINERS" ] || [ "$BUILD_CONTAINERS" == "false" ]); then
   echo "Import container images"
+  # Default SOURCE_REGISTRY if empty or unset
+  if [ -z "${SOURCE_REGISTRY}" ]; then
+    SOURCE_REGISTRY="ghcr.io/azure-samples"
+  fi
+
   for service in "${services[@]}"; do
     echo "Importing aks-store-demo/${service}:latest"
-    az acr import --name ${AZURE_REGISTRY_NAME} --source ghcr.io/pauldotyu/aks-store-demo/${service}:latest --image aks-store-demo/${service}:latest
+    az acr import \
+      --name "${AZURE_REGISTRY_NAME}" \
+      --source "${SOURCE_REGISTRY}/aks-store-demo/${service}:latest" \
+      --image "aks-store-demo/${service}:latest"
   done
 else 
   echo "No BUILD_CONTAINERS variable set, skipping container build/import"

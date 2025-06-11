@@ -11,9 +11,12 @@ if (($env:DEPLOY_AZURE_CONTAINER_REGISTRY -like "true") -and ($env:BUILD_CONTAIN
 } 
 elseif (($env:DEPLOY_AZURE_CONTAINER_REGISTRY -like "true") -and ($env:BUILD_CONTAINERS -like "false")) {
   echo "Import container images"
+  if ([string]::IsNullOrEmpty($env:SOURCE_REGISTRY)){
+    $env:SOURCE_REGISTRY = 'ghrc.io/azure-samples'
+  }
   foreach ($service in $services) {
     echo "Importing aks-store-demo/${service}:latest"
-    az acr import --name $env:AZURE_REGISTRY_NAME --source ghcr.io/azure-samples/aks-store-demo/${service}:latest --image aks-store-demo/${service}:latest
+    az acr import --name $env:AZURE_REGISTRY_NAME --source $env:SOURCE_REGISTRY/aks-store-demo/${service}:latest --image aks-store-demo/${service}:latest
   }
 } 
 else {
