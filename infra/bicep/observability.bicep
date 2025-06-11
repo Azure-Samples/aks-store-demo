@@ -3,6 +3,7 @@ param nameSuffix string
 @description('The location of the resource.')
 param location string = resourceGroup().location
 param currentUserObjectId string
+param tags object
 
 resource logWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: 'logs-${nameSuffix}'
@@ -15,11 +16,13 @@ resource logWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
       name: 'PerGB2018'
     }
   }
+  tags: tags
 }
 
 resource metricsWorkspace 'Microsoft.Monitor/accounts@2023-04-03' = {
   name: 'metrics-${nameSuffix}'
   location: location
+  tags: tags
 }
 
 resource grafanaDashboard 'Microsoft.Dashboard/grafana@2023-09-01' = {
@@ -32,6 +35,7 @@ resource grafanaDashboard 'Microsoft.Dashboard/grafana@2023-09-01' = {
     type: 'SystemAssigned'
   }
   properties: {
+    grafanaMajorVersion: '11'
     grafanaIntegrations: {
       azureMonitorWorkspaceIntegrations: [
         {
@@ -40,6 +44,7 @@ resource grafanaDashboard 'Microsoft.Dashboard/grafana@2023-09-01' = {
       ]
     }
   }
+  tags: tags
 }
 
 resource grafanaAdminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {

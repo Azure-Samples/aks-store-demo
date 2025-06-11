@@ -67,6 +67,11 @@ param currentIpAddress string
 @description('value of source registry to use for image imports')
 param sourceRegistry string = 'ghcr.io/azure-samples'
 
+@description('value of tags to apply to resources')
+param tags object = {
+  environment: 'development'
+}
+
 // generate a unique string based on the resource group id
 // this is used to ensure that each resource name is unique
 var name = '${appEnvironment}${take(uniqueString(subscription().id, appEnvironment), 4)}'
@@ -74,6 +79,7 @@ var name = '${appEnvironment}${take(uniqueString(subscription().id, appEnvironme
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'rg-${name}'
   location: location
+  tags: tags
 }
 
 module observability 'observability.bicep' = if (deployObservabilityTools) {
@@ -82,6 +88,7 @@ module observability 'observability.bicep' = if (deployObservabilityTools) {
   params: {
     nameSuffix: name
     currentUserObjectId: currentUserObjectId
+    tags: tags
   }
 }
 
@@ -98,6 +105,7 @@ module aks 'kubernetes.bicep' = {
     currentUserObjectId: currentUserObjectId
     currentIpAddress: currentIpAddress
     configureMonitorSettings: deployObservabilityTools
+    tags: tags
   }
 }
 
@@ -113,6 +121,7 @@ module workloadidentity 'workloadidentity.bicep' = if (deployAzureCosmosDB || de
         partialSubject: 'system:serviceaccount:${k8sNamespace}'
       }
     ]
+    tags: tags
   }
 }
 
@@ -124,6 +133,7 @@ module servicebus 'servicebus.bicep' = if (deployAzureServiceBus) {
     currentUserObjectId: currentUserObjectId
     currentIpAddress: currentIpAddress
     servicePrincipalId: workloadidentity.outputs.principalId
+    tags: tags
   }
 }
 
@@ -136,6 +146,7 @@ module cosmosdb 'cosmosdb.bicep' = if (deployAzureCosmosDB) {
     identityPrincipalId: workloadidentity.outputs.principalId
     currentIpAddress: currentIpAddress
     servicePrincipalId: workloadidentity.outputs.principalId
+    tags: tags
   }
 }
 
@@ -160,6 +171,7 @@ module openai 'openai.bicep' = if (deployAzureOpenAI) {
     currentIpAddress: currentIpAddress
     servicePrincipalId: workloadidentity.outputs.principalId
     modelDeployments: modelDeployments
+    tags: tags
   }
 }
 
@@ -196,5 +208,5 @@ output AZURE_DATABASE_API string = cosmosDBAccountKind == 'MongoDB' ? 'mongodb' 
 output AZURE_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
 output AZURE_REGISTRY_URI string = deployAzureContainerRegistry
   ? aks.outputs.registryLoginServer
-  : sourceRegistry
+  : sourceRegistry 
 output AZURE_TENANT_ID string = tenant().tenantId

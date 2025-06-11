@@ -1,6 +1,7 @@
 @minLength(3)
 param nameSuffix string
 param federatedCredentials federatedCredential[]
+param tags object
 
 type federatedCredential = {
   audiences: string[]
@@ -20,6 +21,7 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
         subject: '${fc.partialSubject}:mi-${nameSuffix}'
       }
     ]
+    tags: tags
   }
 }
 

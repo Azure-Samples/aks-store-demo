@@ -8,6 +8,7 @@ param metricsWorkspaceResourceId string
 param currentUserObjectId string
 param currentIpAddress string
 param configureMonitorSettings bool = false
+param tags object
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/container-service/managed-cluster
 module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3' = {
@@ -30,6 +31,7 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
     enableOidcIssuerProfile: true
     enableWorkloadIdentity: true
     enableKeyvaultSecretsProvider: true
+    enableSecretRotation: true
     enableAzureMonitorProfileMetrics: configureMonitorSettings
     enableContainerInsights: configureMonitorSettings
     disablePrometheusMetricsScraping: !configureMonitorSettings
@@ -42,9 +44,9 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
       systemAssigned: true
     }
     publicNetworkAccess: 'Enabled'
-    // authorizedIPRanges: [
-    //   currentIpAddress
-    // ]
+    authorizedIPRanges: [
+      currentIpAddress
+    ]
     roleAssignments: [
       {
         principalId: currentUserObjectId
@@ -52,6 +54,39 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
         principalType: 'User'
       }
     ]
+    maintenanceConfigurations: [
+      {
+        maintenanceWindow: {
+          durationHours: 4
+          schedule: {
+            weekly: {
+              dayOfWeek: 'Sunday'
+              intervalWeeks: 1
+            }
+          }
+          startDate: '2025-06-11'
+          startTime: '00:00'
+          utcOffset: '+00:00'
+        }
+        name: 'aksManagedAutoUpgradeSchedule'
+      }
+      {
+        maintenanceWindow: {
+          durationHours: 4
+          schedule: {
+            weekly: {
+              dayOfWeek: 'Sunday'
+              intervalWeeks: 1
+            }
+          }
+          startDate: '2025-06-11'
+          startTime: '00:00'
+          utcOffset: '+00:00'
+        }
+        name: 'aksManagedNodeOSUpgradeSchedule'
+      }
+    ]
+    tags: tags
   }
 }
 
@@ -77,6 +112,7 @@ module registry 'br/public:avm/res/container-registry/registry:0.9.1' = if (depl
         principalType: 'ServicePrincipal'
       }
     ]
+    tags: tags
   }
 }
 
@@ -95,6 +131,7 @@ resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2022
   properties: {
     description: 'Data Collection Endpoint for Prometheus'
   }
+  tags: tags
 }
 
 resource dataCollectionRuleAssociationEndpoint 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = if (configureMonitorSettings) {
@@ -148,6 +185,7 @@ resource dataCollectionRuleMSCI 'Microsoft.Insights/dataCollectionRules@2022-06-
       }
     ]
   }
+  tags: tags
 }
 
 resource dataCollectionRuleAssociationMSCI 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = if (configureMonitorSettings) {
@@ -193,6 +231,7 @@ resource dataCollectionRuleMSProm 'Microsoft.Insights/dataCollectionRules@2022-0
       }
     ]
   }
+  tags: tags
 }
 
 resource dataCollectionRuleAssociationMSProm 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = if (configureMonitorSettings) {
@@ -306,6 +345,7 @@ resource prometheusK8sRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGroup
       }
     ]
   }
+  tags: tags
 }
 
 resource prometheusNodeRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGroups@2023-03-01' = if (configureMonitorSettings) {
@@ -367,6 +407,7 @@ resource prometheusNodeRuleGroups 'Microsoft.AlertsManagement/prometheusRuleGrou
       }
     ]
   }
+  tags: tags
 }
 
 output id string = managedCluster.outputs.resourceId

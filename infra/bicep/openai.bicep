@@ -5,6 +5,7 @@ param currentUserObjectId string
 param currentIpAddress string
 param servicePrincipalId string
 param modelDeployments array = []
+param tags object
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/cognitive-services/account
 module cognitiveServicesAccount 'br/public:avm/res/cognitive-services/account:0.10.1' = {
@@ -52,6 +53,7 @@ module cognitiveServicesAccount 'br/public:avm/res/cognitive-services/account:0.
         principalType: 'ServicePrincipal'
       }
     ]
+    tags: tags
   }
 }
 

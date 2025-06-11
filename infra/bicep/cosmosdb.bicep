@@ -4,6 +4,7 @@ param accountKind string
 param identityPrincipalId string
 param currentIpAddress string
 param servicePrincipalId string
+param tags object
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/document-db/database-account
 module databaseAccount 'br/public:avm/res/document-db/database-account:0.11.3' = {
@@ -92,6 +93,7 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:0.11.3' =
         principalType: 'ServicePrincipal'
       }
     ]
+    tags: tags
   }
 }
 
