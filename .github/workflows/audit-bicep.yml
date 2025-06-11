@@ -24,20 +24,18 @@ jobs:
       - name: Run PSRule analysis
         uses: microsoft/ps-rule@46451b8f5258c41beb5ae69ed7190ccbba84112c # v2.9.0
         with:
+          inputPath: main.test.bicep
           modules: PSRule.Rules.Azure
-          baseline: Azure.Pillar.Security
-          inputPath: infra/bicep/*.test.bicep
+          option: ps-rule.yaml
           outputFormat: Sarif
           outputPath: reports/ps-rule-results.sarif
+          path: infra/bicep
           summary: true
-        continue-on-error: true
         env:
           PSRULE_AZURE_BICEP_USE_AZURE_CLI: "true"
-          PSRULE_CONFIGURATION_AZURE_BICEP_FILE_EXPANSION: "true"
-          PSRULE_CONFIGURATION_AZURE_BICEP_FILE_EXPANSION_TIMEOUT: "30"
 
       - name: Upload alerts to Security tab
         uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3
         if: github.repository_owner == 'Azure-Samples'
         with:
-          sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+          sarif_file: infra/bicep/reports/ps-rule-results.sarif
