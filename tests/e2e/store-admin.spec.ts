@@ -22,10 +22,13 @@ test.describe('store-front tests', () => {
     await page.getByRole('spinbutton', { name: 'Price' }).fill('2.99');
     await page.getByRole('textbox', { name: 'Keywords' }).fill('dog, snack, treat');
 
-    await page.waitForTimeout(5000);
-    const askOpenAI = page.getByRole('button', { name: 'Ask AI Assistant' });
-    if (await askOpenAI.isVisible()) {
-      await askOpenAI.click();
+    // pause for 60 seconds
+    await page.waitForTimeout(60000);
+
+    // look for the AI Assistant button and click it if visible
+    const askAIAssistantButton = page.locator('button:has-text("Ask AI Assistant")');
+    if (await askAIAssistantButton.isVisible()) {
+      await askAIAssistantButton.click();
       await page.waitForResponse(response =>
         response.url().includes('/api/ai/generate/description') && response.status() === 200
       );
