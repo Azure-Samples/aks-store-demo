@@ -66,6 +66,7 @@ jobs:
           azd env set DEPLOY_AZURE_COSMOSDB true
           azd env set AZURE_COSMOSDB_ACCOUNT_KIND MongoDB
           azd env set DEPLOY_OBSERVABILITY_TOOLS true
+          azd env set SOURCE_REGISTRY "ghcr.io/${{ github.repository_owner }}"
           azd up --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}

@@ -50,6 +50,8 @@ jobs:
 
       - name: Provision and deploy
         run: |
+          azd env new ${{ vars.AZURE_ENV_NAME }}
+          azd env set SOURCE_REGISTRY "ghcr.io/${{ github.repository_owner }}"
           azd up --no-prompt
         env:
           AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
