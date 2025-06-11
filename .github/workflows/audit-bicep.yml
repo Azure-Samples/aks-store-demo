@@ -1,4 +1,4 @@
-name: Scan Bicep code
+name: audit-bicep
 on:
   push:
     branches:
