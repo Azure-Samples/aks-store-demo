@@ -1,5 +1,6 @@
 configuration:
   AZURE_BICEP_FILE_EXPANSION: true
+  AZURE_BICEP_FILE_EXPANSION_TIMEOUT: 30
 rule:
   exclude:
     # Ignore the following rules for all resources to keep cost down
