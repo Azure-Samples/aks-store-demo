@@ -4,9 +4,10 @@ param federatedCredentials federatedCredential[]
 param tags object
 
 type federatedCredential = {
+  name: string
   audiences: string[]
   issuer: string
-  partialSubject: string
+  subject: string
 }
 
 module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = {
@@ -15,10 +16,10 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
     name: 'mi-${nameSuffix}'
     federatedIdentityCredentials: [
       for fc in federatedCredentials: {
-        name: 'mi-${nameSuffix}-fc'
+        name: fc.name
         audiences: fc.audiences
         issuer: fc.issuer
-        subject: '${fc.partialSubject}:mi-${nameSuffix}'
+        subject: fc.subject
       }
     ]
     tags: tags

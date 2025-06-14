@@ -75,7 +75,7 @@ output "AZURE_REGISTRY_NAME" {
   value = local.deploy_azure_container_registry ? module.acr[0].name : ""
 }
 
-output "AZURE_REGISTRY_URI" {
+output "AZURE_CONTAINER_REGISTRY_ENDPOINT" {
   value = local.deploy_azure_container_registry ? module.acr[0].resource.login_server : var.source_registry
 }
 

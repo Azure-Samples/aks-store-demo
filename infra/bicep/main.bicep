@@ -116,9 +116,22 @@ module workloadidentity 'workloadidentity.bicep' = if (deployAzureCosmosDB || de
     nameSuffix: name
     federatedCredentials: [
       {
+        name: 'ai-service'
         audiences: ['api://AzureADTokenExchange']
         issuer: aks.outputs.oidcIssuerUrl
-        partialSubject: 'system:serviceaccount:${k8sNamespace}'
+        subject: 'system:serviceaccount:${k8sNamespace}:ai-service'
+      }
+      {
+        name: 'order-service'
+        audiences: ['api://AzureADTokenExchange']
+        issuer: aks.outputs.oidcIssuerUrl
+        subject: 'system:serviceaccount:${k8sNamespace}:order-service'
+      }
+      {
+        name: 'makeline-service'
+        audiences: ['api://AzureADTokenExchange']
+        issuer: aks.outputs.oidcIssuerUrl
+        subject: 'system:serviceaccount:${k8sNamespace}:makeline-service'
       }
     ]
     tags: tags
@@ -206,7 +219,7 @@ output AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL string = deployAzureCosm
   : ''
 output AZURE_DATABASE_API string = cosmosDBAccountKind == 'MongoDB' ? 'mongodb' : 'cosmosdbsql'
 output AZURE_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
-output AZURE_REGISTRY_URI string = deployAzureContainerRegistry
+output AZURE_CONTAINER_REGISTRY_ENDPOINT string = deployAzureContainerRegistry
   ? aks.outputs.registryLoginServer
   : sourceRegistry 
 output AZURE_TENANT_ID string = tenant().tenantId

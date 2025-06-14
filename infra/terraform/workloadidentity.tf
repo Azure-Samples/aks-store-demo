@@ -6,14 +6,34 @@ resource "azurerm_user_assigned_identity" "example" {
 }
 
 
-resource "azurerm_federated_identity_credential" "example" {
-  count               = local.deploy_azure_openai || local.deploy_azure_servicebus || local.deploy_azure_cosmosdb ? 1 : 0
-  name                = azurerm_user_assigned_identity.example[0].name
+resource "azurerm_federated_identity_credential" "example1" {
+  count               = local.deploy_azure_openai ? 1 : 0
+  name                = "ai-service"
   resource_group_name = azurerm_resource_group.example.name
   parent_id           = azurerm_user_assigned_identity.example[0].id
   audience            = ["api://AzureADTokenExchange"]
   issuer              = module.aks.oidc_issuer_url
-  subject             = "system:serviceaccount:${var.k8s_namespace}:${azurerm_user_assigned_identity.example[0].name}"
+  subject             = "system:serviceaccount:${var.k8s_namespace}:ai-service"
+}
+
+resource "azurerm_federated_identity_credential" "example2" {
+  count               = local.deploy_azure_servicebus || local.deploy_azure_cosmosdb ? 1 : 0
+  name                = "order-service"
+  resource_group_name = azurerm_resource_group.example.name
+  parent_id           = azurerm_user_assigned_identity.example[0].id
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = module.aks.oidc_issuer_url
+  subject             = "system:serviceaccount:${var.k8s_namespace}:order-service"
+}
+
+resource "azurerm_federated_identity_credential" "example3" {
+  count               = local.deploy_azure_servicebus || local.deploy_azure_cosmosdb ? 1 : 0
+  name                = "makeline-service"
+  resource_group_name = azurerm_resource_group.example.name
+  parent_id           = azurerm_user_assigned_identity.example[0].id
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = module.aks.oidc_issuer_url
+  subject             = "system:serviceaccount:${var.k8s_namespace}:makeline-service"
 }
 
 resource "azurerm_role_assignment" "aoai_mid" {
