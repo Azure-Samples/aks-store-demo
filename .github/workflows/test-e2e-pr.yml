@@ -1,0 +1,191 @@
+name: test-e2e-pr
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  check-permissions:
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/test-e2e')
+    runs-on: ubuntu-latest
+    outputs:
+      has-permission: ${{ steps.check.outputs.has-permission }}
+    steps:
+      - name: Check if user has permission
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: collaborator } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.actor
+            });
+
+            const hasPermission = ['admin', 'maintain'].includes(collaborator.permission);
+            console.log(`User ${context.actor} has permission: ${collaborator.permission}`);
+            console.log(`Has required permission: ${hasPermission}`);
+
+            core.setOutput('has-permission', hasPermission);
+
+            if (!hasPermission) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `❌ @${context.actor} You don't have permission to run this command. Only repository owners and maintainers can trigger this workflow.`
+              });
+            }
+
+  test-e2e:
+    needs: check-permissions
+    if: needs.check-permissions.outputs.has-permission == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add status comment - Starting
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 @${context.actor} Starting E2E tests...
+              
+              **Workflow Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              **Environment:** ${{ vars.AZURE_ENV_NAME }}
+              **Location:** ${{ vars.AZURE_LOCATION }}`
+            });
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: PR checkout
+        run: |
+          PR_URL="${{ github.event.issue.pull_request.url }}"
+          PR_NUM=${PR_URL##*/}
+          gh pr checkout $PR_NUM
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+
+      - name: Install azd
+        uses: Azure/setup-azd@ae0f8b5482eeac61e940f447327d84c73beb8b1e # v2.1.0
+
+      - name: Install kubelogin
+        uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1
+        with:
+          kubelogin-version: "v0.2.8"
+
+      - name: Azure login
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure Developer CLI login
+        run: |
+          azd auth login \
+            --client-id ${{ secrets.AZURE_CLIENT_ID }} \
+            --federated-credential-provider "github" \
+            --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Turn on Kustomize support
+        run: azd config set alpha.aks.kustomize on
+
+      - name: Provision resources and deploy app
+        run: |
+          azd env new ${{ vars.AZURE_ENV_NAME }}
+          azd env set AKS_NODE_POOL_VM_SIZE Standard_D2_v4
+          azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
+          azd env set DEPLOY_AZURE_OPENAI true
+          azd env set AZURE_OPENAI_LOCATION ${{ vars.AZURE_LOCATION }}
+          azd env set DEPLOY_AZURE_OPENAI_DALL_E_MODEL false
+          azd env set DEPLOY_AZURE_SERVICE_BUS true
+          azd env set DEPLOY_AZURE_COSMOSDB true
+          azd env set AZURE_COSMOSDB_ACCOUNT_KIND MongoDB
+          azd env set DEPLOY_OBSERVABILITY_TOOLS true
+          azd up
+        env:
+          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get endpoint URLs
+        id: azd_get_endpoint_urls
+        run: |
+          echo "STORE_ADMIN_URL=$(azd env get-value SERVICE_STORE_ADMIN_ENDPOINT_URL)" >> "$GITHUB_OUTPUT"
+          echo "STORE_FRONT_URL=$(azd env get-value SERVICE_STORE_FRONT_ENDPOINT_URL)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Playwright dependencies
+        run: npm ci
+        working-directory: tests
+
+      - name: Run Playwright tests
+        run: npx playwright test --config=playwright.service.config.ts --workers=20
+        working-directory: tests
+        env:
+          PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
+          STORE_ADMIN_URL: ${{ steps.azd_get_endpoint_urls.outputs.STORE_ADMIN_URL }}
+          STORE_FRONT_URL: ${{ steps.azd_get_endpoint_urls.outputs.STORE_FRONT_URL }}
+          CI: true
+
+      - name: Clean up resources
+        if: always()
+        run: azd down --force --purge
+        env:
+          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Add status comment - Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const startTime = new Date('${{ github.event.comment.created_at }}');
+            const endTime = new Date();
+            const duration = Math.round((endTime - startTime) / 1000 / 60); // minutes
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `✅ @${context.actor} E2E tests completed successfully!
+              
+              **Workflow Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              **Duration:** ~${duration} minutes
+              **Status:** Passed
+              **Environment:** ${{ vars.AZURE_ENV_NAME }}
+              **Location:** ${{ vars.AZURE_LOCATION }}
+              
+              All tests passed and resources have been cleaned up.`
+            });
+
+      - name: Add status comment - Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `❌ @${context.actor} E2E tests failed!
+              
+              **Workflow Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              **Status:** Failed
+              **Environment:** ${{ vars.AZURE_ENV_NAME }}
+              **Location:** ${{ vars.AZURE_LOCATION }}
+              
+              Please check the workflow logs for details and try again.`
+            });
