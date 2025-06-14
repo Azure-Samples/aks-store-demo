@@ -1,6 +1,5 @@
-
-use wasmtime_wasi::preview2::{WasiView, Table, WasiCtx, WasiCtxBuilder};
 use wasmtime::component::*;
+use wasmtime_wasi::preview2::{Table, WasiCtx, WasiCtxBuilder, WasiView};
 
 use super::aksstoredemo::rules::logging::{self, HostLogger};
 use super::aksstoredemo::rules::types::Host as HostTypes;
@@ -15,10 +14,7 @@ impl RulesEngineState {
     pub fn new() -> Self {
         let wasi_ctx = WasiCtxBuilder::new().inherit_stdio().build();
         let table = Table::new();
-        Self {
-            table,
-            wasi_ctx,
-        }
+        Self { table, wasi_ctx }
     }
 }
 
@@ -40,40 +36,27 @@ impl WasiView for RulesEngineState {
     }
 }
 
-
 impl HostLogger for RulesEngineState {
-    fn log(&mut self,
-         this: Resource<logging::Logger>,
-         message: String
-        ) -> anyhow::Result<()>  {
+    fn log(&mut self, this: Resource<logging::Logger>, message: String) -> anyhow::Result<()> {
         let resource: Resource<MyLogger> = Resource::new_own(this.rep());
-        self
-            .table()
-            .get::<MyLogger>(&resource)?;
+        self.table().get::<MyLogger>(&resource)?;
 
         info!("{}", message);
         Ok(())
     }
     fn drop(&mut self, this: Resource<logging::Logger>) -> anyhow::Result<()> {
         let resource: Resource<MyLogger> = Resource::new_own(this.rep());
-        Ok(self
-            .table_mut()
-            .delete::<MyLogger>(resource)
-            .map(|_| ())?)
+        Ok(self.table_mut().delete::<MyLogger>(resource).map(|_| ())?)
     }
 }
 
-impl HostTypes for RulesEngineState {
-}
-
+impl HostTypes for RulesEngineState {}
 
 struct MyLogger;
 
 impl logging::Host for RulesEngineState {
     fn get_logger(&mut self) -> anyhow::Result<Resource<logging::Logger>> {
         let resource = self.table_mut().push::<MyLogger>(MyLogger)?;
-        Ok(Resource::new_own(
-            resource.rep(),
-        ))
+        Ok(Resource::new_own(resource.rep()))
     }
 }

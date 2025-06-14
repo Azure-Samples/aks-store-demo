@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccount: ai-service
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: ai-service
+          image: ai-service:latest
+          ports:
+            - containerPort: 5001
+          envFrom:
+            - configMapRef:
+                name: ai-service
+          resources:
+            requests:
+              cpu: 20m
+              memory: 50Mi
+            limits:
+              cpu: 50m
+              memory: 128Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 60
+            failureThreshold: 3
+            timeoutSeconds: 3
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 3
+            failureThreshold: 10
+            timeoutSeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            failureThreshold: 10
+            initialDelaySeconds: 3
+            timeoutSeconds: 3
+            periodSeconds: 10

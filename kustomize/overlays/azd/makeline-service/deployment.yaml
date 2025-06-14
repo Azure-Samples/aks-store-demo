@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: makeline-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: makeline-service
+  template:
+    metadata:
+      labels:
+        app: makeline-service
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccount: makeline-service
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: makeline-service
+          image: makeline-service:latest
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: makeline-service
+          resources:
+            requests:
+              cpu: 1m
+              memory: 6Mi
+            limits:
+              cpu: 5m
+              memory: 20Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3

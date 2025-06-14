@@ -15,52 +15,52 @@ spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-      - name: makeline-service
-        image: ghcr.io/azure-samples/aks-store-demo/makeline-service:latest
-        ports:
-        - containerPort: 3001
-        env:
-        - name: ORDER_QUEUE_URI
-          value: "amqp://rabbitmq:5672"
-        - name: ORDER_QUEUE_USERNAME
-          value: "username"
-        - name: ORDER_QUEUE_PASSWORD
-          value: "password"
-        - name: ORDER_QUEUE_NAME
-          value: "orders"
-        - name: ORDER_DB_URI
-          value: "mongodb://mongodb:27017"
-        - name: ORDER_DB_NAME
-          value: "orderdb"
-        - name: ORDER_DB_COLLECTION_NAME
-          value: "orders"
-        resources:
-          requests:
-            cpu: 1m
-            memory: 6Mi
-          limits:
-            cpu: 5m
-            memory: 20Mi
-        startupProbe:
-          httpGet:
-            path: /health
-            port: 3001
-          failureThreshold: 10
-          periodSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3001
-          failureThreshold: 3
-          initialDelaySeconds: 3
-          periodSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3001
-          failureThreshold: 5
-          initialDelaySeconds: 3
-          periodSeconds: 3
+        - name: makeline-service
+          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:latest
+          ports:
+            - containerPort: 3001
+          env:
+            - name: ORDER_QUEUE_URI
+              value: "amqp://rabbitmq:5672"
+            - name: ORDER_QUEUE_USERNAME
+              value: "username"
+            - name: ORDER_QUEUE_PASSWORD
+              value: "password"
+            - name: ORDER_QUEUE_NAME
+              value: "orders"
+            - name: ORDER_DB_URI
+              value: "mongodb://mongodb:27017"
+            - name: ORDER_DB_NAME
+              value: "orderdb"
+            - name: ORDER_DB_COLLECTION_NAME
+              value: "orders"
+          resources:
+            requests:
+              cpu: 1m
+              memory: 6Mi
+            limits:
+              cpu: 5m
+              memory: 20Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
 ---
 apiVersion: v1
 kind: Service
@@ -69,8 +69,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - name: http
-    port: 3001
-    targetPort: 3001
+    - name: http
+      port: 3001
+      targetPort: 3001
   selector:
     app: makeline-service

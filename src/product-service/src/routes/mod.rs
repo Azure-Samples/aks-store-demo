@@ -1,13 +1,13 @@
 mod add;
+mod ai;
 mod delete;
 mod get;
-mod update;
 mod health;
-mod ai;
+mod update;
 
 pub use add::*;
+pub use ai::*;
 pub use delete::*;
 pub use get::*;
-pub use update::*;
 pub use health::*;
-pub use ai::*;
+pub use update::*;

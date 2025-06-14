@@ -15,49 +15,59 @@ spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-      - name: ai-service
-        image: ghcr.io/azure-samples/aks-store-demo/ai-service:latest
-        ports:
-        - containerPort: 5001
-        env:
-        - name: USE_AZURE_OPENAI # set to True for Azure OpenAI, False for Public OpenAI
-          value: ""
-        - name: AZURE_OPENAI_DEPLOYMENT_NAME # required if using Azure OpenAI
-          value: ""
-        - name: AZURE_OPENAI_ENDPOINT # required if using Azure OpenAI
-          value: ""
-        - name: OPENAI_API_KEY # always required
-          value: ""
-        - name: OPENAI_ORG_ID # required if using Public OpenAI
-          value: ""
-        resources:
-          requests:
-            cpu: 20m
-            memory: 50Mi
-          limits:
-            cpu: 50m
-            memory: 128Mi
-        startupProbe:
-          httpGet:
-            path: /health
-            port: 5001
-          initialDelaySeconds: 60
-          failureThreshold: 3
-          periodSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 5001
-          initialDelaySeconds: 3
-          failureThreshold: 10
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5001
-          initialDelaySeconds: 3
-          failureThreshold: 10
-          periodSeconds: 10
+        - name: ai-service
+          image: ghcr.io/azure-samples/aks-store-demo/ai-service:latest
+          ports:
+            - containerPort: 5001
+          env:
+            - name: USE_AZURE_OPENAI # set to False if you are not using Azure OpenAI
+              value: "True"
+            - name: USE_AZURE_AD # set to False if you are not using workload identity
+              value: "True"
+            - name: AZURE_OPENAI_DEPLOYMENT_NAME # required if using Azure OpenAI
+              value: ""
+            - name: AZURE_OPENAI_ENDPOINT # required if using Azure OpenAI
+              value: ""
+            - name: OPENAI_API_KEY # required if using OpenAI or Azure OpenAI without workload identity
+              value: ""
+            - name: AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI DALL-E
+              value: ""
+            - name: AZURE_OPENAI_API_VERSION=2024-02-15-preview # required if using Azure OpenAI DALL-E
+              value: ""
+            - name: AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI DALL-E
+              value: ""
+            - name: USE_LOCAL_LLM=False # set to True if you are using a local LLM provided by KAITO
+              value: "False"
+            - name: "LOCAL_LLM_ENDPOINT" # required if using a local LLM
+              value: ""
+          resources:
+            requests:
+              cpu: 20m
+              memory: 50Mi
+            limits:
+              cpu: 50m
+              memory: 128Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 60
+            failureThreshold: 3
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 3
+            failureThreshold: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5001
+            initialDelaySeconds: 3
+            failureThreshold: 10
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -66,8 +76,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - name: http
-    port: 5001
-    targetPort: 5001
+    - name: http
+      port: 5001
+      targetPort: 5001
   selector:
     app: ai-service

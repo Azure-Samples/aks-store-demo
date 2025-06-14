@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: product-service
+          image: product-service:latest
+          ports:
+            - containerPort: 3002
+          env:
+            - name: AI_SERVICE_URL
+              value: "http://ai-service:5001/"
+          resources:
+            requests:
+              cpu: 1m
+              memory: 1Mi
+            limits:
+              cpu: 2m
+              memory: 20Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3

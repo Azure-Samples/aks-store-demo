@@ -13,8 +13,9 @@ data:
   {{- end }}
   ORDER_QUEUE_NAME: "{{ .Values.makelineService.orderQueueName }}"
   ORDER_DB_URI: "{{ .Values.makelineService.orderDBUri }}"
+  ORDER_DB_LIST_CONNECTION_STRING_URL: "{{ .Values.makelineService.orderDBListConnectionStringsUrl }}"
   ORDER_DB_NAME: "{{ .Values.makelineService.orderDBName }}"
-  {{- if or (eq .Values.makelineService.orderDBApi "cosmosdbsql") (eq .Values.useAzureAd true) }}
+  {{- if eq .Values.makelineService.orderDBApi "cosmosdbsql" }}
   ORDER_DB_API: "{{ .Values.makelineService.orderDBApi }}"
   ORDER_DB_CONTAINER_NAME: "{{ .Values.makelineService.orderDBContainerName }}"
   ORDER_DB_PARTITION_KEY: "storeId"

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-admin
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8081
+  selector:
+    app: store-admin

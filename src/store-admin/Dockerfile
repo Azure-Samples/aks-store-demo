@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:18.20.4-alpine AS builder
+FROM node:22.14-alpine AS builder
 
 WORKDIR /app
 

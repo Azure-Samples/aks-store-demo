@@ -1,7 +1,7 @@
 mod common;
-use common::*;  
-use product_service::model::Product;
 use actix_web::test;
+use common::*;
+use product_service::model::Product;
 
 // test health check
 #[test]
@@ -69,7 +69,6 @@ async fn test_get_product_by_id() {
     assert_eq!(product.id, 1);
 }
 
-
 #[test]
 async fn test_add_product() {
     let url = spawn_app(false);
@@ -90,7 +89,10 @@ async fn test_add_product_with_validation_short_description_length() {
     let failed_res = post_product(&url, &new_product()).await;
 
     assert_eq!(failed_res.status().as_u16(), 400);
-    assert_eq!(failed_res.text().await.unwrap(), "Error::InvalidProduct(\"The product description is too short!\")");
+    assert_eq!(
+        failed_res.text().await.unwrap(),
+        "Error::InvalidProduct(\"The product description is too short!\")"
+    );
 }
 
 #[test]
@@ -112,7 +114,10 @@ async fn test_add_product_with_validation_high_price() {
     let failed_res = post_product(&url, &new_product_with_high_price()).await;
 
     assert_eq!(failed_res.status().as_u16(), 400);
-    assert_eq!(failed_res.text().await.unwrap(), "Error::PricingStandardsViolation(\"Price is too high!\")");
+    assert_eq!(
+        failed_res.text().await.unwrap(),
+        "Error::PricingStandardsViolation(\"Price is too high!\")"
+    );
 }
 
 // test update product

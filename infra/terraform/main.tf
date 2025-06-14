@@ -1,18 +1,19 @@
 terraform {
+  required_version = ">= 1.9.2"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.113.0"
+      version = ">= 4.0.0, < 5.0.0"
     }
 
     local = {
       source  = "hashicorp/local"
-      version = "=2.5.1"
+      version = "~> 2.5.2"
     }
 
     random = {
       source  = "hashicorp/random"
-      version = "=3.6.1"
+      version = "~> 3.5"
     }
 
     http = {
@@ -23,6 +24,8 @@ terraform {
 }
 
 provider "azurerm" {
+  resource_provider_registrations = "none"
+
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
@@ -48,21 +51,44 @@ resource "random_integer" "example" {
 }
 
 resource "random_pet" "example" {
-  length    = 2
+  length    = 1
   separator = ""
   keepers = {
     location = var.location
   }
 }
 
-data "http" "ifconfig" {
-  url = "http://ipv4.icanhazip.com"
-}
-
 data "azurerm_subscription" "current" {}
 data "azurerm_client_config" "current" {}
 
+data "http" "current_ip" {
+  url = "https://ipv4.icanhazip.com"
+}
+
+locals {
+  name                            = "${var.environment}${random_pet.example.id}${random_integer.example.result}"
+  aks_node_pool_vm_size           = var.aks_node_pool_vm_size != "" ? var.aks_node_pool_vm_size : "Standard_DS2_v2"
+  deploy_azure_cosmosdb           = var.deploy_azure_cosmosdb == "true" ? true : false
+  default_cosmosdb_account_kind   = "GlobalDocumentDB"
+  cosmosdb_account_kind           = var.cosmosdb_account_kind != "" ? var.cosmosdb_account_kind : local.default_cosmosdb_account_kind
+  deploy_observability_tools      = var.deploy_observability_tools == "true" ? true : false
+  deploy_azure_container_registry = var.deploy_azure_container_registry == "true" ? true : false
+  deploy_azure_openai             = var.deploy_azure_openai == "true" ? true : false
+  deploy_image_generation_model   = var.deploy_image_generation_model == "true" ? true : false
+  deploy_azure_servicebus         = var.deploy_azure_servicebus == "true" ? true : false
+}
+
 resource "azurerm_resource_group" "example" {
-  name     = "rg-${var.resource_group_name_suffix}"
-  location = local.location
+  name     = "rg-${local.name}"
+  location = var.location
+}
+
+resource "azuread_group" "example" {
+  display_name     = "AKS Store Demo App"
+  security_enabled = true
+}
+
+resource "azuread_group_member" "example" {
+  group_object_id  = azuread_group.example.object_id
+  member_object_id = data.azurerm_client_config.current.object_id
 }

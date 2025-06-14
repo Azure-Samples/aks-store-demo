@@ -1,0 +1,99 @@
+name: test-e2e
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # Every Sunday at midnight UTC
+
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+
+      - name: Install azd
+        uses: Azure/setup-azd@ae0f8b5482eeac61e940f447327d84c73beb8b1e # v2.1.0
+
+      - name: Install kubelogin
+        uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1
+        with:
+          kubelogin-version: "v0.2.8"
+
+      - name: Azure login
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure Developer CLI login
+        run: |
+          azd auth login \
+            --client-id ${{ secrets.AZURE_CLIENT_ID }} \
+            --federated-credential-provider "github" \
+            --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Turn on Helm support for AKS
+        run: azd config set alpha.aks.helm on
+
+      - name: Set helm chart location
+        run: sed -i 's/azure-samples.github.io/${{ github.repository_owner }}.github.io/' azure.yaml
+
+      - name: Provision and deploy
+        run: |
+          azd env new ${{ vars.AZURE_ENV_NAME }}
+          azd env set SOURCE_REGISTRY "ghcr.io/${{ github.repository_owner }}"
+          azd up --no-prompt
+        env:
+          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Store IPs
+        id: kubectl_get_service
+        run: |
+          eval $(azd env get-values)
+          storeAdminIp=$(kubectl get service store-admin -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          while [ -z "$storeAdminIp" ]; do
+            sleep 60
+            storeAdminIp=$(kubectl get service store-admin -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          done
+          echo "STORE_ADMIN_IP=${storeAdminIp}"
+          echo "STORE_ADMIN_IP=${storeAdminIp}" >> "$GITHUB_OUTPUT"
+          storeFrontIp=$(kubectl get service store-front -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          while [ -z "$storeFrontIp" ]; do
+            sleep 60
+            storeFrontIp=$(kubectl get service store-front -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          done
+          echo "STORE_FRONT_IP=${storeFrontIp}"
+          echo "STORE_FRONT_IP=${storeFrontIp}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Playwright dependencies
+        run: npm ci
+        working-directory: tests
+
+      - name: Run Playwright tests
+        run: npx playwright test --config=playwright.service.config.ts --workers=20
+        working-directory: tests
+        env:
+          PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
+          STORE_ADMIN_URL: "http://${{ steps.kubectl_get_service.outputs.STORE_ADMIN_IP }}"
+          STORE_FRONT_URL: "http://${{ steps.kubectl_get_service.outputs.STORE_FRONT_IP }}"
+          CI: true
+
+      - name: Destroy environment
+        run: azd down --force --purge
+        if: always()
+        env:
+          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
