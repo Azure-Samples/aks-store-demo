@@ -1,0 +1,46 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  helm_deploy:
+    runs-on: ubuntu-latest
+    steps:
+    
+      # checks out code
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      # installs the latest helm version
+      - name: Setup Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+           version: '3.16.0' # Can pin a helm version here
+        id: install
+
+      # logs into the AZ CLI using the supplied credentials
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      # Gets the cluster credentials  
+      - name: Get credentials for AKS Cluster
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+           az aks get-credentials --name ${{ secrets.AKS_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP}} --file ${{ github.workspace }}/kubeconfig
+           chmod +r ${{ github.workspace }}/kubeconfig
+      
+      # deploys the helm chart 
+      - name: Deploy to Kubernetes using Helm
+        env:
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
+        run: |
+         echo $KUBECONFIG
+         cd charts/aks-store-demo       
+         helm upgrade --install aks-store-demo . --set acrName="${{ VARS.ACR_REGISTRY }}" --namespace default
+         
