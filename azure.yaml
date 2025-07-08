@@ -9,7 +9,7 @@ infra:
 services:
   ai-service:
     project: src/ai-service
-    language: python # this is a hack to trigger container image build
+    language: docker
     docker:
       context: .
       path: Dockerfile
@@ -40,7 +40,7 @@ services:
           run: git restore ../../kustomize/overlays/azd/ai-service/kustomization.yaml
   product-service:
     project: src/product-service
-    language: ts # this is a hack to trigger container image build
+    language: docker
     docker:
       context: .
       path: Dockerfile
@@ -65,7 +65,7 @@ services:
           run: git restore ../../kustomize/overlays/azd/product-service/kustomization.yaml
   order-service:
     project: src/order-service
-    language: ts # this is a hack to trigger container image build
+    language: docker
     docker:
       context: .
       path: Dockerfile
@@ -96,7 +96,7 @@ services:
           run: git restore ../../kustomize/overlays/azd/order-service/kustomization.yaml
   makeline-service:
     project: src/makeline-service
-    language: ts # this is a hack to trigger container image build
+    language: docker
     docker:
       context: .
       path: Dockerfile
@@ -130,7 +130,7 @@ services:
           run: git restore ../../kustomize/overlays/azd/makeline-service/kustomization.yaml
   store-front:
     project: src/store-front
-    language: ts # this is a hack to trigger container image build
+    language: docker
     docker:
       context: .
       path: Dockerfile
@@ -155,7 +155,7 @@ services:
           run: git restore ../../kustomize/overlays/azd/store-front/kustomization.yaml
   store-admin:
     project: src/store-admin
-    language: ts # this is a hack to trigger container image build
+    language: docker
     docker:
       context: .
       path: Dockerfile
