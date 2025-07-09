@@ -6,7 +6,7 @@ test('has title', async ({ page }) => {
   await page.goto('/');
 
   // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/store-admin/);
+  await expect(page).toHaveTitle(/Contoso Pet Store Admin Portal/);
 });
 
 test('has Products link', async ({ page }) => {

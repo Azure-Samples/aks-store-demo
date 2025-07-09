@@ -1,0 +1,21 @@
+{
+  "configurations": [
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "name": "Launch FastAPI App",
+      "python": "${workspaceFolder}/.venv/bin/python3",
+      "module": "uvicorn",
+      "args": [
+        "main:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5001"
+      ],
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.example",
+      "preLaunchTask": "Install dependencies"
+    }
+  ]
+}

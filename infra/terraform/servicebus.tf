@@ -1,35 +1,47 @@
-resource "azurerm_servicebus_namespace" "example" {
+// https://github.com/Azure/terraform-azurerm-avm-res-servicebus-namespace/
+module "sb" {
   count               = local.deploy_azure_servicebus ? 1 : 0
+  source              = "Azure/avm-res-servicebus-namespace/azurerm"
+  version             = "0.4.0"
   name                = "sb-${local.name}"
-  location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
   sku                 = "Standard"
-  local_auth_enabled  = !local.deploy_azure_workload_identity
+  local_auth_enabled  = false
+
+  queues = {
+    orders = {}
+  }
+
+  # network_rule_config = {
+  #   cidr_or_ip_rules = ["${chomp(data.http.current_ip.response_body)}/32"]
+  # }
 }
 
-resource "azurerm_servicebus_queue" "example" {
-  count        = local.deploy_azure_servicebus ? 1 : 0
-  name         = "orders"
-  namespace_id = azurerm_servicebus_namespace.example[0].id
+module "avm-res-authorization-roleassignment-sb" {
+  count   = local.deploy_azure_servicebus ? 1 : 0
+  source  = "Azure/avm-res-authorization-roleassignment/azurerm"
+  version = "0.2.0"
+  # users_by_object_id = {
+  #   current_user = data.azurerm_client_config.current.object_id
+  # }
+  groups_by_object_id = {
+    demo_group = azuread_group.example.object_id
+  }
+  role_definitions = {
+    service_bus_data_owner_role = {
+      name = "Azure Service Bus Data Owner"
+    }
+  }
+  role_assignments_for_scopes = {
+    service_bus_role_assignments = {
+      scope = module.sb[0].resource_id
+      role_assignments = {
+        role_assignment_1 = {
+          role_definition = "service_bus_data_owner_role"
+          any_principals  = ["demo_group"]
+        }
+      }
+    }
+  }
 }
-
-resource "azurerm_servicebus_namespace_authorization_rule" "example" {
-  count        = local.deploy_azure_servicebus && !local.deploy_azure_workload_identity ? 1 : 0
-  name         = "listener"
-  namespace_id = azurerm_servicebus_namespace.example[0].id
-
-  listen = true
-  send   = false
-  manage = false
-}
-
-resource "azurerm_servicebus_queue_authorization_rule" "example" {
-  count    = local.deploy_azure_servicebus && !local.deploy_azure_workload_identity ? 1 : 0
-  name     = "sender"
-  queue_id = azurerm_servicebus_queue.example[0].id
-
-  listen = false
-  send   = true
-  manage = false
-}
-

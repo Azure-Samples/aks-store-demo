@@ -1,35 +1,41 @@
-name: Scan Bicep code
+name: audit-bicep
 on:
   push:
-    branches: 
+    branches:
       - main
     paths:
       - "infra/bicep/**"
   pull_request:
-    branches: 
+    branches:
       - main
     paths:
       - "infra/bicep/**"
   workflow_dispatch:
 
 jobs:
-  build:
+  psrule:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Run Microsoft Security DevOps Analysis
-        uses: microsoft/security-devops-action@preview
-        id: msdo
-        continue-on-error: true
+      - name: Run PSRule analysis
+        uses: microsoft/ps-rule@46451b8f5258c41beb5ae69ed7190ccbba84112c # v2.9.0
         with:
-          tools: templateanalyzer
+          inputPath: main.test.bicep
+          modules: PSRule.Rules.Azure
+          option: ps-rule.yaml
+          outputFormat: Sarif
+          outputPath: reports/ps-rule-results.sarif
+          path: infra/bicep
+          summary: true
+        env:
+          PSRULE_AZURE_BICEP_PATH: "/usr/local/bin/bicep"
 
       - name: Upload alerts to Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3
         if: github.repository_owner == 'Azure-Samples'
         with:
-          sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+          sarif_file: infra/bicep/reports/ps-rule-results.sarif

@@ -3,16 +3,16 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Scan Terraform code
+name: audit-terraform
 
 on:
   push:
-    branches: 
+    branches:
       - main
     paths:
       - "infra/terraform/**"
   pull_request:
-    branches: 
+    branches:
       - main
     paths:
       - "infra/terraform/**"
@@ -32,18 +32,19 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Run Trivy vulnerability scanner in IaC mode for Terraform
-        uses: aquasecurity/trivy-action@b2933f565dbc598b29947660e66259e3c7bc8561 # 0.20.0
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # v0.30.0
         with:
-          scan-type: 'config'
-          scan-ref: './infra/terraform'
+          scan-type: "config"
+          scan-ref: "./infra/terraform"
           hide-progress: true
-          format: 'sarif'
-          output: 'trivy-terraform-results.sarif'
-          exit-code: '1'
+          format: "sarif"
+          output: "trivy-terraform-results.sarif"
+          exit-code: "1"
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: "CRITICAL,HIGH"
+          trivyignores: "./infra/terraform/.trivyignore"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@e14ec90e52a057614c707baecf2ed88a81b68bc9 # v2
+        uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3
         with:
-          sarif_file: 'trivy-terraform-results.sarif'
+          sarif_file: "trivy-terraform-results.sarif"

@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "playwright": "^1.38.1",
-    "playwright-core": "^1.38.1",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "playwright": "^1.50.1",
+    "playwright-core": "^1.50.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.38.1",
-    "@types/node": "^20.7.2"
+    "@azure/microsoft-playwright-testing": "^1.0.0-beta.7",
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.15.3"
   },
   "scripts": {},
   "keywords": [],

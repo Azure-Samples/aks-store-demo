@@ -1,78 +1,59 @@
-resource "azurerm_cosmosdb_account" "example" {
-  count                              = local.deploy_azure_cosmosdb ? 1 : 0
-  name                               = "db-${local.name}"
-  location                           = azurerm_resource_group.example.location
-  resource_group_name                = azurerm_resource_group.example.name
-  offer_type                         = "Standard"
-  kind                               = local.cosmosdb_account_kind
-  access_key_metadata_writes_enabled = !local.deploy_azure_workload_identity
-  minimal_tls_version                = "Tls12"
-  automatic_failover_enabled         = true
+// https://github.com/Azure/terraform-azurerm-avm-res-documentdb-databaseaccount/
+module "db" {
+  count                         = local.deploy_azure_cosmosdb ? 1 : 0
+  source                        = "Azure/avm-res-documentdb-databaseaccount/azurerm"
+  version                       = "0.7.0"
+  name                          = "db-${local.name}"
+  resource_group_name           = azurerm_resource_group.example.name
+  location                      = azurerm_resource_group.example.location
+  minimal_tls_version           = "Tls12"
+  public_network_access_enabled = true
+  # network_acl_bypass_for_azure_services = true
+  # ip_range_filter = [
+  #   "0.0.0.0",
+  #   "${chomp(data.http.current_ip.response_body)}/32"
+  # ]
 
-  dynamic "capabilities" {
-    for_each = local.cosmosdb_account_kind == "MongoDB" ? ["EnableAggregationPipeline", "mongoEnableDocLevelTTL", "MongoDBv3.4", "EnableMongo"] : ["EnableAggregationPipeline"]
-    content {
-      name = capabilities.value
+  capabilities = local.cosmosdb_account_kind == "MongoDB" ? [
+    {
+      name = "EnableAggregationPipeline"
+    },
+    {
+      name = "EnableMongo"
     }
-  }
+    ] : [
+    {
+      name = "EnableAggregationPipeline"
+    }
+  ]
 
-  consistency_policy {
-    consistency_level       = "BoundedStaleness"
-    max_interval_in_seconds = 300
-    max_staleness_prefix    = 100000
-  }
+  mongo_server_version = local.cosmosdb_account_kind == "MongoDB" ? "4.2" : null
+  mongo_databases = local.cosmosdb_account_kind == "MongoDB" ? {
+    database_with_collections = {
+      name       = "orderdb"
+      throughput = 400
+      collections = {
+        orders_collection = {
+          name       = "orders"
+          throughput = 400
+          # index = {
+          #   keys = ["_id"]
+          # }
+        }
+      }
+    }
+  } : null
 
-  geo_location {
-    location          = azurerm_resource_group.example.location
-    failover_priority = 0 # primary location
-  }
-
-  geo_location {
-    location          = local.cosmosdb_failover_location
-    failover_priority = 1 # secondary location
-  }
-}
-
-resource "azurerm_cosmosdb_mongo_database" "example" {
-  count               = local.deploy_azure_cosmosdb && local.cosmosdb_account_kind == "MongoDB" ? 1 : 0
-  name                = "orderdb"
-  resource_group_name = azurerm_cosmosdb_account.example[0].resource_group_name
-  account_name        = azurerm_cosmosdb_account.example[0].name
-  throughput          = 400
-}
-
-resource "azurerm_cosmosdb_mongo_collection" "example" {
-  count               = local.deploy_azure_cosmosdb && local.cosmosdb_account_kind == "MongoDB" ? 1 : 0
-  name                = "orders"
-  resource_group_name = azurerm_cosmosdb_account.example[0].resource_group_name
-  account_name        = azurerm_cosmosdb_account.example[0].name
-  database_name       = azurerm_cosmosdb_mongo_database.example[0].name
-  throughput          = 400
-
-  index {
-    keys = ["_id"]
-  }
-
-  lifecycle {
-    ignore_changes = [index]
-  }
-}
-
-resource "azurerm_cosmosdb_sql_database" "example" {
-  count               = local.deploy_azure_cosmosdb && local.cosmosdb_account_kind == "GlobalDocumentDB" ? 1 : 0
-  name                = "orderdb"
-  resource_group_name = azurerm_cosmosdb_account.example[0].resource_group_name
-  account_name        = azurerm_cosmosdb_account.example[0].name
-  throughput          = 400
-}
-
-resource "azurerm_cosmosdb_sql_container" "example" {
-  count                 = local.deploy_azure_cosmosdb && local.cosmosdb_account_kind == "GlobalDocumentDB" ? 1 : 0
-  name                  = "orders"
-  resource_group_name   = azurerm_cosmosdb_account.example[0].resource_group_name
-  account_name          = azurerm_cosmosdb_account.example[0].name
-  database_name         = azurerm_cosmosdb_sql_database.example[0].name
-  partition_key_paths   = ["/storeId"]
-  partition_key_version = 1
-  throughput            = 400
+  sql_databases = local.cosmosdb_account_kind == "GlobalDocumentDB" ? {
+    database_with_containers = {
+      name       = "orderdb"
+      throughput = 400
+      containers = {
+        orders_container = {
+          name                = "orders"
+          partition_key_paths = ["/storeId"]
+        }
+      }
+    }
+  } : null
 }

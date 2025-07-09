@@ -1,7 +1,7 @@
 services:
   mongodb:
     image: mongo:6.0.6
-    container_name: 'mongo'
+    container_name: mongo
     restart: always
     ports:
       - 27017:27017
@@ -14,7 +14,7 @@ services:
       - backend_services
   rabbitmq:
     image: rabbitmq:3.13.2-management-alpine
-    container_name: 'rabbitmq'
+    container_name: rabbitmq
     restart: always
     environment:
       - "RABBITMQ_DEFAULT_USER=username"
@@ -33,7 +33,7 @@ services:
       - backend_services
   order-service:
     build: src/order-service
-    container_name: 'order-service'
+    container_name: order-service
     restart: always
     ports:
       - 3000:3000
@@ -56,7 +56,7 @@ services:
         condition: service_healthy
   makeline-service:
     build: src/makeline-service
-    container_name: 'makeline-service'
+    container_name: makeline-service
     restart: always
     ports:
       - 3001:3001
@@ -82,7 +82,7 @@ services:
         condition: service_healthy
   product-service:
     build: src/product-service
-    container_name: 'product-service'
+    container_name: product-service
     restart: always
     ports:
       - 3002:3002
@@ -97,7 +97,7 @@ services:
       - backend_services
   store-front:
     build: src/store-front
-    container_name: 'store-front'
+    container_name: store-front
     restart: always
     ports:
       - 8080:8080
@@ -106,9 +106,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    environment:
-      - VUE_APP_PRODUCT_SERVICE_URL=http://product-service:3002/
-      - VUE_APP_ORDER_SERVICE_URL=http://order-service:3000/
     networks:
       - backend_services
     depends_on:
@@ -116,7 +113,7 @@ services:
       - order-service
   store-admin:
     build: src/store-admin
-    container_name: 'store-admin'
+    container_name: store-admin
     restart: always
     ports:
       - 8081:8081
@@ -125,9 +122,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    environment:
-      - VUE_APP_PRODUCT_SERVICE_URL=http://product-service:3002/
-      - VUE_APP_MAKELINE_SERVICE_URL=http://makeline-service:3001/
     networks:
       - backend_services
     depends_on:
@@ -135,11 +129,11 @@ services:
       - makeline-service
   virtual-customer:
     build: src/virtual-customer
-    container_name: 'virtual-customer'
+    container_name: virtual-customer
     restart: always
     environment:
       - ORDER_SERVICE_URL=http://order-service:3000/
-      - ORDERS_PER_HOUR=500
+      - ORDERS_PER_HOUR=30
     networks:
       - backend_services
     depends_on:
@@ -147,11 +141,11 @@ services:
         condition: service_healthy
   virtual-worker:
     build: src/virtual-worker
-    container_name: 'virtual-worker'
+    container_name: virtual-worker
     restart: always
     environment:
       - MAKELINE_SERVICE_URL=http://makeline-service:3001
-      - ORDERS_PER_HOUR=400
+      - ORDERS_PER_HOUR=20
     networks:
       - backend_services
     depends_on:
@@ -159,7 +153,7 @@ services:
         condition: service_healthy
   ai-service:
     build: src/ai-service
-    container_name: 'ai-service'
+    container_name: ai-service
     restart: always
     ports:
       - 5001:5001
@@ -172,7 +166,7 @@ services:
       - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
       - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
       - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
-      - OPENAI_API_KEY= # required if using OpenAI and not required if using Azure OpenAI with Azure AD 
+      - OPENAI_API_KEY= # required if using OpenAI and not required if using Azure OpenAI with Azure AD
       - OPENAI_ORG_ID= # required if using OpenAI
     networks:
       - backend_services

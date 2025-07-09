@@ -1,6 +1,6 @@
 # store-admin
 
-This is a Vue.js app that simulates a store admin portal where users can manually process orders, and manage products. It is meant to be used in conjunction with the [product-service](../product-service/) and [makeline-service](../makeline-service). If you have access to OpenAI or Azure OpenAI API keys, you can also deploy the  [ai-service](../ai-service) to help you generate product descriptions. You should also run the [virtual-customer](../virtual-customer) to simulate customers placing orders to have some order data to work with.
+This is a Vue.js app that simulates a store admin portal where users can manually process orders, and manage products. It is meant to be used in conjunction with the [product-service](../product-service/) and [makeline-service](../makeline-service). If you have access to OpenAI or Azure OpenAI API keys, you can also deploy the [ai-service](../ai-service) to help you generate product descriptions. You should also run the [virtual-customer](../virtual-customer) to simulate customers placing orders to have some order data to work with.
 
 ## Running the app locally
 
@@ -41,18 +41,18 @@ docker compose up
 With the services running, open a new terminal and navigate to the `store-admin` directory. Then run the following commands:
 
 ```bash
-export VUE_APP_PRODUCT_SERVICE_URL=http://localhost:3002/
-export VUE_APP_MAKELINE_SERVICE_URL=http://localhost:3001/
+export VITE_PRODUCT_SERVICE_URL=http://localhost:3002/
+export VITE_MAKELINE_SERVICE_URL=http://localhost:3001/
 
 npm install
-npm run serve
+npm run dev
 ```
 
 When the app is running, you should see output similar to the following:
 
 ```text
   App running at:
-  - Local:   http://localhost:8081/ 
+  - Local:   http://localhost:8081/
   - Network: http://192.168.0.144:8081/
 
   Note that the development build is not optimized.

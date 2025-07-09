@@ -1,17 +1,17 @@
-version: "3.7"
+version: '3.7'
 services:
   rabbitmq:
     image: rabbitmq:3.11.17-management-alpine
     container_name: 'rabbitmq'
     restart: always
     environment:
-      - "RABBITMQ_DEFAULT_USER=username"
-      - "RABBITMQ_DEFAULT_PASS=password"
+      - RABBITMQ_DEFAULT_USER=username
+      - RABBITMQ_DEFAULT_PASS=password
     ports:
       - 15672:15672
       - 5672:5672
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
+      test: ['CMD', 'rabbitmqctl', 'status']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -26,7 +26,7 @@ services:
     ports:
       - 3000:3000
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://order-service:3000/health"]
+      test: ['CMD', 'wget', '-O', '/dev/null', '-q', 'http://order-service:3000/health']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -49,10 +49,12 @@ services:
     ports:
       - 3002:3002
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://product-service:3002/health"]
+      test: ['CMD', 'wget', '-O', '/dev/null', '-q', 'http://product-service:3002/health']
       interval: 30s
       timeout: 10s
       retries: 5
+    environment:
+      - AI_SERVICE_URL=http://ai-service:5001/
     networks:
       - backend_services
 networks:

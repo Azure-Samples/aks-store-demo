@@ -1,3 +1,4 @@
+{{ if .Values.virtualCustomer.create }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,7 +22,7 @@ spec:
         - name: ORDER_SERVICE_URL
           value: http://order-service:3000/
         - name: ORDERS_PER_HOUR
-          value: "200"
+          value: {{ .Values.virtualCustomer.ordersPerHour | quote }}
         resources:
           requests:
             cpu: 1m
@@ -29,3 +30,4 @@ spec:
           limits:
             cpu: 2m
             memory: 20Mi
+{{ end }}

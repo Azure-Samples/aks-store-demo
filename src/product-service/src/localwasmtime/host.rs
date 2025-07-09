@@ -4,16 +4,16 @@ use log::debug;
 use wasmtime::{component::*, Config, Engine, Store};
 use wasmtime_wasi::preview2::command;
 
-use super::{RulesEngineState, WasmProduct, Error};
+use super::{Error, RulesEngineState, WasmProduct};
 
 /// This struct is responsible for hosting the rules engine
 /// it consists of a wasmtime component, store, and linker.
 /// The store and linker are generics and used to wrap a State struct
-/// that is used to store the state of the wasmtime runtime. 
+/// that is used to store the state of the wasmtime runtime.
 pub struct LocalWasmtimeHost {
-    component: Component, 
+    component: Component,
     store: Store<RulesEngineState>,
-    linker: Linker<RulesEngineState>, 
+    linker: Linker<RulesEngineState>,
 }
 
 /// The implementation of the LocalWasmtimeHost struct
@@ -24,11 +24,8 @@ impl LocalWasmtimeHost {
         let config = Self::create_wasmtime_config();
         let engine = Self::create_wasmtime_engine(&config)?;
         let component = Self::create_wasmtime_component(&engine, actor_component_path)?;
-        let store = Store::new(
-            &engine,
-            RulesEngineState::new(),
-        );
-        let mut linker:Linker<RulesEngineState> = Linker::new(&engine);
+        let store = Store::new(&engine, RulesEngineState::new());
+        let mut linker: Linker<RulesEngineState> = Linker::new(&engine);
         command::sync::add_to_linker(&mut linker)?;
         super::ServiceHost::add_to_linker(&mut linker, |state: &mut RulesEngineState| state)?;
         Ok(Self {
@@ -43,15 +40,18 @@ impl LocalWasmtimeHost {
     /// An EngineInternalError is returned if there is an error instantiating the rules engine
     /// Otherwise, the result of the rules engine is returned.
     pub fn execute(&mut self, product: WasmProduct) -> Result<WasmProduct, Error> {
-
         debug!("Instantiating the rules engine");
-        let (bindings, _) = match super::ServiceHost::instantiate(&mut self.store, &self.component, &self.linker) {
-            Ok(bindings) => bindings,
-            Err(e) => return Err(Error::EngineInternalError(e.to_string())),
-        };
-        
+        let (bindings, _) =
+            match super::ServiceHost::instantiate(&mut self.store, &self.component, &self.linker) {
+                Ok(bindings) => bindings,
+                Err(e) => return Err(Error::EngineInternalError(e.to_string())),
+            };
+
         debug!("Executing rules engine");
-        let result = match bindings.aksstoredemo_rules_engine().call_execute(&mut self.store, &product) {
+        let result = match bindings
+            .aksstoredemo_rules_engine()
+            .call_execute(&mut self.store, &product)
+        {
             Ok(result) => result,
             Err(e) => return Err(Error::EngineInternalError(e.to_string())),
         };
@@ -72,23 +72,25 @@ impl LocalWasmtimeHost {
         return Engine::new(config);
     }
 
-    fn create_wasmtime_component(engine: &Engine, actor_component_path: &Path) -> anyhow::Result<Component> {
+    fn create_wasmtime_component(
+        engine: &Engine,
+        actor_component_path: &Path,
+    ) -> anyhow::Result<Component> {
         return Component::from_file(&engine, actor_component_path);
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::super::{Error, WasmProduct};
     use super::*;
-    use super::super::{WasmProduct, Error};
-    use std::path::PathBuf;
     use std::env;
+    use std::path::PathBuf;
 
     fn setup() -> LocalWasmtimeHost {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push("./tests/rule_engine.wasm");
         LocalWasmtimeHost::new(&path).unwrap()
-        
     }
 
     #[test]
@@ -105,7 +107,10 @@ mod tests {
         assert_eq!(result.id, 123);
         assert_eq!(result.name, "Test Product".to_string());
         assert_eq!(result.price, 15.0);
-        assert_eq!(result.description, "This is longer than 10 characters".to_string());
+        assert_eq!(
+            result.description,
+            "This is longer than 10 characters".to_string()
+        );
         assert_eq!(result.image, "/placeholder.png".to_string());
     }
 
@@ -122,7 +127,9 @@ mod tests {
         let result = host.execute(product);
         assert!(result.is_err());
         match result.unwrap_err() {
-            Error::InvalidProduct(error_message) => assert_eq!(error_message, "The product description is too short!"),
+            Error::InvalidProduct(error_message) => {
+                assert_eq!(error_message, "The product description is too short!")
+            }
             _ => panic!("Unexpected error type"),
         }
     }
@@ -140,7 +147,9 @@ mod tests {
         let result = host.execute(product);
         assert!(result.is_err());
         match result.unwrap_err() {
-            Error::PricingStandardsViolation(error_message) => assert_eq!(error_message, "Price is too high!"),
+            Error::PricingStandardsViolation(error_message) => {
+                assert_eq!(error_message, "Price is too high!")
+            }
             _ => panic!("Unexpected error type"),
         }
     }

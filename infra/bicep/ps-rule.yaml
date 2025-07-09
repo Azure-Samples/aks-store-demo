@@ -1,0 +1,16 @@
+configuration:
+  AZURE_BICEP_FILE_EXPANSION: true
+  AZURE_BICEP_FILE_EXPANSION_TIMEOUT: 30
+rule:
+  exclude:
+    # Ignore the following rules for all resources to keep cost down
+    - Azure.Log.Replication # log storage not necessary for this demo
+    - Azure.ACR.ContentTrust # requires ACR Premium SKU
+    - Azure.ACR.Firewall # requires ACR Premium SKU
+    - Azure.AKS.PoolScaleSet # run on a single node pool
+    - Azure.AKS.NodeMinPods # run on a single node pool
+    - Azure.AKS.AuditLogs # log storage not necessary for this demo
+    - Azure.AKS.PlatformLogs # log storage not necessary for this demo
+    - Azure.AKS.NetworkPolicy # using cilium instead which is recommended but not in the allowlist in this rule
+    - Azure.AKS.DefenderProfile # log storage not necessary for this demo
+    - Azure.Deployment.SecureParameter # uniqueKeyPolicyKeys needs to be secured here https://github.com/Azure/bicep-registry-modules/blob/main/avm/res/document-db/database-account/main.bicep

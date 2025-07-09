@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pets
+  namespace: argocd
+spec:
+  destination:
+    name: ""
+    namespace: ""
+    server: https://kubernetes.default.svc
+  source:
+    path: kustomize/overlays/kaito
+    repoURL: https://github.com/azure-samples/aks-store-demo
+    targetRevision: main
+    kustomize:
+      images:
+        - >-
+          ghcr.io/azure-samples/aks-store-demo/ai-service=ghcr.io/azure-samples/aks-store-demo/ai-service:latest
+        - >-
+          ghcr.io/azure-samples/aks-store-demo/makeline-service=ghcr.io/azure-samples/aks-store-demo/makeline-service:latest
+        - >-
+          ghcr.io/azure-samples/aks-store-demo/order-service=ghcr.io/azure-samples/aks-store-demo/order-service:latest
+        - >-
+          ghcr.io/azure-samples/aks-store-demo/product-service=ghcr.io/azure-samples/aks-store-demo/product-service:latest
+        - >-
+          ghcr.io/azure-samples/aks-store-demo/store-admin=ghcr.io/azure-samples/aks-store-demo/store-admin:latest
+        - >-
+          ghcr.io/azure-samples/aks-store-demo/store-front=ghcr.io/azure-samples/aks-store-demo/store-front:latest
+        - >-
+          ghcr.io/azure-samples/aks-store-demo/virtual-customer=ghcr.io/azure-samples/aks-store-demo/virtual-customer:latest
+        - >-
+          ghcr.io/azure-samples/aks-store-demo/virtual-worker=ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest
+      namespace: pets
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false

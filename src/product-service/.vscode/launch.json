@@ -1,0 +1,102 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in library 'product_service'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=product-service"
+        ],
+        "filter": {
+          "name": "product_service",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'product-service'",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=product-service",
+          "--package=product-service"
+        ],
+        "filter": {
+          "name": "product-service",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'product-service'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=product-service",
+          "--package=product-service"
+        ],
+        "filter": {
+          "name": "product-service",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test 'base_product_service'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=base_product_service",
+          "--package=product-service"
+        ],
+        "filter": {
+          "name": "base_product_service",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test 'common'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=common",
+          "--package=product-service"
+        ],
+        "filter": {
+          "name": "common",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
