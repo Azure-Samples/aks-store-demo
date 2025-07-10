@@ -30,13 +30,13 @@ spec:
               value: ""
             - name: OPENAI_API_KEY # required if using OpenAI or Azure OpenAI without workload identity
               value: ""
-            - name: AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI DALL-E
+            - name: AZURE_OPENAI_DALLE_ENDPOINT # required if using Azure OpenAI DALL-E
               value: ""
-            - name: AZURE_OPENAI_API_VERSION=2024-02-15-preview # required if using Azure OpenAI DALL-E
+            - name: AZURE_OPENAI_API_VERSION # required if using Azure OpenAI DALL-E
+              value: "2024-02-15-preview"
+            - name: AZURE_OPENAI_DALLE_DEPLOYMENT_NAME # required if using Azure OpenAI DALL-E
               value: ""
-            - name: AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI DALL-E
-              value: ""
-            - name: USE_LOCAL_LLM=False # set to True if you are using a local LLM provided by KAITO
+            - name: USE_LOCAL_LLM # set to True if you are using a local LLM provided by KAITO
               value: "False"
             - name: "LOCAL_LLM_ENDPOINT" # required if using a local LLM
               value: ""
