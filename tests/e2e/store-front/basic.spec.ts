@@ -1,27 +1,27 @@
 import { test, expect } from '@playwright/test';
-
-const STORE_FRONT_URL = process.env.STORE_FRONT_URL || 'http://';
+// @ts-ignore
+const testConfig = require('../../test-config');
 
 test.describe('store-front tests', () => {
-  test.skip(STORE_FRONT_URL === 'http://', 'STORE_FRONT_URL is not set');
+  test.skip(!testConfig.isStoreFrontConfigured(), 'testConfig.storeFrontUrl is not set');
 
   test('has title', async ({ page }) => {
-    await page.goto(STORE_FRONT_URL);
-    await expect(page).toHaveTitle(/Contoso Pet Store/);
+    await page.goto(testConfig.storeFrontUrl);
+    await expect(page).toHaveTitle(testConfig.getExpectedStoreFrontTitle());
   });
 
   test('has products and cart links', async ({ page }) => {
-    await page.goto(STORE_FRONT_URL);
+    await page.goto(testConfig.storeFrontUrl);
     await page.getByRole('link', { name: /Products/ }).click();
     await page.getByRole('link', { name: /Cart/ }).click();
   });
 
   test('can navigate to product details and add one to cart', async ({ page }) => {
-    await page.goto(STORE_FRONT_URL);
+    await page.goto(testConfig.storeFrontUrl);
 
     await page.locator('.product-list .product-card').first().click()
     await expect(page.url()).toContain('product')
-    await expect(page.locator('.product-info h2')).toHaveText("Contoso Catnip's Friend");
+    await expect(page.locator('.product-info h2')).toHaveText(`${testConfig.companyName} Catnip's Friend`);
 
     const cartLink = page.getByRole('link', { name: /Cart \(\d+\)/ });
     const initialCartCount = parseInt((await cartLink.textContent() || '').match(/\d+/)?.[0] || '0');
@@ -31,7 +31,7 @@ test.describe('store-front tests', () => {
   });
 
   test('can add one to cart from home page', async ({ page }) => {
-    await page.goto(STORE_FRONT_URL);
+    await page.goto(testConfig.storeFrontUrl);
 
     await expect(page.locator('.product-list')).toBeVisible();
 
@@ -45,7 +45,7 @@ test.describe('store-front tests', () => {
   });
 
   test('can add multiple items to cart from home page', async ({ page }) => {
-    await page.goto(STORE_FRONT_URL);
+    await page.goto(testConfig.storeFrontUrl);
 
     await expect(page.locator('.product-list')).toBeVisible();
 
@@ -62,7 +62,7 @@ test.describe('store-front tests', () => {
   });
 
   test('can place an order', async ({ page }) => {
-    await page.goto(STORE_FRONT_URL);
+    await page.goto(testConfig.storeFrontUrl);
 
     await expect(page.locator('.product-list')).toBeVisible();
 

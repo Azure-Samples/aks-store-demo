@@ -34,6 +34,7 @@ jobs:
         working-directory: tests
         env:
           PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
-          STORE_ADMIN_URL: ${{ inputs.storeAdminUrl }}
-          STORE_FRONT_URL: ${{ inputs.storeFrontUrl }}
+          SERVICE_STORE_ADMIN_ENDPOINT_URL: ${{ inputs.storeAdminUrl }}
+          SERVICE_STORE_FRONT_ENDPOINT_URL: ${{ inputs.storeFrontUrl }}
+          COMPANY_NAME: 'Contoso'
           CI: true
