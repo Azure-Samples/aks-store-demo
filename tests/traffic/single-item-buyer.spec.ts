@@ -62,7 +62,7 @@ test.describe('Single Item Buyer Traffic Simulation', () => {
     // Get initial cart count
     const cartLink = page.getByRole('link', { name: /Cart/i });
     const initialCartText = await cartLink.textContent() || '';
-    const initialCount = parseInt(initialCartText.match(/\\d+/)?.[0] || '0');
+    const initialCount = parseInt(initialCartText.match(/\d+/)?.[0] || '0');
     
     // Quick impulse purchase - add first visible product
     const firstProductAddButton = page.locator('.product-list .product-controls').first()
