@@ -27,6 +27,18 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     configureServer(server: ViteDevServer) {
       server.middlewares.use(bodyParser.json())
 
+      // Runtime configuration endpoint
+      server.middlewares.use('/api/config', (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method === 'GET') {
+          // Support both proper case environment variables and lowercase for backwards compatibility
+          const companyName = process.env.COMPANY_NAME || env.VITE_COMPANY_NAME || 'Contoso'
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ 
+            companyName: companyName
+          }))
+        }
+      })
+
       // Health check
       server.middlewares.use('/health', (req: IncomingMessage, res: ServerResponse) => {
         if (req.method === 'GET') {
@@ -49,54 +61,50 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             .catch((error: Error) => {
               console.error(error)
               res.statusCode = 500
+              res.setHeader('Content-Type', 'application/json')
               res.end(JSON.stringify({ error: 'Failed to fetch products' }))
             })
         }
       })
 
-      // Submit order
+      // Proxy all other /api requests to the respective services
       server.middlewares.use('/api/orders', (req: IncomingMessageWithBody, res: ServerResponse) => {
         if (req.method === 'POST') {
-          const order = req.body
-          fetch(`${ORDER_SERVICE_URL}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(order),
+          let body = ''
+          req.on('data', (chunk: Buffer) => {
+            body += chunk.toString()
           })
-            .then(() => {
-              res.statusCode = 201
-              res.end()
+          req.on('end', () => {
+            fetch(`${ORDER_SERVICE_URL}v1/order`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: body,
             })
-            .catch((error: Error) => {
-              console.error(error)
-              res.statusCode = 500
-              res.end(JSON.stringify({ error: 'Failed to submit order' }))
-            })
+              .then((response: Response) => response.json())
+              .then((data: unknown) => {
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify(data))
+              })
+              .catch((error: Error) => {
+                console.error(error)
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: 'Failed to place order' }))
+              })
+          })
         }
       })
-    }
+    },
   }
+
   return {
-    plugins: [
-      vue(),
-      vueJsx(),
-      vueDevTools(),
-      middlewarePlugin,
-    ],
+    plugins: [vue(), vueJsx(), vueDevTools(), middlewarePlugin],
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    server: {
-      port: 8080,
-      open: true,
-      host: '0.0.0.0',
-      cors: true,
-      strictPort: true,
-      proxy: {},
-    }
   }
 })

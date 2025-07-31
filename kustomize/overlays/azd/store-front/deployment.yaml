@@ -20,6 +20,9 @@ spec:
           ports:
             - containerPort: 8080
               name: store-front
+          envFrom:
+            - configMapRef:
+                name: store-front
           resources:
             requests:
               cpu: 1m

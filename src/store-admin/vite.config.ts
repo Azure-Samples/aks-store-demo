@@ -27,6 +27,18 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     configureServer(server: ViteDevServer) {
       server.middlewares.use(bodyParser.json())
 
+      // Runtime configuration endpoint
+      server.middlewares.use('/api/config', (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method === 'GET') {
+          // Support both proper case environment variables and lowercase for backwards compatibility
+          const companyName = process.env.COMPANY_NAME || env.VITE_COMPANY_NAME || 'Contoso'
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ 
+            companyName: companyName
+          }))
+        }
+      })
+
       // Health check
       server.middlewares.use('/health', (req: IncomingMessage, res: ServerResponse) => {
         if (req.method === 'GET') {

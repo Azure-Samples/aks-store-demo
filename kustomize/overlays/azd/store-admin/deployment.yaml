@@ -20,6 +20,9 @@ spec:
           ports:
             - containerPort: 8081
               name: store-admin # container images hosted on ghcr.io and will be removed in future releases
+          envFrom:
+            - configMapRef:
+                name: store-admin
           resources:
             requests:
               cpu: 1m

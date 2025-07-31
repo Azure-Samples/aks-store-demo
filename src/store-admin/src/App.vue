@@ -1,10 +1,11 @@
 <template>
   <TopNav />
-  <router-view />
+  <RouterView />
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { RouterView } from 'vue-router'
 import { useProductStore, useOrderStore } from '@/stores'
 import type { Product, Order } from '@/types'
 import TopNav from './components/TopNav.vue'

@@ -19,9 +19,9 @@ spec:
           image: product-service:latest
           ports:
             - containerPort: 3002
-          env:
-            - name: AI_SERVICE_URL
-              value: "http://ai-service:5001/"
+          envFrom:
+            - configMapRef:
+                name: product-service
           resources:
             requests:
               cpu: 1m

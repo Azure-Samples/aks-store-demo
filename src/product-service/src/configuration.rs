@@ -9,6 +9,7 @@ pub struct Settings {
     pub wasm_bin_path: PathBuf,
     tcp_listener: Option<TcpListener>,
     pub ai_service_url: String,
+    pub company_name: String,
 }
 
 impl Settings {
@@ -17,6 +18,8 @@ impl Settings {
             var("WASM_RULE_ENGINE_PATH").unwrap_or_else(|_| "./tests/rule_engine.wasm".to_string());
         let ai_service_url =
             std::env::var("AI_SERVICE_URL").unwrap_or_else(|_| "http://127.0.0.1:5001".to_string());
+        let company_name =
+            std::env::var("COMPANY_NAME").unwrap_or_else(|_| "Contoso".to_string());
         Settings {
             max_size: 262_144,
             log_level: "info".to_string(),
@@ -25,6 +28,7 @@ impl Settings {
             wasm_bin_path: PathBuf::from(wasm_bin_path_env),
             tcp_listener: None,
             ai_service_url: ai_service_url.trim_end_matches('/').to_string(),
+            company_name,
         }
     }
 

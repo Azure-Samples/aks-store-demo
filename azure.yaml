@@ -51,6 +51,9 @@ services:
         dir: ../../kustomize/overlays/azd/product-service
         edits:
           - set image product-service=${SERVICE_PRODUCT_SERVICE_IMAGE_NAME}
+        env:
+          AI_SERVICE_URL: "http://ai-service:5001/"
+          COMPANY_NAME: ${COMPANY_NAME}
     hooks:
       postdeploy:
         posix:
@@ -141,6 +144,8 @@ services:
         dir: ../../kustomize/overlays/azd/store-front
         edits:
           - set image store-front=${SERVICE_STORE_FRONT_IMAGE_NAME}
+        env:
+          COMPANY_NAME: ${COMPANY_NAME}
     hooks:
       postdeploy:
         posix:
@@ -166,6 +171,8 @@ services:
         dir: ../../kustomize/overlays/azd/store-admin
         edits:
           - set image store-admin=${SERVICE_STORE_ADMIN_IMAGE_NAME}
+        env:
+          COMPANY_NAME: ${COMPANY_NAME}
     hooks:
       postdeploy:
         posix:

@@ -178,12 +178,12 @@ const completeOrder = () => {
 }
 
 .status-pending {
-  color: #f39c12;
+  color: #666666;
   font-weight: bold;
 }
 
 .status-completed {
-  color: #2ecc71;
+  color: #000000;
   font-weight: bold;
 }
 
@@ -220,7 +220,7 @@ const completeOrder = () => {
   background-color: var(--primary-color, #f8f9fa);
   font-weight: bold;
   color: var(--secondary-color, #333);
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color, #ddd);
   padding: 12px 0;
 }
 
@@ -232,7 +232,7 @@ const completeOrder = () => {
   display: grid;
   grid-template-columns: 0.5fr 1fr 0.5fr 0.5fr 0.5fr;
   width: 100%;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
   align-items: center;
   padding: 10px 0;
 }

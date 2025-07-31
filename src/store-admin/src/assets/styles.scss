@@ -1,11 +1,13 @@
 :root {
+  /* Default theme values - will be overridden by theme system */
   --primary-color: #2a2a2a;
   --secondary-color: #ffffff;
   --accent-color: #007bff;
-  --accent-color-dark: #0062cc; /* Pre-calculated darker version */
+  --accent-color-dark: #0062cc;
   --background-color: #f8f9fa;
   --card-background: #ffffff;
   --text-color: #2c3e50;
+  --border-color: #e0e0e0;
   --border-radius: 8px;
   --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   --button-color: #005f8b;
@@ -48,103 +50,122 @@ nav {
   align-items: center;
 }
 
-ul {
-  display: flex;
+nav ul {
   list-style: none;
+  display: flex;
+  gap: 2rem;
   margin: 0;
   padding: 0;
 }
 
-li {
-  margin: 0 1rem;
-}
-
-a {
-  color: #fff;
+nav a {
+  color: var(--secondary-color);
   text-decoration: none;
+  font-weight: 500;
 }
 
-/* Footer */
-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #333;
-  color: #fff;
-  padding: 1rem;
-  margin: 0;
+nav a:hover {
+  opacity: 0.8;
 }
 
-/* Product Display */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  padding: 20px 0;
-}
-
-.product-list {
+/* Admin dashboard styles */
+.dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
 }
 
-.product-card {
+.dashboard-card {
   background: var(--card-background);
-  padding: 15px;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  transition: transform 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  margin: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.dashboard-card h2 {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+.dashboard-card .count {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--accent-color);
+  margin: 1rem 0;
+}
+
+/* Tables */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin: 2rem 0;
+}
+
+.admin-table th,
+.admin-table td {
   padding: 1rem;
-  border: 1px solid #ccc;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.product-card:hover {
-  transform: translateY(-5px);
+.admin-table th {
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  font-weight: 600;
 }
 
-.product-card img {
-  max-width: 100%;
-  margin-bottom: 1rem;
+.admin-table tr:hover {
+  background: rgba(0, 0, 0, 0.02);
 }
 
-.product-card a {
-  text-decoration: none;
-  color: #333;
+/* Forms */
+.admin-form {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  margin: 2rem 0;
 }
 
-.product-card h2 {
-  font-weight: bold;
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
   margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-color);
 }
 
-.product-card p {
-  margin-bottom: 1rem;
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  background: var(--card-background);
+  color: var(--text-color);
 }
 
-.product-controls {
-  display: flex;
-  align-items: center;
-  margin-top: 0.5rem;
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-.product-controls p {
-  margin-right: 20px;
-}
-
-.product-price {
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-/* Button Styles */
-.button,
-button {
+/* Buttons */
+.button {
   background: var(--accent-color);
   color: var(--secondary-color);
   border: none;
@@ -154,21 +175,137 @@ button {
   transition: background 0.3s;
 }
 
-.button:hover,
-button:hover {
+.button:hover {
+  background: var(--button-hover-color);
+}
+
+.button-primary {
+  background: var(--accent-color);
+}
+
+.button-primary:hover {
   background: var(--accent-color-dark);
 }
 
-.product-controls button:hover {
-  background-color: var(--button-hover-color);
+.button-secondary {
+  background: var(--border-color);
+  color: var(--text-color);
 }
 
-/* Form Controls */
-.quantity-input {
-  width: 50px;
-  height: 30px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 5px;
-  margin-right: 10px;
+.button-secondary:hover {
+  background: #ccc;
+}
+
+.button-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.button-danger:hover {
+  background: #c82333;
+}
+
+/* Status indicators */
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-processing {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Loading and error states */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: var(--border-radius);
+  margin: 1rem 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .dashboard-card {
+    padding: 1rem;
+  }
+  
+  .admin-table {
+    font-size: 0.875rem;
+  }
+  
+  .admin-table th,
+  .admin-table td {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  nav ul {
+    gap: 1rem;
+  }
+  
+  nav a {
+    font-size: 0.9rem;
+  }
+  
+  .dashboard-card .count {
+    font-size: 2rem;
+  }
+  
+  .button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
 }

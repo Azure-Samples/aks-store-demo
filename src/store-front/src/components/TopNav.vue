@@ -2,7 +2,7 @@
   <nav>
     <div class="logo">
       <router-link to="/">
-        <img src="/contoso-pet-store-logo.png" alt="Contoso Pet Store Logo" />
+        <img :src="theme.logo.src" :alt="theme.logo.alt" />
       </router-link>
     </div>
     <button class="hamburger" @click="toggleNav">
@@ -20,9 +20,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useCartStore } from '@/stores'
+import { useTheme } from '@/composables/useTheme'
 
 const cartStore = useCartStore()
 const isNavOpen = ref(false)
+const { theme } = useTheme()
 
 const cartItemCount = computed(() => cartStore.count)
 
@@ -40,8 +42,8 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #333;
-  color: #fff;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
   padding-top: 0.5rem;
   padding-left: 1rem;
   padding-right: 1rem;
@@ -78,7 +80,7 @@ nav img {
   display: block;
   width: 20px;
   height: 2px;
-  background-color: #fff;
+  background-color: var(--secondary-color);
   position: relative;
   top: 50%;
   transform: translateY(-50%);
@@ -90,7 +92,7 @@ nav img {
   display: block;
   width: 20px;
   height: 2px;
-  background-color: #fff;
+  background-color: var(--secondary-color);
   position: absolute;
   left: 0;
 }
@@ -110,7 +112,7 @@ nav img {
     top: 100%;
     left: 0;
     right: 0;
-    background-color: #333;
+    background-color: var(--primary-color);
     padding: 1rem;
   }
 

@@ -3,3 +3,7 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - service.yaml
+configMapGenerator:
+  - envs:
+      - .env
+    name: store-admin
