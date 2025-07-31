@@ -6,14 +6,35 @@
   "dependencies": {
     "dotenv": "^10.0.0",
     "playwright": "^1.50.1",
-    "playwright-core": "^1.50.1"
+    "playwright-core": "^1.50.1",
+    "typescript": "^5.8.3"
   },
   "devDependencies": {
     "@azure/microsoft-playwright-testing": "^1.0.0-beta.7",
     "@playwright/test": "^1.50.1",
-    "@types/node": "^22.15.3"
+    "@types/node": "^22.16.5"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:e2e": "playwright test e2e/",
+    "test:store-front": "playwright test e2e/store-front/",
+    "test:store-front:basic": "playwright test e2e/store-front/basic.spec.ts",
+    "test:store-front:comprehensive": "playwright test e2e/store-front/comprehensive.spec.ts",
+    "test:store-front:headed": "playwright test e2e/store-front/ --headed",
+    "test:store-admin": "playwright test e2e/store-admin/",
+    "test:store-admin:basic": "playwright test e2e/store-admin/basic.spec.ts",
+    "test:store-admin:comprehensive": "playwright test e2e/store-admin/comprehensive.spec.ts",
+    "test:store-admin:headed": "playwright test e2e/store-admin/ --headed",
+    "test:traffic": "playwright test traffic/",
+    "test:traffic:single-buyer": "playwright test traffic/single-item-buyer.spec.ts",
+    "test:traffic:casual-browser": "playwright test traffic/casual-browser.spec.ts",
+    "test:traffic:malicious": "playwright test traffic/malicious-buyer.spec.ts",
+    "test:traffic:headed": "playwright test traffic/ --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC"
