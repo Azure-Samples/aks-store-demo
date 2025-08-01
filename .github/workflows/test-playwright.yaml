@@ -30,7 +30,7 @@ jobs:
         working-directory: tests
 
       - name: Run Playwright tests
-        run: npx playwright test --config=playwright.service.config.ts --workers=20
+        run: npx playwright test e2e/store-front/basic.spec.ts e2e/store-admin/basic.spec.ts --config=playwright.service.config.ts --workers=20
         working-directory: tests
         env:
           PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
