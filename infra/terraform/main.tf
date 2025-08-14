@@ -67,7 +67,7 @@ data "http" "current_ip" {
 
 locals {
   name                            = "${var.environment}${random_pet.example.id}${random_integer.example.result}"
-  aks_node_pool_vm_size           = var.aks_node_pool_vm_size != "" ? var.aks_node_pool_vm_size : "Standard_D2_v4"
+  aks_node_pool_vm_size           = var.aks_node_pool_vm_size != "" ? var.aks_node_pool_vm_size : "Standard_D2s_v4"
   deploy_azure_cosmosdb           = var.deploy_azure_cosmosdb == "true" ? true : false
   default_cosmosdb_account_kind   = "GlobalDocumentDB"
   cosmosdb_account_kind           = var.cosmosdb_account_kind != "" ? var.cosmosdb_account_kind : local.default_cosmosdb_account_kind

@@ -88,7 +88,7 @@ The following environment variables control what gets deployed:
 | Variable                          | Description                                                                                                                                                        |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `AZURE_LOCATION`                  | The Azure region for the deployment.                                                                                                                               |
-| `AKS_NODE_POOL_VM_SIZE`           | AKS node VM size. Default: `Standard_D2_v4`.                                                                                                                       |
+| `AKS_NODE_POOL_VM_SIZE`           | AKS node VM size. Default: `Standard_D2s_v4`.                                                                                                                      |
 | `DEPLOY_AZURE_CONTAINER_REGISTRY` | Set `true` to provision Azure Container Registry (ACR). When enabled, images are either imported from GHCR or built to ACR and the deployment uses that registry.  |
 | `BUILD_CONTAINERS`                | With ACR enabled (above), set `true` to build images from `src/*` using `az acr build`. If `false`/unset, images are imported from GHCR into ACR.                  |
 | `DEPLOY_AZURE_OPENAI`             | Set `true` to deploy Azure OpenAI and enable `ai-service` with workload identity.                                                                                  |
@@ -107,7 +107,7 @@ These environment variables listed above can be set with commands like this:
 azd env set AZURE_LOCATION swedencentral
 
 # set the SKU of the virtual machine scale set nodes in the AKS cluster
-azd env set AKS_NODE_POOL_VM_SIZE Standard_D2_v4
+azd env set AKS_NODE_POOL_VM_SIZE Standard_D2s_v4
 
 # deploys azure container registry and imports containers from github container registry
 azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true

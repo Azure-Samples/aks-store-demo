@@ -11,7 +11,7 @@ variable "environment" {
 variable "aks_node_pool_vm_size" {
   description = "value of azure kubernetes node pool vm size"
   type        = string
-  default     = "Standard_D2_v4"
+  default     = "Standard_D2s_v4"
 }
 
 variable "k8s_namespace" {

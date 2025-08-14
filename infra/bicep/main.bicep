@@ -13,7 +13,7 @@ param location string
 param appEnvironment string
 
 @description('value of azure kubernetes node pool vm size')
-param aksNodePoolVMSize string = 'Standard_D2_v4'
+param aksNodePoolVMSize string = 'Standard_D2s_v4'
 
 @description('value of the kubernetes namespace')
 param k8sNamespace string = 'pets'
