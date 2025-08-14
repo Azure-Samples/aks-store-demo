@@ -101,7 +101,7 @@ These environment variables listed above can be set with commands like this:
 azd env set AZURE_LOCATION swedencentral
 
 # set the SKU of the virtual machine scale set nodes in the AKS cluster
-azd env set AKS_NODE_POOL_VM_SIZE Standard_DS2_v3
+azd env set AKS_NODE_POOL_VM_SIZE Standard_D2_v4
 
 # deploys azure container registry and imports containers from github container registry
 azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true

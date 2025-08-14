@@ -1,7 +1,7 @@
 param location string
 @minLength(3)
 param nameSuffix string
-param vmSku string
+param vmSku string = 'Standard_D2_v4'
 param deployAcr bool
 param logsWorkspaceResourceId string
 param metricsWorkspaceResourceId string
