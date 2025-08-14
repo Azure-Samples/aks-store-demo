@@ -19,23 +19,23 @@ param aksNodePoolVMSize string = 'Standard_D2_v4'
 param k8sNamespace string = 'pets'
 
 @description('value to determine if observability tools should be deployed')
-param deployObservabilityTools bool = true
+param deployObservabilityTools bool = false
 
 @description('value to determine if azure container registry should be deployed')
-param deployAzureContainerRegistry bool = true
+param deployAzureContainerRegistry bool = false
 
 @description('value to determine if azure servicebus should be deployed')
-param deployAzureServiceBus bool = true
+param deployAzureServiceBus bool = false
 
 @description('value to determine if azure cosmosdb should be deployed')
-param deployAzureCosmosDB bool = true
+param deployAzureCosmosDB bool = false
 
 @allowed(['GlobalDocumentDB', 'MongoDB'])
 @description('value of azure cosmosdb account kind')
 param cosmosDBAccountKind string = 'GlobalDocumentDB'
 
 @description('value to determine if azure openai should be deployed')
-param deployAzureOpenAI bool = true
+param deployAzureOpenAI bool = false
 
 @description('value of azure location for azure openai resources. defaults to location but you can override it')
 param azureOpenAILocation string = location
@@ -188,6 +188,7 @@ module openai 'openai.bicep' = if (deployAzureOpenAI) {
   }
 }
 
+output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_RESOURCENAME_SUFFIX string = name
 output AZURE_RESOURCE_GROUP string = rg.name
 output AZURE_AKS_CLUSTER_NAME string = aks.outputs.name
@@ -218,7 +219,10 @@ output AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL string = deployAzureCosm
   ? '${environment().resourceManager}${cosmosdb.outputs.id}/listConnectionStrings?api-version=2021-04-15'
   : ''
 output AZURE_DATABASE_API string = cosmosDBAccountKind == 'MongoDB' ? 'mongodb' : 'cosmosdbsql'
-output AZURE_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
+output AZURE_CONTAINER_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = deployAzureContainerRegistry ? aks.outputs.registryLoginServer : ''
-output AZURE_TENANT_ID string = tenant().tenantId
-output SOURCE_REGISTRY string = sourceRegistry
+output SOURCE_REGISTRY string = deployAzureContainerRegistry ? aks.outputs.registryLoginServer : sourceRegistry
+output DEPLOY_AZURE_CONTAINER_REGISTRY bool = deployAzureContainerRegistry
+output DEPLOY_AZURE_SERVICE_BUS bool = deployAzureServiceBus
+output DEPLOY_AZURE_COSMOSDB bool = deployAzureCosmosDB
+output DEPLOY_AZURE_OPENAI bool = deployAzureOpenAI

@@ -76,6 +76,7 @@ locals {
   deploy_azure_openai             = var.deploy_azure_openai == "true" ? true : false
   deploy_image_generation_model   = var.deploy_image_generation_model == "true" ? true : false
   deploy_azure_servicebus         = var.deploy_azure_servicebus == "true" ? true : false
+  source_registry                 = var.source_registry != "" ? var.source_registry : "ghcr.io/azure-samples"
 }
 
 resource "azurerm_resource_group" "example" {

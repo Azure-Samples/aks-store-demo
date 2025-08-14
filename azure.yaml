@@ -3,178 +3,70 @@
 name: aks-store-demo
 metadata:
   template: aks-store-demo@1.1.0
+hooks:
+  preprovision:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/preprovision.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/preprovision.ps1
+  postprovision:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postprovision.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postprovision.ps1
+  predeploy: # This hook is executed before the deployment of the application to create the custom-values.yaml file
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/predeploy.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/predeploy.ps1
+  postdeploy:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postdeploy.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postdeploy.ps1
 infra:
   provider: terraform
   path: infra/terraform
+# infra:
+#   provider: bicep
+#   path: infra/bicep
 services:
-  ai-service:
-    project: src/ai-service
-    language: docker
-    docker:
-      context: .
-      path: Dockerfile
+  demo:
     host: aks
     k8s:
       namespace: pets
-      kustomize:
-        dir: ../../kustomize/overlays/azd/ai-service
-        edits:
-          - set image ai-service=${SERVICE_AI_SERVICE_IMAGE_NAME}
-          - add annotation azure.workload.identity/client-id:${AZURE_IDENTITY_CLIENT_ID}
-        env:
-          AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
-          AZURE_OPENAI_DEPLOYMENT_NAME: ${AZURE_OPENAI_MODEL_NAME}
-          USE_AZURE_OPENAI: "True"
-          USE_AZURE_AD: "True"
-    hooks:
-      postdeploy:
-        posix:
-          shell: sh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/ai-service/kustomization.yaml
-        windows:
-          shell: pwsh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/ai-service/kustomization.yaml
-  product-service:
-    project: src/product-service
-    language: docker
-    docker:
-      context: .
-      path: Dockerfile
-    host: aks
-    k8s:
-      namespace: pets
-      kustomize:
-        dir: ../../kustomize/overlays/azd/product-service
-        edits:
-          - set image product-service=${SERVICE_PRODUCT_SERVICE_IMAGE_NAME}
-    hooks:
-      postdeploy:
-        posix:
-          shell: sh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/product-service/kustomization.yaml
-        windows:
-          shell: pwsh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/product-service/kustomization.yaml
-  order-service:
-    project: src/order-service
-    language: docker
-    docker:
-      context: .
-      path: Dockerfile
-    host: aks
-    k8s:
-      namespace: pets
-      kustomize:
-        dir: ../../kustomize/overlays/azd/order-service
-        edits:
-          - set image order-service=${SERVICE_ORDER_SERVICE_IMAGE_NAME}
-          - add annotation azure.workload.identity/client-id:${AZURE_IDENTITY_CLIENT_ID}
-        env:
-          ORDER_QUEUE_HOSTNAME: ${AZURE_SERVICE_BUS_HOST}
-          ORDER_QUEUE_NAME: "orders"
-          USE_WORKLOAD_IDENTITY_AUTH: "true"
-          FASTIFY_ADDRESS: "0.0.0.0"
-    hooks:
-      postdeploy:
-        posix:
-          shell: sh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/order-service/kustomization.yaml
-        windows:
-          shell: pwsh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/order-service/kustomization.yaml
-  makeline-service:
-    project: src/makeline-service
-    language: docker
-    docker:
-      context: .
-      path: Dockerfile
-    host: aks
-    k8s:
-      namespace: pets
-      kustomize:
-        dir: ../../kustomize/overlays/azd/makeline-service
-        edits:
-          - set image makeline-service=${SERVICE_MAKELINE_SERVICE_IMAGE_NAME}
-          - add annotation azure.workload.identity/client-id:${AZURE_IDENTITY_CLIENT_ID}
-        env:
-          ORDER_QUEUE_HOSTNAME: ${AZURE_SERVICE_BUS_HOST}
-          ORDER_QUEUE_NAME: "orders"
-          USE_WORKLOAD_IDENTITY_AUTH: "true"
-          ORDER_DB_URI: ${AZURE_COSMOS_DATABASE_URI}
-          ORDER_DB_LIST_CONNECTION_STRING_URL: ${AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL}
-          ORDER_DB_COLLECTION_NAME: "orders"
-          ORDER_DB_NAME: "orderdb"
-    hooks:
-      postdeploy:
-        posix:
-          shell: sh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/makeline-service/kustomization.yaml
-        windows:
-          shell: pwsh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/makeline-service/kustomization.yaml
-  store-front:
-    project: src/store-front
-    language: docker
-    docker:
-      context: .
-      path: Dockerfile
-    host: aks
-    k8s:
-      namespace: pets
-      kustomize:
-        dir: ../../kustomize/overlays/azd/store-front
-        edits:
-          - set image store-front=${SERVICE_STORE_FRONT_IMAGE_NAME}
-    hooks:
-      postdeploy:
-        posix:
-          shell: sh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/store-front/kustomization.yaml
-        windows:
-          shell: pwsh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/store-front/kustomization.yaml
-  store-admin:
-    project: src/store-admin
-    language: docker
-    docker:
-      context: .
-      path: Dockerfile
-    host: aks
-    k8s:
-      namespace: pets
-      kustomize:
-        dir: ../../kustomize/overlays/azd/store-admin
-        edits:
-          - set image store-admin=${SERVICE_STORE_ADMIN_IMAGE_NAME}
-    hooks:
-      postdeploy:
-        posix:
-          shell: sh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/store-admin/kustomization.yaml
-        windows:
-          shell: pwsh
-          continueOnError: false
-          interactive: false
-          run: git restore ../../kustomize/overlays/azd/store-admin/kustomization.yaml
+      service:
+        name: store-admin
+      helm:
+        repositories:
+          - name: aks-store-demo
+            url: https://azure-samples.github.io/aks-store-demo
+        releases:
+          - name: demo
+            chart: aks-store-demo/aks-store-demo-chart
+            version: 1.3.0
+            values: custom-values.yaml # This file is created by the predeploy hook
