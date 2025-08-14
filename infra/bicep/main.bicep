@@ -13,7 +13,7 @@ param location string
 param appEnvironment string
 
 @description('value of azure kubernetes node pool vm size')
-param aksNodePoolVMSize string = 'Standard_DS2_v2'
+param aksNodePoolVMSize string = 'Standard_D2_v4'
 
 @description('value of the kubernetes namespace')
 param k8sNamespace string = 'pets'
@@ -219,7 +219,6 @@ output AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL string = deployAzureCosm
   : ''
 output AZURE_DATABASE_API string = cosmosDBAccountKind == 'MongoDB' ? 'mongodb' : 'cosmosdbsql'
 output AZURE_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
-output AZURE_CONTAINER_REGISTRY_ENDPOINT string = deployAzureContainerRegistry
-  ? aks.outputs.registryLoginServer
-  : sourceRegistry 
+output AZURE_CONTAINER_REGISTRY_ENDPOINT string = deployAzureContainerRegistry ? aks.outputs.registryLoginServer : ''
 output AZURE_TENANT_ID string = tenant().tenantId
+output SOURCE_REGISTRY string = sourceRegistry
