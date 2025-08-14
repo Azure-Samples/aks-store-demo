@@ -357,7 +357,7 @@ onMounted(() => {
 .form-textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   font-size: 1rem;
 }
@@ -426,8 +426,8 @@ onMounted(() => {
 }
 
 .validation-errors {
-  background-color: #ffdddd;
-  border-left: 5px solid #f44336;
+  background-color: #f5f5f5;
+  border-left: 5px solid #000000;
   padding: 0.5rem 1rem;
   margin: 1rem 0;
   border-radius: var(--border-radius);
@@ -441,7 +441,7 @@ onMounted(() => {
   list-style: none;
   padding: 0;
   margin: 0;
-  color: #f44336;
+  color: #000000;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -458,7 +458,7 @@ onMounted(() => {
 
 .validation-errors li::before {
   content: '•';
-  color: #f44336;
+  color: #000000;
   position: absolute;
   left: 5px;
   font-weight: bold;

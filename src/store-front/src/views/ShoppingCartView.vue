@@ -180,12 +180,12 @@ const submitOrder = () => {
 }
 
 .status-pending {
-  color: #f39c12;
+  color: #666666;
   font-weight: bold;
 }
 
 .status-completed {
-  color: #2ecc71;
+  color: #000000;
   font-weight: bold;
 }
 
@@ -222,7 +222,7 @@ const submitOrder = () => {
   background-color: var(--primary-color, #f8f9fa);
   font-weight: bold;
   color: var(--secondary-color, #333);
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
   padding: 12px 0;
 }
 
@@ -234,13 +234,13 @@ const submitOrder = () => {
   display: grid;
   grid-template-columns: 1fr 0.5fr 0.5fr 0.5fr;
   width: 100%;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
   align-items: center;
   padding: 10px 0;
 }
 
 .cart-item:hover {
-  background-color: rgba(0, 123, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .cart-column {
@@ -295,7 +295,7 @@ const submitOrder = () => {
   font-weight: bold;
   font-size: 1.2rem;
   margin-top: 10px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border-color);
   padding-top: 10px;
 }
 
@@ -336,7 +336,7 @@ const submitOrder = () => {
 }
 
 .remove-button {
-  background-color: #dc3545;
+  background-color: #000000;
   color: white;
   border: none;
   border-radius: 4px;
@@ -351,7 +351,7 @@ const submitOrder = () => {
 }
 
 .remove-button:hover {
-  background-color: #c82333;
+  background-color: #333333;
 }
 
 .continue-button {
@@ -361,7 +361,7 @@ const submitOrder = () => {
 }
 
 .continue-button:hover {
-  background-color: #444;
+  background-color: var(--accent-color-dark);
 }
 
 .checkout-button {
@@ -395,7 +395,7 @@ const submitOrder = () => {
 .quantity-input {
   width: 40px;
   text-align: center;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 4px;
   margin: 0 5px;
@@ -413,20 +413,20 @@ const submitOrder = () => {
   width: 30px;
   height: 30px;
   border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #f0f0f0;
+  border: 1px solid var(--border-color);
+  background-color: #f8f8f8;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   font-size: 16px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .quantity-btn:hover:not(:disabled) {
-  background-color: #e0e0e0;
-  border-color: #999;
+  background-color: #e8e8e8;
+  border-color: var(--accent-color-dark);
 }
 
 .quantity-btn:disabled {

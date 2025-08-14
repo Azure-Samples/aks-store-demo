@@ -79,7 +79,7 @@ const navigateToProduct = (productId: string | number) => {
 }
 
 .table-row {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .table-row:last-child {

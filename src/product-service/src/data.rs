@@ -1,13 +1,13 @@
 use crate::configuration::Settings;
 use crate::model::Product;
 
-pub fn fetch_products(_settings: &Settings) -> Vec<Product> {
+pub fn fetch_products(settings: &Settings) -> Vec<Product> {
     vec![
         Product {
             id: 1,
-            name: "Contoso Catnip's Friend".to_string(),
+            name: format!("{} Catnip's Friend", settings.company_name),
             price: 9.99,
-            description: "Watch your feline friend embark on a fishing adventure with Contoso Catnip's Friend toy. Packed with irresistible catnip and dangling fish lure.".to_string(),
+            description: format!("Watch your feline friend embark on a fishing adventure with {} Catnip's Friend toy. Packed with irresistible catnip and dangling fish lure.", settings.company_name),
             image: "/catnip.jpg".to_string()
         },
         Product {
@@ -61,9 +61,9 @@ pub fn fetch_products(_settings: &Settings) -> Vec<Product> {
         },
         Product {
             id: 9,
-            name: "Contoso Claw's Crabby Cat Toy".to_string(),
+            name: format!("{} Claw's Crabby Cat Toy", settings.company_name),
             price: 3.99,
-            description: "Watch your cat go crazy for Contoso Claw's Crabby Cat Toy. This crinkly and catnip-filled toy will awaken their hunting instincts and provide endless entertainment.".to_string(),
+            description: format!("Watch your cat go crazy for {} Claw's Crabby Cat Toy. This crinkly and catnip-filled toy will awaken their hunting instincts and provide endless entertainment.", settings.company_name),
             image: "/crabby.jpg".to_string()
         },
         Product {
