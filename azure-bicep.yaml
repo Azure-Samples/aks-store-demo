@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: aks-store-demo
+metadata:
+  template: aks-store-demo@1.1.0
+hooks:
+  preprovision:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/preprovision.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/preprovision.ps1
+  postprovision:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postprovision.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postprovision.ps1
+  predeploy: # This hook is executed before the deployment of the application to create the custom-values.yaml file
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/predeploy.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/predeploy.ps1
+  postdeploy:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postdeploy.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: false
+      run: azd-hooks/postdeploy.ps1
+infra:
+  provider: bicep
+  path: infra/bicep
+services:
+  demo:
+    host: aks
+    k8s:
+      namespace: pets
+      service:
+        name: store-admin
+      helm:
+        repositories:
+          - name: aks-store-demo
+            url: https://azure-samples.github.io/aks-store-demo
+        releases:
+          - name: demo
+            chart: aks-store-demo/aks-store-demo-chart
+            version: 1.3.0
+            values: custom-values.yaml # This file is created by the predeploy hook
