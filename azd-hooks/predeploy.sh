@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 ##########################################################
 # Ensure Helm and Kustomize support is enabled  
@@ -8,7 +8,7 @@ azd config set alpha.aks.kustomize on
 
 # Check kubelogin and install if not exists
 ##########################################################
-if ! command -v kubelogin &> /dev/null; then
+if ! command -v kubelogin >/dev/null 2>&1; then
   echo "kubelogin could not be found. Installing kubelogin..."
   az aks install-cli
 fi

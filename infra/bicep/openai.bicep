@@ -8,7 +8,8 @@ param modelDeployments array = []
 param tags object
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/cognitive-services/account
-module cognitiveServicesAccount 'br/public:avm/res/cognitive-services/account:0.10.1' = {
+// https://mcr.microsoft.com/v2/bicep/avm/res/cognitive-services/account/tags/list
+module cognitiveServicesAccount 'br/public:avm/res/cognitive-services/account:0.13.1' = {
   name: 'accountDeployment'
   params: {
     name: 'aoai-${nameSuffix}'

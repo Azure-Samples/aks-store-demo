@@ -11,7 +11,8 @@ param configureMonitorSettings bool = false
 param tags object
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/container-service/managed-cluster
-module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3' = {
+// https://mcr.microsoft.com/v2/bicep/avm/res/container-service/managed-cluster/tags/list
+module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.9.0' = {
   name: 'managedClusterDeployment'
   params: {
     name: 'aks-${nameSuffix}'
@@ -91,6 +92,7 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
 }
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/container-registry/registry
+// https://mcr.microsoft.com/v2/bicep/avm/res/container-registry/registry/tags/list
 module registry 'br/public:avm/res/container-registry/registry:0.9.1' = if (deployAcr) {
   name: 'registryDeployment'
   params: {

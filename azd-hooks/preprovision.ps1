@@ -1,5 +1,8 @@
 #!/usr/bin/env pwsh
 
+azd config set alpha.aks.helm on
+azd config set alpha.aks.kustomize on
+
 Write-Host "Ensuring providers/features are registered and Azure CLI extensions are installed"
 
 az provider register --namespace "Microsoft.ContainerService"
@@ -57,3 +60,8 @@ az provider register -n Microsoft.ContainerService
 # add azure cli extensions
 az extension add --upgrade --name aks-preview
 az extension add --upgrade --name amg
+
+# if BUILD_CONTAINERS is set to true, set the DEPLOY_AZURE_CONTAINER_REGISTRY to true
+if ($env:BUILD_CONTAINERS -eq "true") {
+  azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
+}
