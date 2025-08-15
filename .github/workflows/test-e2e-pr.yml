@@ -102,14 +102,17 @@ jobs:
       - name: Turn on Kustomize support
         run: azd config set alpha.aks.kustomize on
 
+      - name: Swap azd config files to build from source
+        run: |
+          mv azure.yaml azure.yaml.bak
+          mv azure-build-from-source.yaml azure.yaml
+
       - name: Provision resources and deploy app
         run: |
           azd env new ${{ vars.AZURE_ENV_NAME }}
-          azd env set AKS_NODE_POOL_VM_SIZE Standard_D2_v4
           azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
           azd env set DEPLOY_AZURE_OPENAI true
           azd env set AZURE_OPENAI_LOCATION ${{ vars.AZURE_LOCATION }}
-          azd env set DEPLOY_AZURE_OPENAI_DALL_E_MODEL false
           azd env set DEPLOY_AZURE_SERVICE_BUS true
           azd env set DEPLOY_AZURE_COSMOSDB true
           azd env set AZURE_COSMOSDB_ACCOUNT_KIND MongoDB
