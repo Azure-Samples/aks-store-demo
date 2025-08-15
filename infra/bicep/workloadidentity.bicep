@@ -10,7 +10,7 @@ type federatedCredential = {
   subject: string
 }
 
-module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = {
+module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = {
   name: 'userAssignedIdentityDeployment'
   params: {
     name: 'mi-${nameSuffix}'

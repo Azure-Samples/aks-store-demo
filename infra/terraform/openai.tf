@@ -2,7 +2,7 @@
 module "aoai" {
   count                 = local.deploy_azure_openai ? 1 : 0
   source                = "Azure/avm-res-cognitiveservices-account/azurerm"
-  version               = "0.6.0"
+  version               = "0.10.0"
   name                  = "openai-${local.name}"
   custom_subdomain_name = "openai-${local.name}"
   resource_group_name   = azurerm_resource_group.example.name
@@ -43,30 +43,9 @@ module "aoai" {
   )
 }
 
-module "aoai-role" {
-  count   = local.deploy_azure_openai ? 1 : 0
-  source  = "Azure/avm-res-authorization-roleassignment/azurerm"
-  version = "0.2.0"
-  # users_by_object_id = {
-  #   current_user = data.azurerm_client_config.current.object_id
-  # }
-  groups_by_object_id = {
-    "demo_group" = azuread_group.example.object_id
-  }
-  role_definitions = {
-    cognitive_services_openai_user_role = {
-      name = "Cognitive Services OpenAI User"
-    }
-  }
-  role_assignments_for_scopes = {
-    cognitive_services_role_assignments = {
-      scope = module.aoai[0].resource_id
-      role_assignments = {
-        role_assignment_1 = {
-          role_definition = "cognitive_services_openai_user_role"
-          any_principals  = ["demo_group"]
-        }
-      }
-    }
-  }
+resource "azurerm_role_assignment" "openai_user" {
+  count                = local.deploy_azure_openai ? 1 : 0
+  scope                = module.aoai[0].resource_id
+  role_definition_name = "Cognitive Services OpenAI User"
+  principal_id         = data.azurerm_client_config.current.object_id
 }

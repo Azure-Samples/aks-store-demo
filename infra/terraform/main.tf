@@ -67,7 +67,7 @@ data "http" "current_ip" {
 
 locals {
   name                            = "${var.environment}${random_pet.example.id}${random_integer.example.result}"
-  aks_node_pool_vm_size           = var.aks_node_pool_vm_size != "" ? var.aks_node_pool_vm_size : "Standard_D2_v4"
+  aks_node_pool_vm_size           = var.aks_node_pool_vm_size != "" ? var.aks_node_pool_vm_size : "Standard_D2s_v4"
   deploy_azure_cosmosdb           = var.deploy_azure_cosmosdb == "true" ? true : false
   default_cosmosdb_account_kind   = "GlobalDocumentDB"
   cosmosdb_account_kind           = var.cosmosdb_account_kind != "" ? var.cosmosdb_account_kind : local.default_cosmosdb_account_kind
@@ -76,6 +76,7 @@ locals {
   deploy_azure_openai             = var.deploy_azure_openai == "true" ? true : false
   deploy_image_generation_model   = var.deploy_image_generation_model == "true" ? true : false
   deploy_azure_servicebus         = var.deploy_azure_servicebus == "true" ? true : false
+  source_registry                 = var.source_registry != "" ? var.source_registry : "ghcr.io/azure-samples"
 }
 
 resource "azurerm_resource_group" "example" {
@@ -83,12 +84,4 @@ resource "azurerm_resource_group" "example" {
   location = var.location
 }
 
-resource "azuread_group" "example" {
-  display_name     = "AKS Store Demo App"
-  security_enabled = true
-}
 
-resource "azuread_group_member" "example" {
-  group_object_id  = azuread_group.example.object_id
-  member_object_id = data.azurerm_client_config.current.object_id
-}

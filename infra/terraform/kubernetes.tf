@@ -61,37 +61,20 @@ module "aks" {
 }
 
 // https://github.com/Azure/terraform-azurerm-avm-res-authorization-roleassignment/
-module "aks-role" {
-  source  = "Azure/avm-res-authorization-roleassignment/azurerm"
-  version = "0.2.0"
-  # users_by_object_id = {
-  #   current_user = data.azurerm_client_config.current.object_id
-  # }
-  groups_by_object_id = {
-    demo_group = azuread_group.example.object_id
-  }
-  role_definitions = {
-    aks_cluster_admin_role = {
-      name = "Azure Kubernetes Service RBAC Cluster Admin"
-    }
-  }
-  role_assignments_for_scopes = {
-    aks_cluster_role_assignments = {
-      scope = module.aks.resource_id
-      role_assignments = {
-        role_assignment_1 = {
-          role_definition = "aks_cluster_admin_role"
-          groups          = ["demo_group"]
-        }
-      }
-    }
-  }
+// Group-based AKS RBAC assignment removed; direct assignment to current principal is retained below
+
+# Assign AKS Cluster Admin to the current principal (works for both user and service principal identities)
+resource "azurerm_role_assignment" "aks_cluster_admin" {
+  scope                = module.aks.resource_id
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
+// https://github.com/Azure/terraform-azurerm-avm-res-authorization-roleassignment
 module "acr-role" {
   count   = local.deploy_azure_container_registry ? 1 : 0
   source  = "Azure/avm-res-authorization-roleassignment/azurerm"
-  version = "0.2.0"
+  version = "0.3.0"
   user_assigned_managed_identities_by_principal_id = {
     kubelet_identity = module.aks.kubelet_identity_id
   }

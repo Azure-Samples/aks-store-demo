@@ -6,7 +6,8 @@ param servicePrincipalId string
 param tags object
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/service-bus/namespace
-module serviceBusNamespace 'br/public:avm/res/service-bus/namespace:0.13.2' = {
+// https://mcr.microsoft.com/v2/bicep/avm/res/service-bus/namespace/tags/list
+module serviceBusNamespace 'br/public:avm/res/service-bus/namespace:0.15.0' = {
   name: 'namespaceDeployment'
   params: {
     name: 'sb-${nameSuffix}'

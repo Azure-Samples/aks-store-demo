@@ -1,3 +1,7 @@
+output "AZURE_TENANT_ID" {
+  value = data.azurerm_client_config.current.tenant_id
+}
+
 output "AZURE_RESOURCENAME_SUFFIX" {
   value = local.name
 }
@@ -71,14 +75,30 @@ output "AZURE_DATABASE_API" {
   value = local.deploy_azure_cosmosdb && local.cosmosdb_account_kind == "MongoDB" ? "mongodb" : local.deploy_azure_cosmosdb && local.cosmosdb_account_kind == "GlobalDocumentDB" ? "cosmosdbsql" : ""
 }
 
-output "AZURE_REGISTRY_NAME" {
+output "AZURE_CONTAINER_REGISTRY_NAME" {
   value = local.deploy_azure_container_registry ? module.acr[0].name : ""
 }
 
 output "AZURE_CONTAINER_REGISTRY_ENDPOINT" {
-  value = local.deploy_azure_container_registry ? module.acr[0].resource.login_server : var.source_registry
+  value = local.deploy_azure_container_registry ? module.acr[0].resource.login_server : ""
 }
 
-output "AZURE_TENANT_ID" {
-  value = data.azurerm_client_config.current.tenant_id
+output "SOURCE_REGISTRY" {
+  value = local.deploy_azure_container_registry ? module.acr[0].resource.login_server : local.source_registry
+}
+
+output "DEPLOY_AZURE_CONTAINER_REGISTRY" {
+  value = local.deploy_azure_container_registry
+}
+
+output "DEPLOY_AZURE_SERVICE_BUS" {
+  value = local.deploy_azure_servicebus
+}
+
+output "DEPLOY_AZURE_COSMOSDB" {
+  value = local.deploy_azure_cosmosdb
+}
+
+output "DEPLOY_AZURE_OPENAI" {
+  value = local.deploy_azure_openai
 }

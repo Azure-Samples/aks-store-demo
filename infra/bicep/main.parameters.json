@@ -18,30 +18,30 @@
       "value": "${AKS_NODE_POOL_VM_SIZE}"
     },
     "deployAzureContainerRegistry": {
-      "value": "${DEPLOY_AZURE_CONTAINER_REGISTRY=false}"
+      "value": "${DEPLOY_AZURE_CONTAINER_REGISTRY}"
     },
     "deployAzureServiceBus": {
-      "value": "${DEPLOY_AZURE_SERVICE_BUS=false}"
+      "value": "${DEPLOY_AZURE_SERVICE_BUS}"
     },
     "deployObservabilityTools": {
-      "value": "${DEPLOY_OBSERVABILITY_TOOLS=false}"
+      "value": "${DEPLOY_OBSERVABILITY_TOOLS}"
     },
     "deployAzureCosmosDB": {
-      "value": "${DEPLOY_AZURE_COSMOSDB=false}"
+      "value": "${DEPLOY_AZURE_COSMOSDB}"
     },
     "cosmosDBAccountKind": {
       "value": "${AZURE_COSMOSDB_ACCOUNT_KIND=GlobalDocumentDB}"
     },
     "deployAzureOpenAI": {
-      "value": "${DEPLOY_AZURE_OPENAI=false}"
+      "value": "${DEPLOY_AZURE_OPENAI}"
     },
     "azureOpenAILocation": {
       "value": "${AZURE_OPENAI_LOCATION}"
     },
     "deployImageGenerationModel": {
-      "value": "${DEPLOY_AZURE_OPENAI_DALL_E_MODEL=false}"
+      "value": "${DEPLOY_AZURE_OPENAI_DALL_E_MODEL}"
     },
-    "source_registry": {
+    "sourceRegistry": {
       "value": "${SOURCE_REGISTRY}"
     }
   }
