@@ -51,9 +51,6 @@ hooks:
 infra:
   provider: terraform
   path: infra/terraform
-# infra:
-#   provider: bicep
-#   path: infra/bicep
 services:
   demo:
     host: aks
