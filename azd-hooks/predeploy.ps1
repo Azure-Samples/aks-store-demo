@@ -35,7 +35,6 @@ managedIdentityClientId: $($env:AZURE_IDENTITY_CLIENT_ID)
 # Add base images
 ###########################################################
 @"
-namespace: ${env:AZURE_AKS_NAMESPACE}
 productService:
   image:
     repository: ${env:SOURCE_REGISTRY}/aks-store-demo/product-service
