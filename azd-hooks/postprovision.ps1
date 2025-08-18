@@ -9,7 +9,7 @@ if (($env:DEPLOY_AZURE_CONTAINER_REGISTRY -like "true") -and ($env:BUILD_CONTAIN
     az acr build --registry $env:AZURE_CONTAINER_REGISTRY_NAME --image aks-store-demo/${service}:latest ./src/${service}/
   }
 } 
-elseif (($env:DEPLOY_AZURE_CONTAINER_REGISTRY -like "true") -and ($env:BUILD_CONTAINERS -like "false")) {
+elseif (($env:DEPLOY_AZURE_CONTAINER_REGISTRY -like "true") -and ((-not $env:BUILD_CONTAINERS) -or ($env:BUILD_CONTAINERS -like "false"))) {
   echo "Import container images"
   foreach ($service in $services) {
     echo "Importing aks-store-demo/${service}:latest"
