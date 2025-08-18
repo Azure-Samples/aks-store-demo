@@ -13,29 +13,29 @@ param location string
 param appEnvironment string
 
 @description('value of azure kubernetes node pool vm size')
-param aksNodePoolVMSize string = 'Standard_D2_v4'
+param aksNodePoolVMSize string = 'Standard_D2s_v4'
 
 @description('value of the kubernetes namespace')
 param k8sNamespace string = 'pets'
 
 @description('value to determine if observability tools should be deployed')
-param deployObservabilityTools bool = true
+param deployObservabilityTools bool = false
 
 @description('value to determine if azure container registry should be deployed')
-param deployAzureContainerRegistry bool = true
+param deployAzureContainerRegistry bool = false
 
 @description('value to determine if azure servicebus should be deployed')
-param deployAzureServiceBus bool = true
+param deployAzureServiceBus bool = false
 
 @description('value to determine if azure cosmosdb should be deployed')
-param deployAzureCosmosDB bool = true
+param deployAzureCosmosDB bool = false
 
 @allowed(['GlobalDocumentDB', 'MongoDB'])
 @description('value of azure cosmosdb account kind')
 param cosmosDBAccountKind string = 'GlobalDocumentDB'
 
 @description('value to determine if azure openai should be deployed')
-param deployAzureOpenAI bool = true
+param deployAzureOpenAI bool = false
 
 @description('value of azure location for azure openai resources. defaults to location but you can override it')
 param azureOpenAILocation string = location
@@ -69,7 +69,7 @@ param sourceRegistry string = 'ghcr.io/azure-samples'
 
 @description('value of tags to apply to resources')
 param tags object = {
-  environment: 'development'
+  'azd-env-name': appEnvironment
 }
 
 // generate a unique string based on the resource group id
@@ -100,8 +100,8 @@ module aks 'kubernetes.bicep' = {
     nameSuffix: name
     vmSku: aksNodePoolVMSize
     deployAcr: deployAzureContainerRegistry
-    logsWorkspaceResourceId: deployObservabilityTools ? observability.outputs.logsWorkspaceResourceId : ''
-    metricsWorkspaceResourceId: deployObservabilityTools ? observability.outputs.metricsWorkspaceResourceId : ''
+    logsWorkspaceResourceId: deployObservabilityTools ? observability!.outputs.logsWorkspaceResourceId : ''
+    metricsWorkspaceResourceId: deployObservabilityTools ? observability!.outputs.metricsWorkspaceResourceId : ''
     currentUserObjectId: currentUserObjectId
     currentIpAddress: currentIpAddress
     configureMonitorSettings: deployObservabilityTools
@@ -145,7 +145,7 @@ module servicebus 'servicebus.bicep' = if (deployAzureServiceBus) {
     nameSuffix: name
     currentUserObjectId: currentUserObjectId
     currentIpAddress: currentIpAddress
-    servicePrincipalId: workloadidentity.outputs.principalId
+    servicePrincipalId: workloadidentity!.outputs.principalId
     tags: tags
   }
 }
@@ -156,9 +156,9 @@ module cosmosdb 'cosmosdb.bicep' = if (deployAzureCosmosDB) {
   params: {
     nameSuffix: name
     accountKind: cosmosDBAccountKind
-    identityPrincipalId: workloadidentity.outputs.principalId
+    identityPrincipalId: workloadidentity!.outputs.principalId
     currentIpAddress: currentIpAddress
-    servicePrincipalId: workloadidentity.outputs.principalId
+    servicePrincipalId: workloadidentity!.outputs.principalId
     tags: tags
   }
 }
@@ -182,43 +182,51 @@ module openai 'openai.bicep' = if (deployAzureOpenAI) {
     location: azureOpenAILocation
     currentUserObjectId: currentUserObjectId
     currentIpAddress: currentIpAddress
-    servicePrincipalId: workloadidentity.outputs.principalId
+    servicePrincipalId: workloadidentity!.outputs.principalId
     modelDeployments: modelDeployments
     tags: tags
   }
 }
 
+output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_RESOURCENAME_SUFFIX string = name
 output AZURE_RESOURCE_GROUP string = rg.name
 output AZURE_AKS_CLUSTER_NAME string = aks.outputs.name
 output AZURE_AKS_NAMESPACE string = k8sNamespace
 output AZURE_AKS_CLUSTER_ID string = aks.outputs.id
 output AZURE_AKS_OIDC_ISSUER_URL string = aks.outputs.oidcIssuerUrl
-output AZURE_OPENAI_ENDPOINT string = deployAzureOpenAI ? openai.outputs.endpoint : ''
+output AZURE_OPENAI_ENDPOINT string = deployAzureOpenAI ? openai!.outputs.endpoint : ''
 output AZURE_OPENAI_MODEL_NAME string = deployAzureOpenAI ? chatCompletionModelName : ''
 output AZURE_OPENAI_DALL_E_MODEL_NAME string = deployAzureOpenAI && deployImageGenerationModel
   ? imageGenerationModelName
   : ''
 output AZURE_OPENAI_DALL_E_ENDPOINT string = deployAzureOpenAI && deployImageGenerationModel
-  ? openai.outputs.endpoint
+  ? openai!.outputs.endpoint
   : ''
-output AZURE_IDENTITY_NAME string = workloadidentity.outputs.name
-output AZURE_IDENTITY_CLIENT_ID string = workloadidentity.outputs.clientId
-output AZURE_SERVICE_BUS_HOST string = deployAzureServiceBus ? '${servicebus.outputs.name}.servicebus.windows.net' : ''
+output AZURE_IDENTITY_NAME string = (deployAzureCosmosDB || deployAzureServiceBus || deployAzureOpenAI)
+  ? workloadidentity!.outputs.name
+  : ''
+output AZURE_IDENTITY_CLIENT_ID string = (deployAzureCosmosDB || deployAzureServiceBus || deployAzureOpenAI)
+  ? workloadidentity!.outputs.clientId
+  : ''
+output AZURE_SERVICE_BUS_HOST string = deployAzureServiceBus ? '${servicebus!.outputs.name}.servicebus.windows.net' : ''
 output AZURE_SERVICE_BUS_URI string = deployAzureServiceBus
-  ? 'amqps://${servicebus.outputs.name}.servicebus.windows.net'
+  ? 'amqps://${servicebus!.outputs.name}.servicebus.windows.net'
   : ''
-output AZURE_COSMOS_DATABASE_NAME string = deployAzureCosmosDB ? cosmosdb.outputs.name : ''
+output AZURE_COSMOS_DATABASE_NAME string = deployAzureCosmosDB ? cosmosdb!.outputs.name : ''
 output AZURE_COSMOS_DATABASE_URI string = deployAzureCosmosDB && cosmosDBAccountKind == 'MongoDB'
-  ? 'mongodb://${cosmosdb.outputs.name}.mongo.cosmos.azure.com:10255/?retryWrites=false'
+  ? 'mongodb://${cosmosdb!.outputs.name}.mongo.cosmos.azure.com:10255/?retryWrites=false'
   : deployAzureCosmosDB && cosmosDBAccountKind == 'GlobalDocumentDB'
-      ? 'https://${cosmosdb.outputs.name}.documents.azure.com:443/'
+      ? 'https://${cosmosdb!.outputs.name}.documents.azure.com:443/'
       : ''
 output AZURE_COSMOS_DATABASE_LIST_CONNECTIONSTRINGS_URL string = deployAzureCosmosDB
-  ? '${environment().resourceManager}${cosmosdb.outputs.id}/listConnectionStrings?api-version=2021-04-15'
+  ? '${environment().resourceManager}${cosmosdb!.outputs.id}/listConnectionStrings?api-version=2021-04-15'
   : ''
 output AZURE_DATABASE_API string = cosmosDBAccountKind == 'MongoDB' ? 'mongodb' : 'cosmosdbsql'
-output AZURE_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
+output AZURE_CONTAINER_REGISTRY_NAME string = deployAzureContainerRegistry ? aks.outputs.registryName : ''
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = deployAzureContainerRegistry ? aks.outputs.registryLoginServer : ''
-output AZURE_TENANT_ID string = tenant().tenantId
-output SOURCE_REGISTRY string = sourceRegistry
+output SOURCE_REGISTRY string = deployAzureContainerRegistry ? aks.outputs.registryLoginServer : sourceRegistry
+output DEPLOY_AZURE_CONTAINER_REGISTRY bool = deployAzureContainerRegistry
+output DEPLOY_AZURE_SERVICE_BUS bool = deployAzureServiceBus
+output DEPLOY_AZURE_COSMOSDB bool = deployAzureCosmosDB
+output DEPLOY_AZURE_OPENAI bool = deployAzureOpenAI
