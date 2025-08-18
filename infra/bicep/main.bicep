@@ -69,7 +69,7 @@ param sourceRegistry string = 'ghcr.io/azure-samples'
 
 @description('value of tags to apply to resources')
 param tags object = {
-  environment: 'development'
+  'azd-env-name': appEnvironment
 }
 
 // generate a unique string based on the resource group id
