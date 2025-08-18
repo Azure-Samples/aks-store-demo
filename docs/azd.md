@@ -65,6 +65,18 @@ az login
 
 When selecting an Azure region, choose one that supports all services used here: Azure OpenAI, AKS, Key Vault, Service Bus, Cosmos DB, Log Analytics, Azure Monitor (managed Prometheus), and Managed Grafana.
 
+### Availability zone support
+
+For increased resiliency you may want to deploy into a region that supports Availability Zones. Availability zone mappings are assigned per subscription, so the set of zones available can vary between subscriptions and regions. You can use the following command to list regions that support all three availability zones (1, 2, and 3):
+
+```bash
+az account list-locations \
+  --query "sort_by([? (availabilityZoneMappings != null && contains(availabilityZoneMappings[].logicalZone, '1') && contains(availabilityZoneMappings[].logicalZone, '2') && contains(availabilityZoneMappings[].logicalZone, '3')) || (metadata.availabilityZoneMappings != null && contains(metadata.availabilityZoneMappings[].logicalZone, '1') && contains(metadata.availabilityZoneMappings[].logicalZone, '2') && contains(metadata.availabilityZoneMappings[].logicalZone, '3')) ], &name)[].{Region:name}" \
+  --output table
+```
+
+See the [Azure documentation on availability zones](https://learn.microsoft.com/azure/reliability/availability-zones-overview) for details and service-specific guidance.
+
 If you are deploying an Azure OpenAI account, you will need to ensure you have enough [tokens per minute quota](https://learn.microsoft.com/azure/ai-services/openai/how-to/quota?tabs=cli) for the `gpt-4o-mini` model. You can check your quota by running the following command:
 
 ```bash
