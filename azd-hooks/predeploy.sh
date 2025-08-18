@@ -35,7 +35,6 @@ fi
 # Add base images
 ##########################################################
 cat << EOF >> custom-values.yaml
-namespace: ${AZURE_AKS_NAMESPACE}
 productService:
   image:
     repository: ${SOURCE_REGISTRY}/aks-store-demo/product-service
