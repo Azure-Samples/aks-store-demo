@@ -104,7 +104,7 @@ makelineService:
 EOF
 
 # Add Azure Service Bus to makeline-service if provided
-if [ -n "${AZURE_SERVICE_BUS_URI}" ]; then
+if [ -n "${AZURE_SERVICE_BUS_HOST}" ]; then
   cat << EOF >> custom-values.yaml
   orderQueueHost: ${AZURE_SERVICE_BUS_HOST}
 EOF

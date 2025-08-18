@@ -101,7 +101,6 @@ makelineService:
 "@ | Out-File -FilePath custom-values.yaml -Append -Encoding utf8
 
 # Add Azure Service Bus to makeline-service if provided
-# (Parity with bash: check URI presence but write HOST value)
 # (Parity with bash: check HOST presence and write HOST value)
 if ($env:AZURE_SERVICE_BUS_HOST) {
 @"
