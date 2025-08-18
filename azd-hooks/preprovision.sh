@@ -61,7 +61,7 @@ az provider register -n Microsoft.ContainerService
 az extension add --upgrade --name aks-preview
 az extension add --upgrade --name amg
 
-# if BUILD_CONTAINERS is set to true, set the DEPLOY_AZURE_CONTAINER_REGISTRY to true
+# if BUILD_CONTAINERS is set to true, always set DEPLOY_AZURE_CONTAINER_REGISTRY to true
 if [ "$BUILD_CONTAINERS" = "true" ]; then
   azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
 fi
