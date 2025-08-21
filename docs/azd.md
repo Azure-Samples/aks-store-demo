@@ -43,24 +43,26 @@ az login
 >
 > You may also need to register the following Azure resource providers in your subscription if they are not already registered:
 >
-> - `Microsoft.ContainerService` (for AKS)
-> - `Microsoft.KeyVault` (for Key Vault)
-> - `Microsoft.CognitiveServices` (for Azure OpenAI)
-> - `Microsoft.ServiceBus` (if using Service Bus)
-> - `Microsoft.DocumentDB` (if using Cosmos DB)
-> - `Microsoft.OperationalInsights` (if using observability tools)
 > - `Microsoft.AlertsManagement` (if using observability tools)
+> - `Microsoft.CognitiveServices` (for Azure OpenAI)
+> - `Microsoft.ContainerService` (for AKS)
+> - `Microsoft.Dashboard` (if using Grafana)
+> - `Microsoft.DocumentDB` (if using Cosmos DB)
+> - `Microsoft.KeyVault` (for Key Vault)
+> - `Microsoft.OperationalInsights` (if using observability tools)
+> - `Microsoft.ServiceBus` (if using Service Bus)
 >
 > You can register these providers using the Azure CLI:
 >
 > ```bash
-> az provider register --namespace Microsoft.ContainerService
-> az provider register --namespace Microsoft.KeyVault
-> az provider register --namespace Microsoft.CognitiveServices
-> az provider register --namespace Microsoft.ServiceBus
-> az provider register --namespace Microsoft.DocumentDB
-> az provider register --namespace Microsoft.OperationalInsights
 > az provider register --namespace Microsoft.AlertsManagement
+> az provider register --namespace Microsoft.CognitiveServices
+> az provider register --namespace Microsoft.ContainerService
+> az provider register --namespace Microsoft.Dashboard
+> az provider register --namespace Microsoft.DocumentDB
+> az provider register --namespace Microsoft.KeyVault
+> az provider register --namespace Microsoft.OperationalInsights
+> az provider register --namespace Microsoft.ServiceBus
 > ```
 
 When selecting an Azure region, choose one that supports all services used here: Azure OpenAI, AKS, Key Vault, Service Bus, Cosmos DB, Log Analytics, Azure Monitor (managed Prometheus), and Managed Grafana.
