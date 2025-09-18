@@ -35,6 +35,20 @@ spec:
             limits:
               cpu: 250m
               memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 15672
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 15672
+            failureThreshold: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
           volumeMounts:
             - name: rabbitmq-enabled-plugins
               mountPath: /etc/rabbitmq/enabled_plugins
@@ -89,7 +103,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: order-service
-          image: ghcr.io/azure-samples/aks-store-demo/order-service:latest
+          image: ghcr.io/azure-samples/aks-store-demo/order-service:1da12f1
           ports:
             - containerPort: 3000
           env:
@@ -135,7 +149,7 @@ spec:
             periodSeconds: 3
       initContainers:
         - name: wait-for-rabbitmq
-          image: busybox
+          image: busybox:1.35
           command:
             ["sh", "-c", "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;"]
           resources:
@@ -177,7 +191,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: product-service
-          image: ghcr.io/azure-samples/aks-store-demo/product-service:latest
+          image: ghcr.io/azure-samples/aks-store-demo/product-service:5fc5970
           ports:
             - containerPort: 3002
           env:
@@ -236,7 +250,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-front
-          image: ghcr.io/azure-samples/aks-store-demo/store-front:latest
+          image: ghcr.io/azure-samples/aks-store-demo/store-front:942610d
           ports:
             - containerPort: 8080
               name: store-front
