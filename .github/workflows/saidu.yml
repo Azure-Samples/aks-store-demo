@@ -1,6 +1,13 @@
 name: ci for react js
 on:
     push:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    actions: read
+    security-events: write
+    
 
 jobs:
     building:
