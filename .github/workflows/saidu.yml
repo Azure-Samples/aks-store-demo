@@ -1,6 +1,6 @@
 name: ci for react js
 on:
-    pull_request:
+    push:
     workflow_dispatch:
 
 permissions:
