@@ -1,8 +1,6 @@
 name: ci for react js
 on:
-    push:
-      branches:
-        - main
+    pull_request:
     workflow_dispatch:
 
 permissions:
@@ -29,6 +27,10 @@ jobs:
             - name: building packages
               run: npm run build
               working-directory: src/store-front
+
+            - name: Publish package to JFrog
+              run: jf npm publish
+              working-directory: src/store-front 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
 
