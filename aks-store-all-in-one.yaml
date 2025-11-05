@@ -28,6 +28,14 @@ spec:
             limits:
               cpu: 25m
               memory: 1024Mi
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - db.runCommand('ping').ok
+            initialDelaySeconds: 5
+            periodSeconds: 5
           livenessProbe:
             exec:
               command:
@@ -56,6 +64,14 @@ kind: ConfigMap
 metadata:
   name: rabbitmq-enabled-plugins
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-secrets
+data:
+  RABBITMQ_DEFAULT_USER: dXNlcm5hbWU=
+  RABBITMQ_DEFAULT_PASS: cGFzc3dvcmQ=
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -81,11 +97,25 @@ spec:
               name: rabbitmq-amqp
             - containerPort: 15672
               name: rabbitmq-http
-          env:
-            - name: RABBITMQ_DEFAULT_USER
-              value: "username"
-            - name: RABBITMQ_DEFAULT_PASS
-              value: "password"
+          envFrom:
+            - secretRef:
+                name: rabbitmq-secrets
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 5672
+            timeoutSeconds: 1
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 5672
+            timeoutSeconds: 1
           resources:
             requests:
               cpu: 10m
@@ -121,6 +151,24 @@ spec:
       targetPort: 15672
   type: ClusterIP
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-configs
+data:
+  ORDER_QUEUE_PORT: "5672"
+  ORDER_QUEUE_HOSTNAME: "rabbitmq"
+  ORDER_QUEUE_NAME: "orders"
+  FASTIFY_ADDRESS: "0.0.0.0"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: order-service-secrets
+data:
+  ORDER_QUEUE_USERNAME: dXNlcm5hbWU=
+  ORDER_QUEUE_PASSWORD: cGFzc3dvcmQ=
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -139,22 +187,14 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: order-service
-          image: ghcr.io/azure-samples/aks-store-demo/order-service:latest
+          image: ghcr.io/azure-samples/aks-store-demo/order-service:1.0.0
           ports:
             - containerPort: 3000
-          env:
-            - name: ORDER_QUEUE_HOSTNAME
-              value: "rabbitmq"
-            - name: ORDER_QUEUE_PORT
-              value: "5672"
-            - name: ORDER_QUEUE_USERNAME
-              value: "username"
-            - name: ORDER_QUEUE_PASSWORD
-              value: "password"
-            - name: ORDER_QUEUE_NAME
-              value: "orders"
-            - name: FASTIFY_ADDRESS
-              value: "0.0.0.0"
+          envFrom:
+            - configMapRef:
+                name: order-service-configs
+            - secretRef:
+                name: order-service-secrets
           resources:
             requests:
               cpu: 1m
@@ -185,7 +225,7 @@ spec:
             periodSeconds: 3
       initContainers:
         - name: wait-for-rabbitmq
-          image: busybox
+          image: busybox:1.37
           command:
             ["sh", "-c", "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;"]
           resources:
@@ -227,7 +267,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: makeline-service
-          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:latest
+          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:1.0.0
           ports:
             - containerPort: 3001
           env:
@@ -304,7 +344,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: product-service
-          image: ghcr.io/azure-samples/aks-store-demo/product-service:latest
+          image: ghcr.io/azure-samples/aks-store-demo/product-service:1.0.0
           ports:
             - containerPort: 3002
           env:
@@ -363,7 +403,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-front
-          image: ghcr.io/azure-samples/aks-store-demo/store-front:latest
+          image: ghcr.io/azure-samples/aks-store-demo/store-front:1.0.0
           ports:
             - containerPort: 8080
               name: store-front
@@ -426,7 +466,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-admin
-          image: ghcr.io/azure-samples/aks-store-demo/store-admin:latest
+          image: ghcr.io/azure-samples/aks-store-demo/store-admin:1.0.0
           ports:
             - containerPort: 8081
               name: store-admin
@@ -470,67 +510,67 @@ spec:
   selector:
     app: store-admin
   type: LoadBalancer
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: virtual-customer
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: virtual-customer
-  template:
-    metadata:
-      labels:
-        app: virtual-customer
-    spec:
-      nodeSelector:
-        "kubernetes.io/os": linux
-      containers:
-        - name: virtual-customer
-          image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:latest
-          env:
-            - name: ORDER_SERVICE_URL
-              value: http://order-service:3000/
-            - name: ORDERS_PER_HOUR
-              value: "100"
-          resources:
-            requests:
-              cpu: 1m
-              memory: 1Mi
-            limits:
-              cpu: 2m
-              memory: 20Mi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: virtual-worker
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: virtual-worker
-  template:
-    metadata:
-      labels:
-        app: virtual-worker
-    spec:
-      nodeSelector:
-        "kubernetes.io/os": linux
-      containers:
-        - name: virtual-worker
-          image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest
-          env:
-            - name: MAKELINE_SERVICE_URL
-              value: http://makeline-service:3001
-            - name: ORDERS_PER_HOUR
-              value: "100"
-          resources:
-            requests:
-              cpu: 1m
-              memory: 1Mi
-            limits:
-              cpu: 2m
-              memory: 20Mi
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: virtual-customer
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: virtual-customer
+#   template:
+#     metadata:
+#       labels:
+#         app: virtual-customer
+#     spec:
+#       nodeSelector:
+#         "kubernetes.io/os": linux
+#       containers:
+#         - name: virtual-customer
+#           image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:1.0.0
+#           env:
+#             - name: ORDER_SERVICE_URL
+#               value: http://order-service:3000/
+#             - name: ORDERS_PER_HOUR
+#               value: "100"
+#           resources:
+#             requests:
+#               cpu: 1m
+#               memory: 1Mi
+#             limits:
+#               cpu: 2m
+#               memory: 20Mi
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: virtual-worker
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: virtual-worker
+#   template:
+#     metadata:
+#       labels:
+#         app: virtual-worker
+#     spec:
+#       nodeSelector:
+#         "kubernetes.io/os": linux
+#       containers:
+#         - name: virtual-worker
+#           image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:1.0.0
+#           env:
+#             - name: MAKELINE_SERVICE_URL
+#               value: http://makeline-service:3001
+#             - name: ORDERS_PER_HOUR
+#               value: "100"
+#           resources:
+#             requests:
+#               cpu: 1m
+#               memory: 1Mi
+#             limits:
+#               cpu: 2m
+#               memory: 20Mi
