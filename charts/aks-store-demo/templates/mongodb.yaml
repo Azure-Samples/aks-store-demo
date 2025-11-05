@@ -29,6 +29,14 @@ spec:
           limits:
             cpu: 25m
             memory: 1024Mi
+        readinessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - db.runCommand('ping').ok
+          initialDelaySeconds: 5
+          periodSeconds: 5
         livenessProbe:
           exec:
             command:
