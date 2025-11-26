@@ -26,7 +26,7 @@ aiService:
   azureOpenAiApiVersion: "2024-02-15-preview"
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/ai-service"
-    tag: "latest"
+    tag: "2.0.0"
 
 orderService:
   queueHost: "rabbitmq"
@@ -37,7 +37,7 @@ orderService:
   queueTransport: ""
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/order-service"
-    tag: "latest"
+    tag: "2.0.0"
 
 makelineService:
   orderQueueUri: "amqp://rabbitmq:5672"
@@ -55,37 +55,37 @@ makelineService:
   orderDBPassword: ""
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/makeline-service"
-    tag: "latest"
+    tag: "2.0.0"
 
 productService:
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/product-service"
-    tag: "latest"
+    tag: "2.0.0"
 
 storeAdmin:
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/store-admin"
-    tag: "latest"
+    tag: "2.0.0"
   serviceType: LoadBalancer
 
 storeFront:
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/store-front"
-    tag: "latest"
+    tag: "2.0.0"
   serviceType: LoadBalancer
 
 virtualCustomer:
   create: true
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/virtual-customer"
-    tag: "latest"
+    tag: "2.0.0"
   ordersPerHour: 20
 
 virtualWorker:
   create: true
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/virtual-worker"
-    tag: "latest"
+    tag: "2.0.0"
   ordersPerHour: 10
 
 podAnnotations: {}

@@ -16,7 +16,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-admin
-          image: store-admin:latest
+          image: store-admin:2.0.0
           ports:
             - containerPort: 8081
               name: store-admin # container images hosted on ghcr.io and will be removed in future releases

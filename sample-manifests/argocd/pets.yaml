@@ -15,21 +15,21 @@ spec:
     kustomize:
       images:
         - >-
-          ghcr.io/azure-samples/aks-store-demo/ai-service=ghcr.io/azure-samples/aks-store-demo/ai-service:latest
+          ghcr.io/azure-samples/aks-store-demo/ai-service=ghcr.io/azure-samples/aks-store-demo/ai-service:2.0.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/makeline-service=ghcr.io/azure-samples/aks-store-demo/makeline-service:latest
+          ghcr.io/azure-samples/aks-store-demo/makeline-service=ghcr.io/azure-samples/aks-store-demo/makeline-service:2.0.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/order-service=ghcr.io/azure-samples/aks-store-demo/order-service:latest
+          ghcr.io/azure-samples/aks-store-demo/order-service=ghcr.io/azure-samples/aks-store-demo/order-service:2.0.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/product-service=ghcr.io/azure-samples/aks-store-demo/product-service:latest
+          ghcr.io/azure-samples/aks-store-demo/product-service=ghcr.io/azure-samples/aks-store-demo/product-service:2.0.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/store-admin=ghcr.io/azure-samples/aks-store-demo/store-admin:latest
+          ghcr.io/azure-samples/aks-store-demo/store-admin=ghcr.io/azure-samples/aks-store-demo/store-admin:2.0.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/store-front=ghcr.io/azure-samples/aks-store-demo/store-front:latest
+          ghcr.io/azure-samples/aks-store-demo/store-front=ghcr.io/azure-samples/aks-store-demo/store-front:2.0.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/virtual-customer=ghcr.io/azure-samples/aks-store-demo/virtual-customer:latest
+          ghcr.io/azure-samples/aks-store-demo/virtual-customer=ghcr.io/azure-samples/aks-store-demo/virtual-customer:2.0.0
         - >-
-          ghcr.io/azure-samples/aks-store-demo/virtual-worker=ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest
+          ghcr.io/azure-samples/aks-store-demo/virtual-worker=ghcr.io/azure-samples/aks-store-demo/virtual-worker:2.0.0
       namespace: pets
   sources: []
   project: default

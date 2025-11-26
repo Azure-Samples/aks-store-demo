@@ -14,7 +14,7 @@ COPY . /app
 RUN go build -ldflags "-X main.version=$APP_VERSION" -o main .
 
 # Run the app on alpine
-FROM alpine:latest AS runner
+FROM alpine:3.22 AS runner
 
 ARG APP_VERSION=0.1.0
 

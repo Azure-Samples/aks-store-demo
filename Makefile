@@ -66,49 +66,49 @@ provision-azure: ## Provision Azure Resources
 	@if [ "$(BUILD_ORDER_SERVICE)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t order-service:$(IMAGE_VERSION) ./src/order-service; \
 	else \
-		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/order-service:latest --image order-service:$(IMAGE_VERSION); \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/order-service:2.0.0 --image order-service:$(IMAGE_VERSION); \
 	fi
 
 	@if [ "$(BUILD_MAKELINE_SERVICE)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t makeline-service:$(IMAGE_VERSION) ./src/makeline-service; \
 	else \
-		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/makeline-service:latest --image makeline-service:$(IMAGE_VERSION); \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/makeline-service:2.0.0 --image makeline-service:$(IMAGE_VERSION); \
 	fi
 
 	@if [ "$(BUILD_PRODUCT_SERVICE)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t product-service:$(IMAGE_VERSION) ./src/product-service; \
 	else \
-		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/product-service:latest --image product-service:$(IMAGE_VERSION); \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/product-service:2.0.0 --image product-service:$(IMAGE_VERSION); \
 	fi
 
 	@if [ "$(BUILD_STORE_FRONT)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t store-front:$(IMAGE_VERSION) ./src/store-front; \
 	else \
-		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/store-front:latest --image store-front:$(IMAGE_VERSION); \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/store-front:2.0.0 --image store-front:$(IMAGE_VERSION); \
 	fi
 
 	@if [ "$(BUILD_STORE_ADMIN)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t store-admin:$(IMAGE_VERSION) ./src/store-admin; \
 	else \
-		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/store-admin:latest --image store-admin:$(IMAGE_VERSION); \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/store-admin:2.0.0 --image store-admin:$(IMAGE_VERSION); \
 	fi
 
 	@if [ "$(BUILD_VIRTUAL_CUSTOMER)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t virtual-customer:$(IMAGE_VERSION) ./src/virtual-customer; \
 	else \
-		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/virtual-customer:latest --image virtual-customer:$(IMAGE_VERSION); \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/virtual-customer:2.0.0 --image virtual-customer:$(IMAGE_VERSION); \
 	fi
 
 	@if [ "$(BUILD_VIRTUAL_WORKER)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t virtual-worker:$(IMAGE_VERSION) ./src/virtual-worker; \
 	else \
-		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest --image virtual-worker:$(IMAGE_VERSION); \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/virtual-worker:2.0.0 --image virtual-worker:$(IMAGE_VERSION); \
 	fi
 
 	@if [ "$(BUILD_AI_SERVICE)" = true ]; then \
 		az acr build -r $(ACR_NAME) -t ai-service:$(IMAGE_VERSION) ./src/ai-service; \
 	else \
-		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/ai-service:latest --image ai-service:$(IMAGE_VERSION); \
+		az acr import -n $(ACR_NAME) --source ghcr.io/azure-samples/aks-store-demo/ai-service:2.0.0 --image ai-service:$(IMAGE_VERSION); \
 	fi
 
 .PHONY: deploy-azure

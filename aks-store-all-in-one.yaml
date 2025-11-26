@@ -31,11 +31,23 @@ spec:
           livenessProbe:
             exec:
               command:
-                - mongosh
-                - --eval
+                - mongo
+                - "--eval"
+                - db.runCommand('ping').ok
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mongo
+                - "--eval"
                 - db.runCommand('ping').ok
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service
@@ -93,6 +105,24 @@ spec:
             limits:
               cpu: 250m
               memory: 256Mi
+          startupProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 30
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
           volumeMounts:
             - name: rabbitmq-enabled-plugins
               mountPath: /etc/rabbitmq/enabled_plugins
@@ -139,7 +169,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: order-service
-          image: ghcr.io/azure-samples/aks-store-demo/order-service:latest
+          image: ghcr.io/azure-samples/aks-store-demo/order-service:2.0.0
           ports:
             - containerPort: 3000
           env:
@@ -185,7 +215,7 @@ spec:
             periodSeconds: 3
       initContainers:
         - name: wait-for-rabbitmq
-          image: busybox
+          image: busybox:1.37.0
           command:
             ["sh", "-c", "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;"]
           resources:
@@ -227,7 +257,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: makeline-service
-          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:latest
+          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:2.0.0
           ports:
             - containerPort: 3001
           env:
@@ -304,7 +334,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: product-service
-          image: ghcr.io/azure-samples/aks-store-demo/product-service:latest
+          image: ghcr.io/azure-samples/aks-store-demo/product-service:2.0.0
           ports:
             - containerPort: 3002
           env:
@@ -363,7 +393,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-front
-          image: ghcr.io/azure-samples/aks-store-demo/store-front:latest
+          image: ghcr.io/azure-samples/aks-store-demo/store-front:2.0.0
           ports:
             - containerPort: 8080
               name: store-front
@@ -426,7 +456,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-admin
-          image: ghcr.io/azure-samples/aks-store-demo/store-admin:latest
+          image: ghcr.io/azure-samples/aks-store-demo/store-admin:2.0.0
           ports:
             - containerPort: 8081
               name: store-admin
@@ -489,7 +519,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: virtual-customer
-          image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:latest
+          image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:2.0.0
           env:
             - name: ORDER_SERVICE_URL
               value: http://order-service:3000/
@@ -502,6 +532,22 @@ spec:
             limits:
               cpu: 2m
               memory: 20Mi
+          readinessProbe:
+            exec:
+              command:
+                - cat
+                - /proc/1/status
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - cat
+                - /proc/1/status
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 10
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -521,7 +567,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: virtual-worker
-          image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:latest
+          image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:2.0.0
           env:
             - name: MAKELINE_SERVICE_URL
               value: http://makeline-service:3001
@@ -534,3 +580,19 @@ spec:
             limits:
               cpu: 2m
               memory: 20Mi
+          readinessProbe:
+            exec:
+              command:
+                - cat
+                - /proc/1/status
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - cat
+                - /proc/1/status
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 10

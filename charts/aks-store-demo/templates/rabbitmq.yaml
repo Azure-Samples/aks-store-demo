@@ -50,6 +50,24 @@ spec:
           limits:
             cpu: 250m
             memory: 256Mi
+        startupProbe:
+          tcpSocket:
+            port: 5672
+          failureThreshold: 30
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 5672
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 5672
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
         volumeMounts:
         - name: rabbitmq-enabled-plugins
           mountPath: /etc/rabbitmq/enabled_plugins
