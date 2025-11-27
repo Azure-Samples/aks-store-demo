@@ -53,4 +53,8 @@
     "vitest": "^3.0.8",
     "vue-tsc": "^2.2.8"
   }
+  "parserOptions": {
+  "ecmaVersion": 2022
+}
+
 }
