@@ -16,7 +16,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: store-admin
-        image: {{ .Values.storeAdmin.image.repository }}:{{ .Values.storeAdmin.image.tag }}
+        image: {{ .Values.storeAdmin.image.repository }}:{{ .Values.storeAdmin.image.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 8081
           name: store-admin         # container images hosted on ghcr.io and will be removed in future releases

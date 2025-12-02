@@ -160,6 +160,7 @@ jobs:
           echo "Updating sample manifests..."
           SAMPLE_MANIFESTS=(
             "sample-manifests/docs/app-routing/aks-store-deployments-and-services.yaml"
+            "sample-manifests/argocd/pets.yaml"
           )
 
           for APP in "${APPS[@]}"; do
@@ -191,17 +192,6 @@ jobs:
           # kaito overlay uses full ghcr.io path
           update_full_image_ref "kustomize/overlays/kaito/ai-service.yaml" "ai-service" "$VERSION"
 
-          # =============================================================================
-          # Update Helm chart values
-          # =============================================================================
-
-          echo "Updating Helm chart values.yaml..."
-          # Helm values.yaml uses separate 'tag' field: tag: "X.X.X"
-          if [ -f "charts/aks-store-demo/values.yaml" ]; then
-            sed -i -E "s|(tag: \")[^\"]+(\")|\1${VERSION}\2|g" "charts/aks-store-demo/values.yaml"
-            echo "Updated Helm values.yaml"
-          fi
-
           echo "Manifest updates complete!"
 
       - name: Commit and push changes
@@ -214,5 +204,5 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "chore: update container image tags to ${{ steps.set-version.outputs.VERSION }}"
-            git push
+            git push origin HEAD:main
           fi

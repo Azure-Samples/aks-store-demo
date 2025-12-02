@@ -16,7 +16,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: store-front
-        image: {{ .Values.storeFront.image.repository }}:{{ .Values.storeFront.image.tag }}
+        image: {{ .Values.storeFront.image.repository }}:{{ .Values.storeFront.image.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 8080
           name: store-front

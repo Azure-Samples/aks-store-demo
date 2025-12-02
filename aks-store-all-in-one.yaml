@@ -193,7 +193,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: order-service
-          image: ghcr.io/azure-samples/aks-store-demo/order-service:2.0.0
+          image: ghcr.io/azure-samples/aks-store-demo/order-service:2.1.0
           ports:
             - containerPort: 3000
           envFrom:
@@ -273,7 +273,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: makeline-service
-          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:2.0.0
+          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:2.1.0
           ports:
             - containerPort: 3001
           env:
@@ -350,7 +350,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: product-service
-          image: ghcr.io/azure-samples/aks-store-demo/product-service:2.0.0
+          image: ghcr.io/azure-samples/aks-store-demo/product-service:2.1.0
           ports:
             - containerPort: 3002
           env:
@@ -409,7 +409,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-front
-          image: ghcr.io/azure-samples/aks-store-demo/store-front:2.0.0
+          image: ghcr.io/azure-samples/aks-store-demo/store-front:2.1.0
           ports:
             - containerPort: 8080
               name: store-front
@@ -472,7 +472,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-admin
-          image: ghcr.io/azure-samples/aks-store-demo/store-admin:2.0.0
+          image: ghcr.io/azure-samples/aks-store-demo/store-admin:2.1.0
           ports:
             - containerPort: 8081
               name: store-admin
@@ -535,7 +535,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: virtual-customer
-          image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:2.0.0
+          image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:2.1.0
           env:
             - name: ORDER_SERVICE_URL
               value: http://order-service:3000/
@@ -583,7 +583,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: virtual-worker
-          image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:2.0.0
+          image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:2.1.0
           env:
             - name: MAKELINE_SERVICE_URL
               value: http://makeline-service:3001

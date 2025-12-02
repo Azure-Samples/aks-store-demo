@@ -49,7 +49,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: order-service
-        image: {{ .Values.orderService.image.repository }}:{{ .Values.orderService.image.tag }}
+        image: {{ .Values.orderService.image.repository }}:{{ .Values.orderService.image.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 3000
         envFrom:

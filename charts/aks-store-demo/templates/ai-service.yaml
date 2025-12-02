@@ -74,7 +74,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: ai-service
-        image: {{ .Values.aiService.image.repository }}:{{ .Values.aiService.image.tag }}
+        image: {{ .Values.aiService.image.repository }}:{{ .Values.aiService.image.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 5001
         envFrom:

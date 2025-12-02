@@ -17,7 +17,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: virtual-customer
-        image: {{ .Values.virtualCustomer.image.repository }}:{{ .Values.virtualCustomer.image.tag }}
+        image: {{ .Values.virtualCustomer.image.repository }}:{{ .Values.virtualCustomer.image.tag | default .Chart.AppVersion }}
         env:
         - name: ORDER_SERVICE_URL
           value: http://order-service:3000/

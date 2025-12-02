@@ -16,7 +16,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: product-service
-        image: {{ .Values.productService.image.repository }}:{{ .Values.productService.image.tag }}
+        image: {{ .Values.productService.image.repository }}:{{ .Values.productService.image.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 3002
         env: 

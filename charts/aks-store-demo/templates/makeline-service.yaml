@@ -58,7 +58,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
       - name: makeline-service
-        image: {{ .Values.makelineService.image.repository }}:{{ .Values.makelineService.image.tag }}
+        image: {{ .Values.makelineService.image.repository }}:{{ .Values.makelineService.image.tag | default .Chart.AppVersion }}
         ports:
         - containerPort: 3001
         envFrom:

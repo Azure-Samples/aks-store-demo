@@ -16,7 +16,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: makeline-service
-          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:2.0.0
+          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:2.1.0
           ports:
             - containerPort: 3001
           env:
