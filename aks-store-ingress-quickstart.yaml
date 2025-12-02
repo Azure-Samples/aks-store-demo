@@ -34,22 +34,6 @@ spec:
           envFrom:
             - secretRef:
                 name: rabbitmq-secrets
-          readinessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 3
-            periodSeconds: 5
-            successThreshold: 1
-            tcpSocket:
-              port: 5672
-            timeoutSeconds: 1
-          livenessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 3
-            periodSeconds: 5
-            successThreshold: 1
-            tcpSocket:
-              port: 5672
-            timeoutSeconds: 1
           resources:
             requests:
               cpu: 10m
