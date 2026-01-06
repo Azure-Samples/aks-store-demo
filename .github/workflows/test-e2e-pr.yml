@@ -143,7 +143,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report
