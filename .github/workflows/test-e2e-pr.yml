@@ -142,6 +142,14 @@ jobs:
           STORE_FRONT_URL: ${{ steps.azd_get_endpoint_urls.outputs.STORE_FRONT_URL }}
           CI: true
 
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: tests/playwright-report/
+          retention-days: 10
+
       - name: Clean up resources
         if: always()
         run: azd down --force --purge
