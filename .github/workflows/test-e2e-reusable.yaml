@@ -75,7 +75,7 @@ jobs:
 
       - name: Set helm chart location
         if: inputs.helm-chart-owner != ''
-        run: sed -i "s/azure-samples.github.io/${HELM_CHART_OWNER}.github.io/" azure.yaml
+        run: sed -i "s|azure-samples\.github\.io|${HELM_CHART_OWNER}.github.io|" azure.yaml
         env:
           HELM_CHART_OWNER: ${{ inputs.helm-chart-owner }}
 
@@ -127,34 +127,17 @@ jobs:
             storeFrontIp=$(kubectl get service store-front -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
           done
           echo "STORE_FRONT_URL=http://${storeFrontIp}" >> "$GITHUB_OUTPUT"
+          echo "AZURE_AKS_NAMESPACE=${AZURE_AKS_NAMESPACE}" >> "$GITHUB_OUTPUT"
 
       - name: Install Playwright dependencies
         run: npm ci
         working-directory: tests
 
       - name: Wait for services to be ready
-        run: |
-          STORE_FRONT_URL="${{ steps.get_urls.outputs.STORE_FRONT_URL }}"
-          echo "Waiting for store-front at ${STORE_FRONT_URL}..."
-          for i in $(seq 1 30); do
-            if curl -sf "${STORE_FRONT_URL}" > /dev/null 2>&1; then
-              echo "Store front is responding"
-              break
-            fi
-            echo "Attempt ${i}/30: Store front not ready, waiting 10s..."
-            sleep 10
-          done
-
-          echo "Waiting for order-service to be ready via ${STORE_FRONT_URL}/api/orders/health..."
-          for i in $(seq 1 30); do
-            if curl -sf "${STORE_FRONT_URL}/api/orders/health" > /dev/null 2>&1; then
-              echo "Order service is responding, waiting 30s for all services to stabilize..."
-              sleep 30
-              break
-            fi
-            echo "Attempt ${i}/30: Order service not ready, waiting 10s..."
-            sleep 10
-          done
+        uses: ./.github/actions/wait-for-services
+        with:
+          store-front-url: ${{ steps.get_urls.outputs.STORE_FRONT_URL }}
+          k8s-namespace: ${{ steps.get_urls.outputs.AZURE_AKS_NAMESPACE }}
 
       - name: Run Playwright tests
         run: npx playwright test --config=playwright.service.config.ts --workers=20
@@ -166,7 +149,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
           name: playwright-report

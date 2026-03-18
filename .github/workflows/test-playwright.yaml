@@ -30,28 +30,9 @@ jobs:
         working-directory: tests
 
       - name: Wait for services to be ready
-        run: |
-          STORE_FRONT_URL="${{ inputs.storeFrontUrl }}"
-          echo "Waiting for store-front at ${STORE_FRONT_URL}..."
-          for i in $(seq 1 30); do
-            if curl -sf "${STORE_FRONT_URL}" > /dev/null 2>&1; then
-              echo "Store front is responding"
-              break
-            fi
-            echo "Attempt ${i}/30: Store front not ready, waiting 10s..."
-            sleep 10
-          done
-
-          echo "Waiting for order-service to be ready via ${STORE_FRONT_URL}/api/orders/health..."
-          for i in $(seq 1 30); do
-            if curl -sf "${STORE_FRONT_URL}/api/orders/health" > /dev/null 2>&1; then
-              echo "Order service is responding, waiting 30s for all services to stabilize..."
-              sleep 30
-              break
-            fi
-            echo "Attempt ${i}/30: Order service not ready, waiting 10s..."
-            sleep 10
-          done
+        uses: ./.github/actions/wait-for-services
+        with:
+          store-front-url: ${{ inputs.storeFrontUrl }}
 
       - name: Run Playwright tests
         run: npx playwright test --config=playwright.service.config.ts --workers=20
@@ -60,5 +41,5 @@ jobs:
           PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
           SERVICE_STORE_ADMIN_ENDPOINT_URL: ${{ inputs.storeAdminUrl }}
           SERVICE_STORE_FRONT_ENDPOINT_URL: ${{ inputs.storeFrontUrl }}
-          COMPANY_NAME: 'Contoso'
+          COMPANY_NAME: "Contoso"
           CI: true

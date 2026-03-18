@@ -1,0 +1,82 @@
+name: "Wait for services to be ready"
+description: "Polls store-front and order-service health endpoints until they respond, with optional kubectl diagnostics on failure."
+
+inputs:
+  store-front-url:
+    description: "Base URL of the store-front service (e.g., http://x.x.x.x)"
+    required: true
+  k8s-namespace:
+    description: "Kubernetes namespace for kubectl diagnostics on failure. If empty, diagnostics are skipped."
+    required: false
+    default: ""
+  max-attempts:
+    description: "Maximum number of polling attempts per service"
+    required: false
+    default: "30"
+  retry-interval:
+    description: "Seconds to wait between polling attempts"
+    required: false
+    default: "10"
+  stabilization-delay:
+    description: "Seconds to wait after order-service responds before continuing"
+    required: false
+    default: "30"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Wait for services to be ready
+      shell: bash
+      env:
+        STORE_FRONT_URL: ${{ inputs.store-front-url }}
+        K8S_NAMESPACE: ${{ inputs.k8s-namespace }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
+        RETRY_INTERVAL: ${{ inputs.retry-interval }}
+        STABILIZATION_DELAY: ${{ inputs.stabilization-delay }}
+      run: |
+        echo "Waiting for store-front at ${STORE_FRONT_URL}..."
+        STORE_FRONT_READY=false
+        for i in $(seq 1 "$MAX_ATTEMPTS"); do
+          if curl -sf "${STORE_FRONT_URL}" > /dev/null 2>&1; then
+            echo "Store front is responding"
+            STORE_FRONT_READY=true
+            break
+          fi
+          echo "Attempt ${i}/${MAX_ATTEMPTS}: Store front not ready, waiting ${RETRY_INTERVAL}s..."
+          sleep "$RETRY_INTERVAL"
+        done
+        if [ "$STORE_FRONT_READY" != "true" ]; then
+          echo "::error::Store front failed to respond after ${MAX_ATTEMPTS} attempts"
+          exit 1
+        fi
+
+        echo "Waiting for order-service to be ready via ${STORE_FRONT_URL}/api/orders/health..."
+        ORDER_SERVICE_READY=false
+        for i in $(seq 1 "$MAX_ATTEMPTS"); do
+          HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "${STORE_FRONT_URL}/api/orders/health" 2>&1) || true
+          if [ "$HTTP_RESPONSE" = "200" ]; then
+            echo "Order service is responding (HTTP 200), waiting ${STABILIZATION_DELAY}s for all services to stabilize..."
+            sleep "$STABILIZATION_DELAY"
+            ORDER_SERVICE_READY=true
+            break
+          fi
+          echo "Attempt ${i}/${MAX_ATTEMPTS}: Order service not ready (HTTP ${HTTP_RESPONSE}), waiting ${RETRY_INTERVAL}s..."
+          sleep "$RETRY_INTERVAL"
+        done
+        if [ "$ORDER_SERVICE_READY" != "true" ]; then
+          echo "::error::Order service failed to respond after ${MAX_ATTEMPTS} attempts"
+          if [ -n "$K8S_NAMESPACE" ]; then
+            echo "::group::Diagnostics - pod status"
+            kubectl get pods -n "$K8S_NAMESPACE" -l app=order-service 2>&1 || true
+            echo "--- order-service events ---"
+            kubectl get events -n "$K8S_NAMESPACE" --field-selector involvedObject.kind=Pod --sort-by='.lastTimestamp' 2>&1 | grep order-service || true
+            echo "--- order-service container status ---"
+            kubectl get pods -n "$K8S_NAMESPACE" -l app=order-service -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{range .status.containerStatuses[*]}  {.name}: ready={.ready}, restartCount={.restartCount}, state={.state}{"\n"}{end}{range .status.initContainerStatuses[*]}  init/{.name}: ready={.ready}, state={.state}{"\n"}{end}{end}' 2>&1 || true
+            echo ""
+            echo "--- configmap keys (values redacted) ---"
+            kubectl get configmap -n "$K8S_NAMESPACE" -l "kustomize.toolkit.fluxcd.io/name" -o jsonpath='{range .items[*]}ConfigMap: {.metadata.name}{"\n"}{range $k, $v := .data}  {$k}=***{"\n"}{end}{end}' 2>&1 || true
+            kubectl get configmap -n "$K8S_NAMESPACE" order-service -o jsonpath='{range $k, $v := .data}{$k}=***{"\n"}{end}' 2>&1 || true
+            echo "::endgroup::"
+          fi
+          exit 1
+        fi
