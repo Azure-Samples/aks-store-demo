@@ -73,9 +73,16 @@ runs:
             echo "--- order-service container status ---"
             kubectl get pods -n "$K8S_NAMESPACE" -l app=order-service -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{range .status.containerStatuses[*]}  {.name}: ready={.ready}, restartCount={.restartCount}, state={.state}{"\n"}{end}{range .status.initContainerStatuses[*]}  init/{.name}: ready={.ready}, state={.state}{"\n"}{end}{end}' 2>&1 || true
             echo ""
+            echo "--- order-service logs (last 50 lines) ---"
+            for pod in $(kubectl get pods -n "$K8S_NAMESPACE" -l app=order-service -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+              echo "Pod: ${pod}"
+              kubectl logs -n "$K8S_NAMESPACE" "$pod" -c order-service --tail=50 2>&1 || true
+              echo "--- previous container logs ---"
+              kubectl logs -n "$K8S_NAMESPACE" "$pod" -c order-service --previous --tail=50 2>&1 || true
+            done
+            echo ""
             echo "--- configmap keys (values redacted) ---"
-            kubectl get configmap -n "$K8S_NAMESPACE" -l "kustomize.toolkit.fluxcd.io/name" -o jsonpath='{range .items[*]}ConfigMap: {.metadata.name}{"\n"}{range $k, $v := .data}  {$k}=***{"\n"}{end}{end}' 2>&1 || true
-            kubectl get configmap -n "$K8S_NAMESPACE" order-service -o jsonpath='{range $k, $v := .data}{$k}=***{"\n"}{end}' 2>&1 || true
+            kubectl get configmap -n "$K8S_NAMESPACE" -l app=order-service -o jsonpath='{range .items[*]}ConfigMap: {.metadata.name}{"\n"}{range $k,$v := .data}  {$k}=***{"\n"}{end}{end}' 2>&1 || true
             echo "::endgroup::"
           fi
           exit 1
