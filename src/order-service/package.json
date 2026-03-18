@@ -20,8 +20,8 @@
     "@fastify/autoload": "^5.0.0",
     "@fastify/cors": "^8.3.0",
     "@fastify/sensible": "^4.1.0",
-    "fastify": "^4.0.0",
-    "fastify-cli": "^4.4.0",
+    "fastify": "^5.8.2",
+    "fastify-cli": "^7.4.1",
     "fastify-plugin": "^3.0.0",
     "rhea": "^3.0.2"
   },
