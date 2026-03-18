@@ -1,0 +1,182 @@
+name: test-e2e-reusable
+
+on:
+  workflow_call:
+    inputs:
+      deploy-from-source:
+        description: "Build and deploy from source code"
+        type: boolean
+        default: false
+      deploy-method:
+        description: "Deployment method: helm or kustomize"
+        type: string
+        default: "helm"
+      deploy-full-services:
+        description: "Deploy full Azure service stack (OpenAI, Service Bus, CosmosDB, observability)"
+        type: boolean
+        default: false
+      source-registry:
+        description: "Container registry for SOURCE_REGISTRY (e.g., ghcr.io/owner)"
+        type: string
+        default: ""
+      helm-chart-owner:
+        description: "GitHub owner for helm chart location substitution"
+        type: string
+        default: ""
+      pr-number:
+        description: "PR number to checkout (leave empty for default branch)"
+        type: string
+        default: ""
+
+jobs:
+  test-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Checkout PR
+        if: inputs.pr-number != ''
+        run: gh pr checkout "$PR_NUMBER"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+
+      - name: Install azd
+        uses: Azure/setup-azd@ae0f8b5482eeac61e940f447327d84c73beb8b1e # v2.1.0
+
+      - name: Install kubelogin
+        uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1
+        with:
+          kubelogin-version: "v0.2.8"
+
+      - name: Azure login
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Azure Developer CLI login
+        run: |
+          azd auth login \
+            --client-id ${{ secrets.AZURE_CLIENT_ID }} \
+            --federated-credential-provider "github" \
+            --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Configure deployment method
+        run: azd config set "alpha.aks.${DEPLOY_METHOD}" on
+        env:
+          DEPLOY_METHOD: ${{ inputs.deploy-method }}
+
+      - name: Set helm chart location
+        if: inputs.helm-chart-owner != ''
+        run: sed -i "s/azure-samples.github.io/${HELM_CHART_OWNER}.github.io/" azure.yaml
+        env:
+          HELM_CHART_OWNER: ${{ inputs.helm-chart-owner }}
+
+      - name: Swap azd config to build from source
+        if: inputs.deploy-from-source
+        run: |
+          mv azure.yaml azure.yaml.bak
+          mv azure-build-from-source.yaml azure.yaml
+
+      - name: Provision and deploy
+        run: |
+          azd env new "${{ vars.AZURE_ENV_NAME }}"
+
+          if [ -n "$SOURCE_REGISTRY" ]; then
+            azd env set SOURCE_REGISTRY "$SOURCE_REGISTRY"
+          fi
+
+          if [ "$DEPLOY_FULL" = "true" ]; then
+            azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
+            azd env set DEPLOY_AZURE_OPENAI true
+            azd env set AZURE_OPENAI_LOCATION "${{ vars.AZURE_LOCATION }}"
+            azd env set DEPLOY_AZURE_SERVICE_BUS true
+            azd env set DEPLOY_AZURE_COSMOSDB true
+            azd env set AZURE_COSMOSDB_ACCOUNT_KIND MongoDB
+            azd env set DEPLOY_OBSERVABILITY_TOOLS true
+          fi
+
+          azd up --no-prompt
+        env:
+          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          SOURCE_REGISTRY: ${{ inputs.source-registry }}
+          DEPLOY_FULL: ${{ inputs.deploy-full-services }}
+
+      - name: Get Store URLs
+        id: get_urls
+        run: |
+          eval $(azd env get-values)
+          storeAdminIp=$(kubectl get service store-admin -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          while [ -z "$storeAdminIp" ]; do
+            sleep 60
+            storeAdminIp=$(kubectl get service store-admin -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          done
+          echo "STORE_ADMIN_URL=http://${storeAdminIp}" >> "$GITHUB_OUTPUT"
+          storeFrontIp=$(kubectl get service store-front -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          while [ -z "$storeFrontIp" ]; do
+            sleep 60
+            storeFrontIp=$(kubectl get service store-front -n $AZURE_AKS_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          done
+          echo "STORE_FRONT_URL=http://${storeFrontIp}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Playwright dependencies
+        run: npm ci
+        working-directory: tests
+
+      - name: Wait for services to be ready
+        run: |
+          STORE_FRONT_URL="${{ steps.get_urls.outputs.STORE_FRONT_URL }}"
+          echo "Waiting for store-front at ${STORE_FRONT_URL}..."
+          for i in $(seq 1 30); do
+            if curl -sf "${STORE_FRONT_URL}" > /dev/null 2>&1; then
+              echo "Store front is responding"
+              break
+            fi
+            echo "Attempt ${i}/30: Store front not ready, waiting 10s..."
+            sleep 10
+          done
+
+          echo "Waiting for order-service to be ready via ${STORE_FRONT_URL}/api/orders/health..."
+          for i in $(seq 1 30); do
+            if curl -sf "${STORE_FRONT_URL}/api/orders/health" > /dev/null 2>&1; then
+              echo "Order service is responding, waiting 30s for all services to stabilize..."
+              sleep 30
+              break
+            fi
+            echo "Attempt ${i}/30: Order service not ready, waiting 10s..."
+            sleep 10
+          done
+
+      - name: Run Playwright tests
+        run: npx playwright test --config=playwright.service.config.ts --workers=20
+        working-directory: tests
+        env:
+          PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
+          STORE_ADMIN_URL: ${{ steps.get_urls.outputs.STORE_ADMIN_URL }}
+          STORE_FRONT_URL: ${{ steps.get_urls.outputs.STORE_FRONT_URL }}
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: playwright-report
+          path: tests/playwright-report/
+          retention-days: 10
+
+      - name: Destroy environment
+        if: always()
+        run: azd down --force --purge
+        env:
+          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

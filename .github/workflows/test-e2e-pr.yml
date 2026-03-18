@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       has-permission: ${{ steps.check.outputs.has-permission }}
+      pr-number: ${{ steps.get-pr.outputs.pr-number }}
     steps:
       - name: Check if user has permission
         id: check
@@ -43,7 +44,14 @@ jobs:
               });
             }
 
-  test-e2e:
+      - name: Get PR number
+        id: get-pr
+        if: steps.check.outputs.has-permission == 'true'
+        run: echo "pr-number=${PR_URL##*/}" >> "$GITHUB_OUTPUT"
+        env:
+          PR_URL: ${{ github.event.issue.pull_request.url }}
+
+  start-comment:
     needs: check-permissions
     if: needs.check-permissions.outputs.has-permission == 'true'
     runs-on: ubuntu-latest
@@ -63,128 +71,24 @@ jobs:
               **Location:** ${{ vars.AZURE_LOCATION }}`
             });
 
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+  test-e2e:
+    needs: [check-permissions, start-comment]
+    if: needs.check-permissions.outputs.has-permission == 'true'
+    uses: ./.github/workflows/test-e2e-reusable.yaml
+    secrets: inherit
+    with:
+      deploy-from-source: true
+      deploy-method: kustomize
+      deploy-full-services: true
+      pr-number: ${{ needs.check-permissions.outputs.pr-number }}
 
-      - name: PR checkout
-        run: |
-          PR_URL="${{ github.event.issue.pull_request.url }}"
-          PR_NUM=${PR_URL##*/}
-          gh pr checkout $PR_NUM
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
-
-      - name: Install azd
-        uses: Azure/setup-azd@ae0f8b5482eeac61e940f447327d84c73beb8b1e # v2.1.0
-
-      - name: Install kubelogin
-        uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1
-        with:
-          kubelogin-version: "v0.2.8"
-
-      - name: Azure login
-        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Azure Developer CLI login
-        run: |
-          azd auth login \
-            --client-id ${{ secrets.AZURE_CLIENT_ID }} \
-            --federated-credential-provider "github" \
-            --tenant-id ${{ secrets.AZURE_TENANT_ID }}
-
-      - name: Turn on Kustomize support
-        run: azd config set alpha.aks.kustomize on
-
-      - name: Swap azd config files to build from source
-        run: |
-          mv azure.yaml azure.yaml.bak
-          mv azure-build-from-source.yaml azure.yaml
-
-      - name: Provision resources and deploy app
-        run: |
-          azd env new ${{ vars.AZURE_ENV_NAME }}
-          azd env set DEPLOY_AZURE_CONTAINER_REGISTRY true
-          azd env set DEPLOY_AZURE_OPENAI true
-          azd env set AZURE_OPENAI_LOCATION ${{ vars.AZURE_LOCATION }}
-          azd env set DEPLOY_AZURE_SERVICE_BUS true
-          azd env set DEPLOY_AZURE_COSMOSDB true
-          azd env set AZURE_COSMOSDB_ACCOUNT_KIND MongoDB
-          azd env set DEPLOY_OBSERVABILITY_TOOLS true
-          azd up
-        env:
-          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
-          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Get endpoint URLs
-        id: azd_get_endpoint_urls
-        run: |
-          echo "STORE_ADMIN_URL=$(azd env get-value SERVICE_STORE_ADMIN_ENDPOINT_URL)" >> "$GITHUB_OUTPUT"
-          echo "STORE_FRONT_URL=$(azd env get-value SERVICE_STORE_FRONT_ENDPOINT_URL)" >> "$GITHUB_OUTPUT"
-
-      - name: Install Playwright dependencies
-        run: npm ci
-        working-directory: tests
-
-      - name: Wait for services to be ready
-        run: |
-          STORE_FRONT_URL="${{ steps.azd_get_endpoint_urls.outputs.STORE_FRONT_URL }}"
-          echo "Waiting for store-front at ${STORE_FRONT_URL}..."
-          for i in $(seq 1 30); do
-            if curl -sf "${STORE_FRONT_URL}" > /dev/null 2>&1; then
-              echo "Store front is responding"
-              break
-            fi
-            echo "Attempt ${i}/30: Store front not ready, waiting 10s..."
-            sleep 10
-          done
-
-          echo "Waiting for order-service to be ready via ${STORE_FRONT_URL}/api/orders/health..."
-          for i in $(seq 1 30); do
-            if curl -sf "${STORE_FRONT_URL}/api/orders/health" > /dev/null 2>&1; then
-              echo "Order service is responding, waiting 30s for all services to stabilize..."
-              sleep 30
-              break
-            fi
-            echo "Attempt ${i}/30: Order service not ready, waiting 10s..."
-            sleep 10
-          done
-
-      - name: Run Playwright tests
-        run: npx playwright test --config=playwright.service.config.ts --workers=20
-        working-directory: tests
-        env:
-          PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
-          PLAYWRIGHT_SERVICE_ACCESS_TOKEN: ${{ secrets.PLAYWRIGHT_SERVICE_ACCESS_TOKEN }}
-          STORE_ADMIN_URL: ${{ steps.azd_get_endpoint_urls.outputs.STORE_ADMIN_URL }}
-          STORE_FRONT_URL: ${{ steps.azd_get_endpoint_urls.outputs.STORE_FRONT_URL }}
-          CI: true
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: playwright-report
-          path: tests/playwright-report/
-          retention-days: 10
-
-      - name: Clean up resources
-        if: always()
-        run: azd down --force --purge
-        env:
-          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
-          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
+  result-comment:
+    needs: [check-permissions, test-e2e]
+    if: always() && needs.check-permissions.outputs.has-permission == 'true'
+    runs-on: ubuntu-latest
+    steps:
       - name: Add status comment - Success
-        if: success()
+        if: needs.test-e2e.result == 'success'
         uses: actions/github-script@v7
         with:
           script: |
@@ -208,7 +112,7 @@ jobs:
             });
 
       - name: Add status comment - Failure
-        if: failure()
+        if: needs.test-e2e.result == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
