@@ -70,13 +70,13 @@ variable "azure_openai_location" {
 variable "chat_completion_model_name" {
   description = "value of chat completion model name"
   type        = string
-  default     = "gpt-4o-mini"
+  default     = "gpt-5-mini"
 }
 
 variable "chat_completion_model_version" {
   description = "value of chat completion model version"
   type        = string
-  default     = "2024-07-18"
+  default     = "2025-08-07"
 }
 
 variable "chat_completion_model_capacity" {

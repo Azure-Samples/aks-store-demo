@@ -79,7 +79,7 @@ az account list-locations \
 
 See the [Azure documentation on availability zones](https://learn.microsoft.com/azure/reliability/availability-zones-overview) for details and service-specific guidance.
 
-If you are deploying an Azure OpenAI account, you will need to ensure you have enough [tokens per minute quota](https://learn.microsoft.com/azure/ai-services/openai/how-to/quota?tabs=cli) for the `gpt-4o-mini` model. You can check your quota by running the following command:
+If you are deploying an Azure OpenAI account, you will need to ensure you have enough [tokens per minute quota](https://learn.microsoft.com/azure/ai-services/openai/how-to/quota?tabs=cli) for the `gpt-5-mini` model. You can check your quota by running the following command:
 
 ```bash
 REGION=swedencentral
@@ -91,7 +91,7 @@ az cognitiveservices usage list \
 ```
 
 > [!TIP]
-> If difference between current value and limit for `OpenAI.Standard.gpt-4o-mini` is less than 30, you can request more by following the instructions in the [Azure OpenAI documentation](https://learn.microsoft.com/azure/ai-services/openai/quotas-limits#how-to-request-increases-to-the-default-quotas-and-limits).
+> If difference between current value and limit for `OpenAI.Standard.gpt-5-mini` is less than 30, you can request more by following the instructions in the [Azure OpenAI documentation](https://learn.microsoft.com/azure/ai-services/openai/quotas-limits#how-to-request-increases-to-the-default-quotas-and-limits).
 
 ### Deployment settings
 
