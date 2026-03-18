@@ -15,17 +15,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@azure/identity": "^4.2.1",
-    "@azure/service-bus": "^7.9.4",
-    "@fastify/autoload": "^5.0.0",
-    "@fastify/cors": "^8.3.0",
-    "@fastify/sensible": "^4.1.0",
-    "fastify": "^4.0.0",
-    "fastify-cli": "^4.4.0",
-    "fastify-plugin": "^3.0.0",
-    "rhea": "^3.0.2"
+    "@azure/identity": "^4.13.0",
+    "@azure/service-bus": "^7.9.5",
+    "@fastify/autoload": "^6.3.1",
+    "@fastify/cors": "^11.2.0",
+    "@fastify/sensible": "^6.0.4",
+    "fastify": "^5.8.2",
+    "fastify-cli": "^7.4.1",
+    "fastify-plugin": "^5.1.0",
+    "rhea": "^3.0.4"
   },
   "devDependencies": {
-    "tap": "^21.5.0"
+    "tap": "^21.6.2"
   }
 }
