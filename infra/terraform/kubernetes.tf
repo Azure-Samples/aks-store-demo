@@ -70,29 +70,11 @@ resource "azurerm_role_assignment" "aks_cluster_admin" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
-// https://github.com/Azure/terraform-azurerm-avm-res-authorization-roleassignment
-module "acr-role" {
-  count   = local.deploy_azure_container_registry ? 1 : 0
-  source  = "Azure/avm-res-authorization-roleassignment/azurerm"
-  version = "0.3.0"
-  user_assigned_managed_identities_by_principal_id = {
-    kubelet_identity = module.aks.kubelet_identity_id
-  }
-  role_definitions = {
-    acr_pull_role = {
-      name = "AcrPull"
-    }
-  }
-  role_assignments_for_scopes = {
-    acr_role_assignments = {
-      scope = module.acr[0].resource_id
-      role_assignments = {
-        role_assignment_1 = {
-          role_definition                  = "acr_pull_role"
-          user_assigned_managed_identities = ["kubelet_identity"]
-        }
-      }
-    }
-  }
-  depends_on = [module.aks]
+// Assign AcrPull role to kubelet identity on ACR
+resource "azurerm_role_assignment" "acr_pull" {
+  count                = local.deploy_azure_container_registry ? 1 : 0
+  scope                = module.acr[0].resource_id
+  role_definition_name = "AcrPull"
+  principal_id         = module.aks.kubelet_identity_id
+  depends_on           = [module.aks]
 }
