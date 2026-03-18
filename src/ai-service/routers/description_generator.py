@@ -1,6 +1,7 @@
 """
 Description generation API endpoint.
 """
+
 import os
 import logging
 from typing import List
@@ -25,16 +26,17 @@ USER_PROMPT_TEMPLATE = (
     "with the following tags: '{tags}'."
 )
 
+
 class DescriptionRequest(BaseModel):
     """Request model for the description generation endpoint."""
+
     name: str
     tags: List[str]
 
+
 # Create router with prefix
-description = APIRouter(
-    prefix="/generate",
-    tags=["generation"]
-)
+description = APIRouter(prefix="/generate", tags=["generation"])
+
 
 def _create_completion(client, model, prompt, system_prompt=SYSTEM_PROMPT):
     """Create a chat completion using the provided client and model"""
@@ -46,6 +48,7 @@ def _create_completion(client, model, prompt, system_prompt=SYSTEM_PROMPT):
         ],
         temperature=0,
     )
+
 
 def _handle_local_llm(user_prompt):
     """Handle local LLM completion"""
@@ -66,6 +69,7 @@ def _handle_local_llm(user_prompt):
     response = _create_completion(client, model, user_prompt)
     return response.choices[0].message.content
 
+
 def _handle_openai(user_prompt):
     """Handle OpenAI completion"""
     api_key = os.environ.get("OPENAI_API_KEY")
@@ -83,6 +87,7 @@ def _handle_openai(user_prompt):
     response = _create_completion(client, "gpt-3.5-turbo", user_prompt)
     return response.choices[0].message.content
 
+
 def _handle_azure_openai(user_prompt, use_azure_ad):
     """Handle Azure OpenAI completion"""
     deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NAME")
@@ -95,13 +100,12 @@ def _handle_azure_openai(user_prompt, use_azure_ad):
             "AZURE_OPENAI_DEPLOYMENT_NAME and AZURE_OPENAI_ENDPOINT must be provided"
         )
 
-    api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
+    api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-12-01-preview")
 
     if use_azure_ad:
         logger.info("Using Microsoft Entra authentication")
         token_provider = get_bearer_token_provider(
-            DefaultAzureCredential(),
-            "https://cognitiveservices.azure.com/.default"
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
         )
 
         client = AzureOpenAI(
@@ -125,6 +129,7 @@ def _handle_azure_openai(user_prompt, use_azure_ad):
     response = _create_completion(client, deployment, user_prompt)
     return response.choices[0].message.content
 
+
 @description.post("/description", operation_id="generate_description")
 async def generate_description(request: DescriptionRequest):
     """
@@ -133,8 +138,7 @@ async def generate_description(request: DescriptionRequest):
     try:
         # Format the user prompt with the product name and tags
         user_prompt = USER_PROMPT_TEMPLATE.format(
-            name=request.name,
-            tags=", ".join(request.tags)
+            name=request.name, tags=", ".join(request.tags)
         )
 
         env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
@@ -156,6 +160,5 @@ async def generate_description(request: DescriptionRequest):
         return {"description": description_text}
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Error generating description: {str(e)}"
+            status_code=500, detail=f"Error generating description: {str(e)}"
         ) from e

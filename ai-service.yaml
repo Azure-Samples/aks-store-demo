@@ -33,7 +33,7 @@ spec:
             - name: AZURE_OPENAI_DALLE_ENDPOINT # required if using Azure OpenAI DALL-E
               value: ""
             - name: AZURE_OPENAI_API_VERSION # required if using Azure OpenAI DALL-E
-              value: "2024-02-15-preview"
+              value: "2024-12-01-preview"
             - name: AZURE_OPENAI_DALLE_DEPLOYMENT_NAME # required if using Azure OpenAI DALL-E
               value: ""
             - name: USE_LOCAL_LLM # set to True if you are using a local LLM provided by KAITO

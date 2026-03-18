@@ -23,7 +23,7 @@ aiService:
   useAzureOpenAi: false
   openAiDalleEndpoint: ""
   openAiDalleModelName: ""
-  azureOpenAiApiVersion: "2024-02-15-preview"
+  azureOpenAiApiVersion: "2024-12-01-preview"
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/ai-service"
     tag: "" # defaults to Chart.AppVersion
@@ -90,12 +90,10 @@ virtualWorker:
 
 podAnnotations: {}
 
-podSecurityContext:
-  {}
+podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext:
-  {}
+securityContext: {}
   # capabilities:
   #   drop:
   #   - ALL
