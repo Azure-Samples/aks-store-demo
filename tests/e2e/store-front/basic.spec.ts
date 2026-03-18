@@ -33,7 +33,7 @@ test.describe('store-front tests', () => {
   test('can add one to cart from home page', async ({ page }) => {
     await page.goto(testConfig.storeFrontUrl);
 
-    await expect(page.locator('.product-list')).toBeVisible();
+    await expect(page.locator('.product-list .product-card').first()).toBeVisible({ timeout: 30_000 });
 
     const cartLink = page.getByRole('link', { name: /Cart \(\d+\)/ });
     const initialCartCount = parseInt((await cartLink.textContent() || '').match(/\d+/)?.[0] || '0');
@@ -47,7 +47,7 @@ test.describe('store-front tests', () => {
   test('can add multiple items to cart from home page', async ({ page }) => {
     await page.goto(testConfig.storeFrontUrl);
 
-    await expect(page.locator('.product-list')).toBeVisible();
+    await expect(page.locator('.product-list .product-card').first()).toBeVisible({ timeout: 30_000 });
 
     const cartLink = page.getByRole('link', { name: /Cart \(\d+\)/ });
     const initialCartCount = parseInt((await cartLink.textContent() || '').match(/\d+/)?.[0] || '0');
@@ -64,7 +64,7 @@ test.describe('store-front tests', () => {
   test('can place an order', async ({ page }) => {
     await page.goto(testConfig.storeFrontUrl);
 
-    await expect(page.locator('.product-list')).toBeVisible();
+    await expect(page.locator('.product-list .product-card').first()).toBeVisible({ timeout: 30_000 });
 
     const firstProduct = page.locator('.product-list .product-controls').first();
     await firstProduct.getByRole('button', { name: /Add to Cart/ }).click();
@@ -73,11 +73,11 @@ test.describe('store-front tests', () => {
     await lastProduct.getByRole('button', { name: /Add to Cart/ }).click();
 
     await page.getByRole('link', { name: /Cart \(\d+\)/ }).click();
-    await page.getByRole('button', { name: 'Checkout' }).click();
 
-    page.on('dialog', async dialog => {
-      expect(dialog.message()).toContain('Order submitted successfully');
-      await dialog.accept();
-    });
+    const dialogPromise = page.waitForEvent('dialog');
+    await page.getByRole('button', { name: 'Checkout' }).click();
+    const dialog = await dialogPromise;
+    expect(dialog.message()).toContain('Order submitted successfully');
+    await dialog.accept();
   });
 });

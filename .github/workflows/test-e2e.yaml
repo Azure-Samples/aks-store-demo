@@ -81,6 +81,20 @@ jobs:
         run: npm ci
         working-directory: tests
 
+      - name: Wait for services to be ready
+        run: |
+          STORE_FRONT_URL="http://${{ steps.kubectl_get_service.outputs.STORE_FRONT_IP }}"
+          echo "Waiting for store-front at ${STORE_FRONT_URL}..."
+          for i in $(seq 1 30); do
+            if curl -sf "${STORE_FRONT_URL}" > /dev/null 2>&1; then
+              echo "Store front is responding, waiting 30s for backend services to stabilize..."
+              sleep 30
+              break
+            fi
+            echo "Attempt ${i}/30: Store front not ready, waiting 10s..."
+            sleep 10
+          done
+
       - name: Run Playwright tests
         run: npx playwright test --config=playwright.service.config.ts --workers=20
         working-directory: tests
