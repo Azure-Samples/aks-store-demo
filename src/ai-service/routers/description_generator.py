@@ -50,8 +50,8 @@ def _create_completion(client, model, prompt, temperature, system_prompt=SYSTEM_
             ],
             temperature=temperature,
         )
-    except Exception as e:
-        logger.error("Error creating completion: %s", e)
+    except Exception:
+        logger.exception("Error creating completion")
         raise
 
 
