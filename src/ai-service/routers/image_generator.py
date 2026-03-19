@@ -108,5 +108,5 @@ async def generate_image(request: ImageRequest):
     except Exception as e:
         logger.error("Error generating image: %s", e)
         raise HTTPException(
-            status_code=500, detail=f"Error generating image: {str(e)}"
+            status_code=500, detail="Error generating image"
         ) from e
