@@ -74,8 +74,8 @@ def _handle_azure_openai(user_prompt, use_azure_ad):
         response = client.images.generate(
             model=model_deployment_name, prompt=user_prompt, n=1
         )
-    except Exception as e:
-        logger.error("Error generating image: %s", e)
+    except Exception:
+        logger.exception("Error generating image")
         raise
 
     json_response = json.loads(response.model_dump_json())
@@ -106,7 +106,5 @@ async def generate_image(request: ImageRequest):
             content={"image": image_url}, status_code=status.HTTP_200_OK
         )
     except Exception as e:
-        logger.error("Error generating image: %s", e)
-        raise HTTPException(
-            status_code=500, detail="Error generating image"
-        ) from e
+        logger.exception("Error generating image")
+        raise HTTPException(status_code=500, detail="Error generating image") from e
