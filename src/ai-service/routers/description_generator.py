@@ -154,7 +154,7 @@ async def generate_description(request: DescriptionRequest):
         use_local_llm = os.environ.get("USE_LOCAL_LLM", "False").lower() == "true"
         use_azure = os.environ.get("USE_AZURE_OPENAI", "False").lower() == "true"
         use_azure_ad = os.environ.get("USE_AZURE_AD", "False").lower() == "true"
-        temperature = float(os.environ.get("TEMPERATURE", "0"))
+        temperature = float(os.environ.get("TEMPERATURE", "1"))
 
         if use_local_llm:
             description_text = _handle_local_llm(user_prompt, temperature)
