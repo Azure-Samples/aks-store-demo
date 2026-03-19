@@ -69,7 +69,16 @@ def _handle_local_llm(user_prompt, temperature):
     )
 
     models = client.models.list()
-    model = models.data[0].id
+
+    local_llm_name = os.environ.get("LOCAL_LLM_MODEL")
+    if local_llm_name:
+        logger.info("Looking for local LLM model: %s", local_llm_name)
+        matching_models = [m for m in models.data if m.id == local_llm_name]
+        if not matching_models:
+            raise ValueError(f"Model '{local_llm_name}' not found in local LLM")
+        model = matching_models[0].id
+    else:
+        model = models.data[0].id
 
     response = _create_completion(client, model, user_prompt, temperature)
     return response.choices[0].message.content
