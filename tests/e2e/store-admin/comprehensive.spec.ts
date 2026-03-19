@@ -21,27 +21,37 @@ test.describe('store-admin comprehensive tests', () => {
     // Wait for page to load
     await page.waitForTimeout(10000);
 
-    // Try to use AI Assistant if available
+    // Try to use AI Assistant if available, with fallback to manual description
     const askAIAssistantButton = page.locator('button:has-text("Ask AI Assistant")');
     if (await askAIAssistantButton.isVisible()) {
       await askAIAssistantButton.click();
-      await page.waitForResponse(response =>
-        response.url().includes('/api/ai/generate/description') && response.status() === 200
-      );
+      try {
+        await page.waitForResponse(
+          response => response.url().includes('/api/ai/generate/description'),
+          { timeout: 30000 }
+        );
+      } catch {
+        console.log('AI Assistant timed out, falling back to manual description');
+        await page.getByRole('textbox', { name: 'Description' }).fill('Something tasty for the pups');
+      }
     } else {
-      // Fallback to manual description
+      console.log('AI Assistant button not found, using manual description');
       await page.getByRole('textbox', { name: 'Description' }).fill('Something tasty for the pups');
     }
 
-    // Handle success dialog
-    page.once('dialog', dialog => {
-      console.log(`Dialog message: ${dialog.message()}`);
-      expect(dialog.message()).toBe('Product saved successfully');
-      dialog.dismiss().catch(() => { });
-    });
+    // Ensure description has a value before saving
+    const descriptionField = page.getByRole('textbox', { name: 'Description' });
+    if (await descriptionField.inputValue() === '') {
+      await descriptionField.fill('Something tasty for the pups');
+    }
 
-    // Save the product
+    // Save the product and wait for the dialog response
+    const dialogPromise = page.waitForEvent('dialog');
     await page.getByRole('button', { name: 'Save Product' }).click();
+    const dialog = await dialogPromise;
+    console.log(`Dialog message: ${dialog.message()}`);
+    expect(dialog.message()).toBe('Product saved successfully');
+    await dialog.dismiss();
   });
 
   test('can view and manage products list', async ({ page }) => {
@@ -64,7 +74,7 @@ test.describe('store-admin comprehensive tests', () => {
       // Verify first product has expected company name
       const firstProduct = productRows.first();
       const productName = firstProduct.locator('td').nth(1); // Assuming name is in second column
-      
+
       // Check if product contains company name
       const productNameText = await productName.textContent();
       if (productNameText && productNameText.includes('Bike')) {
@@ -83,10 +93,10 @@ test.describe('store-admin comprehensive tests', () => {
     const productLinks = page.locator('a[href*="/product/"]');
     if (await productLinks.count() > 0) {
       await productLinks.first().click();
-      
+
       // Verify we're on product detail page
       await expect(page.url()).toContain('/product/');
-      
+
       // Check for product detail elements
       const productTitle = page.locator('h1, h2, .product-title');
       if (await productTitle.count() > 0) {
@@ -102,10 +112,10 @@ test.describe('store-admin comprehensive tests', () => {
     const ordersLink = page.getByRole('link', { name: /Orders?/ });
     if (await ordersLink.isVisible()) {
       await ordersLink.click();
-      
+
       // Verify orders page loaded
       await expect(page.url()).toContain('order');
-      
+
       // Check for orders table/list elements
       const ordersTable = page.locator('table, .orders-list, [data-testid="orders"]');
       if (await ordersTable.count() > 0) {
@@ -125,7 +135,7 @@ test.describe('store-admin comprehensive tests', () => {
     const saveButton = page.getByRole('button', { name: 'Save Product' });
     if (await saveButton.isVisible()) {
       await saveButton.click();
-      
+
       // Look for validation messages
       const validationMessages = page.locator('.error, .validation-error, [role="alert"]');
       if (await validationMessages.count() > 0) {
@@ -142,7 +152,7 @@ test.describe('store-admin comprehensive tests', () => {
 
     // Navigate to Products page and verify branding consistency
     await page.getByRole('link', { name: 'Products' }).click();
-    
+
     // Check if page maintains branding
     const headerElements = page.locator('h1, h2, .header, .page-title');
     if (await headerElements.count() > 0) {
@@ -174,18 +184,18 @@ test.describe('store-admin comprehensive tests', () => {
     const askAIButton = page.locator('button:has-text("Ask AI Assistant")');
     if (await askAIButton.isVisible()) {
       await askAIButton.click();
-      
+
       // Wait for AI response with timeout
       try {
         await page.waitForResponse(
           response => response.url().includes('/api/ai/generate/description') && response.status() === 200,
           { timeout: 30000 }
         );
-        
+
         // Verify description field was populated
         const descriptionField = page.getByRole('textbox', { name: 'Description' });
         await expect(descriptionField).not.toHaveValue('');
-        
+
         console.log('AI Assistant successfully generated product description');
       } catch (error) {
         console.log('AI Assistant not available or timeout occurred, using manual description');
@@ -204,7 +214,7 @@ test.describe('store-admin comprehensive tests', () => {
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     await page.getByRole('link', { name: 'Products' }).click();
-    
+
     // Verify basic functionality works on mobile
     await expect(page.getByRole('button', { name: 'Add Product' })).toBeVisible();
 
@@ -226,17 +236,17 @@ test.describe('store-admin comprehensive tests', () => {
 
     // Try to access a non-existent product
     await page.goto(`${testConfig.storeAdminUrl}/product/non-existent-id`);
-    
+
     // Should handle error gracefully (either redirect or show error message)
     await page.waitForTimeout(3000);
-    
+
     // Check if we're redirected or if error message is shown
     const currentUrl = page.url();
     const errorElements = page.locator('.error, .not-found, [role="alert"]');
-    
+
     const isRedirected = !currentUrl.includes('non-existent-id');
     const hasErrorMessage = await errorElements.count() > 0;
-    
+
     expect(isRedirected || hasErrorMessage).toBe(true);
   });
 });

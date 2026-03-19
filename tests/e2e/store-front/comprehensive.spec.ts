@@ -3,10 +3,12 @@ import { test, expect } from '@playwright/test';
 const testConfig = require('../../test-config');
 
 test.describe('Comprehensive Store Front Tests', () => {
-  
+
   test.beforeEach(async ({ page }) => {
     // Set longer timeout for navigation
     await page.goto(testConfig.storeFrontUrl, { waitUntil: 'networkidle' });
+    // Wait for products to load from API and render before running tests
+    await page.locator('.product-card').first().waitFor({ state: 'visible', timeout: 15000 });
   });
 
   test.describe('Page Structure and Navigation', () => {
@@ -29,7 +31,7 @@ test.describe('Comprehensive Store Front Tests', () => {
       // Navigate to Products
       await page.getByRole('link', { name: /Products/i }).click();
       await expect(page.url()).toContain(testConfig.storeFrontUrl);
-      
+
       // Navigate to Cart
       await page.getByRole('link', { name: /Cart/i }).click();
       await expect(page.url()).toContain(testConfig.storeFrontUrl);
@@ -38,13 +40,14 @@ test.describe('Comprehensive Store Front Tests', () => {
 
   test.describe('Product Display and Functionality', () => {
     test('should display product list on home page', async ({ page }) => {
-      await expect(page.locator('.product-list, .products, [data-testid="product-list"]')).toBeVisible();
+      // Products already loaded via beforeEach; verify the list container has visible cards
+      await expect(page.locator('.product-card').first()).toBeVisible();
     });
 
     test('should display individual product cards', async ({ page }) => {
       const productCards = page.locator('.product-card, .product, [data-testid="product-card"]');
       await expect(productCards.first()).toBeVisible();
-      
+
       // Check that products have essential elements
       const firstProduct = productCards.first();
       await expect(firstProduct.locator('img, .image')).toBeVisible();
@@ -54,17 +57,17 @@ test.describe('Comprehensive Store Front Tests', () => {
     test('should show product details when clicking on a product', async ({ page }) => {
       const firstProduct = page.locator('.product-card, .product, [data-testid="product-card"]').first();
       await firstProduct.click();
-      
+
       // Should navigate to product detail page or show modal
       await expect(page.locator('.product-info, .product-details, [data-testid="product-details"]')).toBeVisible();
     });
 
     test('should display product information (name, price, description)', async ({ page }) => {
       const firstProduct = page.locator('.product-card, .product, [data-testid="product-card"]').first();
-      
+
       // Check for product name
       await expect(firstProduct.locator('h2, h3, .product-name, .name')).toBeVisible();
-      
+
       // Check for price (look for $ symbol or price class)
       await expect(firstProduct.locator('.price, [data-testid="price"]')).toBeVisible();
     });
@@ -73,7 +76,7 @@ test.describe('Comprehensive Store Front Tests', () => {
       // Look for products that should contain the company name
       const productWithCompanyName = page.locator('.product-card, .product, [data-testid="product-card"]')
         .filter({ hasText: new RegExp(`${testConfig.companyName}`, 'i') });
-      
+
       // Should have at least one product with company branding
       await expect(productWithCompanyName.first()).toBeVisible();
     });
@@ -83,7 +86,7 @@ test.describe('Comprehensive Store Front Tests', () => {
     test('should start with empty cart', async ({ page }) => {
       const cartLink = page.getByRole('link', { name: /Cart/i });
       const cartText = await cartLink.textContent();
-      
+
       // Cart should show 0 items initially or be empty
       expect(cartText).toMatch(/Cart\s*\(?\s*0?\s*\)?/i);
     });
@@ -98,7 +101,7 @@ test.describe('Comprehensive Store Front Tests', () => {
       const firstAddButton = page.locator('.product-card, .product, [data-testid="product-card"]')
         .first()
         .getByRole('button', { name: /Add to Cart/i });
-      
+
       await firstAddButton.click();
 
       // Check cart count increased
@@ -133,7 +136,7 @@ test.describe('Comprehensive Store Front Tests', () => {
 
       // Navigate to product details
       await page.locator('.product-card, .product, [data-testid="product-card"]').first().click();
-      
+
       // Add to cart from detail page
       await page.getByRole('button', { name: /Add to Cart/i }).click();
 
@@ -153,21 +156,21 @@ test.describe('Comprehensive Store Front Tests', () => {
 
     test('should navigate to cart page and display items', async ({ page }) => {
       await page.getByRole('link', { name: /Cart/i }).click();
-      
+
       // Should see cart items
       await expect(page.locator('.cart-item, .cart-product, [data-testid="cart-item"]')).toBeVisible();
     });
 
     test('should show checkout button when items in cart', async ({ page }) => {
       await page.getByRole('link', { name: /Cart/i }).click();
-      
+
       // Should see checkout button
       await expect(page.getByRole('button', { name: /Checkout/i })).toBeVisible();
     });
 
     test('should be able to modify item quantities in cart', async ({ page }) => {
       await page.getByRole('link', { name: /Cart/i }).click();
-      
+
       // Look for quantity controls (+ - buttons or number input)
       const quantityControls = page.locator('.quantity, [data-testid="quantity"], input[type="number"]');
       if (await quantityControls.count() > 0) {
@@ -183,7 +186,7 @@ test.describe('Comprehensive Store Front Tests', () => {
         .first()
         .getByRole('button', { name: /Add to Cart/i });
       await firstAddButton.click();
-      
+
       const secondAddButton = page.locator('.product-card, .product, [data-testid="product-card"]')
         .nth(1)
         .getByRole('button', { name: /Add to Cart/i });
@@ -193,7 +196,7 @@ test.describe('Comprehensive Store Front Tests', () => {
     test('should complete checkout process successfully', async ({ page }) => {
       // Navigate to cart
       await page.getByRole('link', { name: /Cart/i }).click();
-      
+
       // Start checkout
       await page.getByRole('button', { name: /Checkout/i }).click();
 
@@ -202,14 +205,14 @@ test.describe('Comprehensive Store Front Tests', () => {
         expect(dialog.message()).toMatch(/success|submitted|complete|order/i);
         await dialog.accept();
       });
-      
+
       // Wait for potential navigation or modal
       await page.waitForTimeout(2000);
     });
 
     test('should show order confirmation or success message', async ({ page }) => {
       await page.getByRole('link', { name: /Cart/i }).click();
-      
+
       // Set up dialog listener before clicking checkout
       const dialogPromise = new Promise(resolve => {
         page.on('dialog', async dialog => {
@@ -217,9 +220,9 @@ test.describe('Comprehensive Store Front Tests', () => {
           await dialog.accept();
         });
       });
-      
+
       await page.getByRole('button', { name: /Checkout/i }).click();
-      
+
       // Wait for dialog and check message
       const dialogMessage = await dialogPromise;
       expect(dialogMessage).toMatch(/success|submitted|complete|order/i);
@@ -229,7 +232,7 @@ test.describe('Comprehensive Store Front Tests', () => {
   test.describe('Responsive Design and UI', () => {
     // test('should be responsive on mobile viewport', async ({ page }) => {
     //   await page.setViewportSize({ width: 375, height: 667 });
-      
+
     //   // Check that main elements are still visible
     //   await expect(page.locator('.product-list, .products, [data-testid="product-list"]')).toBeVisible();
     //   await expect(page.getByRole('link', { name: /Cart/i })).toBeVisible();
@@ -237,15 +240,15 @@ test.describe('Comprehensive Store Front Tests', () => {
 
     test('should be responsive on tablet viewport', async ({ page }) => {
       await page.setViewportSize({ width: 768, height: 1024 });
-      
-      // Check layout adjusts properly
-      await expect(page.locator('.product-list, .products, [data-testid="product-list"]')).toBeVisible();
+
+      // Check layout adjusts properly (products already loaded via beforeEach)
+      await expect(page.locator('.product-card').first()).toBeVisible();
     });
 
     test('should display product images properly', async ({ page }) => {
       const productImages = page.locator('.product-card img, .product img, [data-testid="product-image"]');
       await expect(productImages.first()).toBeVisible();
-      
+
       // Check image has proper attributes
       const firstImage = productImages.first();
       await expect(firstImage).toHaveAttribute('src');
@@ -255,7 +258,7 @@ test.describe('Comprehensive Store Front Tests', () => {
   test.describe('Error Handling and Edge Cases', () => {
     test('should handle empty cart gracefully', async ({ page }) => {
       await page.getByRole('link', { name: /Cart/i }).click();
-      
+
       // Should show empty cart message or handle gracefully
       const emptyCartElements = page.locator('.empty-cart, .no-items, [data-testid="empty-cart"]');
       if (await emptyCartElements.count() > 0) {
@@ -268,9 +271,10 @@ test.describe('Comprehensive Store Front Tests', () => {
       await page.route('**/*', route => {
         setTimeout(() => route.continue(), 100);
       });
-      
+
       await page.reload();
-      await expect(page.locator('.product-list, .products, [data-testid="product-list"]')).toBeVisible();
+      // Wait for products to reload after network delay
+      await page.locator('.product-card').first().waitFor({ state: 'visible', timeout: 15000 });
     });
   });
 
@@ -284,7 +288,7 @@ test.describe('Comprehensive Store Front Tests', () => {
       const buttons = page.getByRole('button');
       const buttonCount = await buttons.count();
       expect(buttonCount).toBeGreaterThan(0);
-      
+
       for (let i = 0; i < Math.min(buttonCount, 3); i++) {
         await expect(buttons.nth(i)).toBeEnabled();
       }
@@ -294,7 +298,7 @@ test.describe('Comprehensive Store Front Tests', () => {
       const links = page.getByRole('link');
       const linkCount = await links.count();
       expect(linkCount).toBeGreaterThan(0);
-      
+
       for (let i = 0; i < Math.min(linkCount, 3); i++) {
         await expect(links.nth(i)).toBeVisible();
       }
@@ -306,7 +310,7 @@ test.describe('Comprehensive Store Front Tests', () => {
       const startTime = Date.now();
       await page.goto(testConfig.storeFrontUrl, { waitUntil: 'networkidle' });
       const loadTime = Date.now() - startTime;
-      
+
       // Should load within 5 seconds
       expect(loadTime).toBeLessThan(5000);
     });
@@ -314,13 +318,13 @@ test.describe('Comprehensive Store Front Tests', () => {
     test('should have working product images', async ({ page }) => {
       const images = page.locator('img');
       const imageCount = await images.count();
-      
+
       if (imageCount > 0) {
         // Check first few images load properly
         for (let i = 0; i < Math.min(imageCount, 3); i++) {
           const image = images.nth(i);
           await expect(image).toBeVisible();
-          
+
           // Check image has loaded (not broken)
           const naturalWidth = await image.evaluate((img: HTMLImageElement) => img.naturalWidth);
           expect(naturalWidth).toBeGreaterThan(0);
