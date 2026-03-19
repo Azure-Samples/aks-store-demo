@@ -38,19 +38,26 @@ class DescriptionRequest(BaseModel):
 description = APIRouter(prefix="/generate", tags=["generation"])
 
 
-def _create_completion(client, model, prompt, system_prompt=SYSTEM_PROMPT):
+def _create_completion(
+    client, model, prompt, temperature=1.0, system_prompt=SYSTEM_PROMPT
+):
     """Create a chat completion using the provided client and model"""
-    return client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0,
-    )
+
+    try:
+        return client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=temperature,
+        )
+    except Exception:
+        logger.exception("Error creating completion")
+        raise
 
 
-def _handle_local_llm(user_prompt):
+def _handle_local_llm(user_prompt, temperature):
     """Handle local LLM completion"""
     logger.info("Using local LLM")
 
@@ -64,13 +71,24 @@ def _handle_local_llm(user_prompt):
     )
 
     models = client.models.list()
-    model = models.data[0].id
 
-    response = _create_completion(client, model, user_prompt)
+    local_llm_name = os.environ.get("LOCAL_LLM_MODEL")
+    if local_llm_name:
+        logger.info("Looking for local LLM model: %s", local_llm_name)
+        matching_models = [m for m in models.data if m.id == local_llm_name]
+        if not matching_models:
+            raise ValueError(f"Model '{local_llm_name}' not found in local LLM")
+        model = matching_models[0].id
+    else:
+        if not models.data:
+            raise ValueError("No models returned from local LLM endpoint")
+        model = models.data[0].id
+
+    response = _create_completion(client, model, user_prompt, temperature)
     return response.choices[0].message.content
 
 
-def _handle_openai(user_prompt):
+def _handle_openai(user_prompt, temperature):
     """Handle OpenAI completion"""
     api_key = os.environ.get("OPENAI_API_KEY")
     org_id = os.environ.get("OPENAI_ORG_ID")
@@ -84,11 +102,11 @@ def _handle_openai(user_prompt):
         api_key=api_key,
         organization=org_id,
     )
-    response = _create_completion(client, "gpt-3.5-turbo", user_prompt)
+    response = _create_completion(client, "gpt-5-mini", user_prompt, temperature)
     return response.choices[0].message.content
 
 
-def _handle_azure_openai(user_prompt, use_azure_ad):
+def _handle_azure_openai(user_prompt, use_azure_ad, temperature):
     """Handle Azure OpenAI completion"""
     deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NAME")
     endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -126,7 +144,7 @@ def _handle_azure_openai(user_prompt, use_azure_ad):
             api_key=api_key,
         )
 
-    response = _create_completion(client, deployment, user_prompt)
+    response = _create_completion(client, deployment, user_prompt, temperature)
     return response.choices[0].message.content
 
 
@@ -149,13 +167,24 @@ async def generate_description(request: DescriptionRequest):
         use_local_llm = os.environ.get("USE_LOCAL_LLM", "False").lower() == "true"
         use_azure = os.environ.get("USE_AZURE_OPENAI", "False").lower() == "true"
         use_azure_ad = os.environ.get("USE_AZURE_AD", "False").lower() == "true"
+        temperature_str = os.environ.get("TEMPERATURE", "1")
+        try:
+            temperature = float(temperature_str)
+        except ValueError:
+            logger.warning(
+                "Invalid TEMPERATURE value '%s'; falling back to default 1.0",
+                temperature_str,
+            )
+            temperature = 1.0
 
         if use_local_llm:
-            description_text = _handle_local_llm(user_prompt)
+            description_text = _handle_local_llm(user_prompt, temperature)
         elif not use_azure:
-            description_text = _handle_openai(user_prompt)
+            description_text = _handle_openai(user_prompt, temperature)
         else:
-            description_text = _handle_azure_openai(user_prompt, use_azure_ad)
+            description_text = _handle_azure_openai(
+                user_prompt, use_azure_ad, temperature
+            )
 
         return {"description": description_text}
     except Exception as e:

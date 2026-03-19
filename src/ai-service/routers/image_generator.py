@@ -1,6 +1,7 @@
 """
 Image generation API endpoint using Azure OpenAI DALL-E.
 """
+
 import os
 import json
 import logging
@@ -20,20 +21,22 @@ USER_PROMPT_TEMPLATE = (
     "a description '{description}' to be sold in an online pet supply store"
 )
 
+
 class ImageRequest(BaseModel):
     """Request model for the image generation endpoint."""
+
     name: str
     description: str
 
+
 # Create router with prefix
-image = APIRouter(
-    prefix="/generate",
-    tags=["generation"]
-)
+image = APIRouter(prefix="/generate", tags=["generation"])
+
 
 def _handle_azure_openai(user_prompt, use_azure_ad):
-    endpoint = os.environ.get("AZURE_OPENAI_DALLE_ENDPOINT") \
-                or os.environ.get("AZURE_OPENAI_ENDPOINT")
+    endpoint = os.environ.get("AZURE_OPENAI_DALLE_ENDPOINT") or os.environ.get(
+        "AZURE_OPENAI_ENDPOINT"
+    )
     if not endpoint:
         raise ValueError(
             "AZURE_OPENAI_DALLE_ENDPOINT or AZURE_OPENAI_ENDPOINT must be provided"
@@ -49,8 +52,7 @@ def _handle_azure_openai(user_prompt, use_azure_ad):
 
     if use_azure_ad:
         token_provider = get_bearer_token_provider(
-            DefaultAzureCredential(),
-            "https://cognitiveservices.azure.com/.default"
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
         )
         client = AzureOpenAI(
             api_version=api_version,
@@ -69,13 +71,12 @@ def _handle_azure_openai(user_prompt, use_azure_ad):
         )
 
     response = client.images.generate(
-        model=model_deployment_name,
-        prompt=user_prompt,
-        n=1
+        model=model_deployment_name, prompt=user_prompt, n=1
     )
 
     json_response = json.loads(response.model_dump_json())
     return json_response["data"][0]["url"]
+
 
 @image.post("/image", operation_id="generate_image")
 async def generate_image(request: ImageRequest):
@@ -85,8 +86,7 @@ async def generate_image(request: ImageRequest):
     try:
         # Format the user prompt with the product name and tags
         user_prompt = USER_PROMPT_TEMPLATE.format(
-            name=request.name,
-            description=request.description
+            name=request.name, description=request.description
         )
 
         env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
@@ -99,11 +99,8 @@ async def generate_image(request: ImageRequest):
         image_url = _handle_azure_openai(user_prompt, use_azure_ad)
 
         return JSONResponse(
-            content={"image": image_url},
-            status_code=status.HTTP_200_OK
+            content={"image": image_url}, status_code=status.HTTP_200_OK
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error generating image: {str(e)}"
-        ) from e
+        logger.exception("Error generating image")
+        raise HTTPException(status_code=500, detail="Error generating image") from e
