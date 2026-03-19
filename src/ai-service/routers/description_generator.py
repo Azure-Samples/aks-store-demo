@@ -98,7 +98,7 @@ def _handle_openai(user_prompt, temperature):
         api_key=api_key,
         organization=org_id,
     )
-    response = _create_completion(client, "gpt-3.5-turbo", user_prompt, temperature)
+    response = _create_completion(client, "gpt-5-mini", user_prompt, temperature)
     return response.choices[0].message.content
 
 
