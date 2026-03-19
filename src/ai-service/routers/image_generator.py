@@ -70,13 +70,9 @@ def _handle_azure_openai(user_prompt, use_azure_ad):
             api_key=api_key,
         )
 
-    try:
-        response = client.images.generate(
-            model=model_deployment_name, prompt=user_prompt, n=1
-        )
-    except Exception:
-        logger.exception("Error generating image")
-        raise
+    response = client.images.generate(
+        model=model_deployment_name, prompt=user_prompt, n=1
+    )
 
     json_response = json.loads(response.model_dump_json())
     return json_response["data"][0]["url"]

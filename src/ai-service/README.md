@@ -36,7 +36,7 @@ export AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI's DA
 export USE_LOCAL_LLM=False # set to True if you are using a local KAITO LLM model
 export LOCAL_LLM_ENDPOINT= # optional if using a local KAITO LLM model (ex: http://<A_REACHABLE_IP>/v1)
 export LOCAL_LLM_MODEL= # optional if using a local KAITO LLM model (ex: phi-4-mini)
-export TEMPERATURE=0.7 # optional, set the temperature for the generated descriptions
+export TEMPERATURE=0.7 # optional (default 1.0), set the temperature for the generated descriptions
 
 uvicorn main:app --host 127.0.0.1 --port 5001
 ```

@@ -38,7 +38,9 @@ class DescriptionRequest(BaseModel):
 description = APIRouter(prefix="/generate", tags=["generation"])
 
 
-def _create_completion(client, model, prompt, temperature, system_prompt=SYSTEM_PROMPT):
+def _create_completion(
+    client, model, prompt, temperature=1.0, system_prompt=SYSTEM_PROMPT
+):
     """Create a chat completion using the provided client and model"""
 
     try:
@@ -78,6 +80,8 @@ def _handle_local_llm(user_prompt, temperature):
             raise ValueError(f"Model '{local_llm_name}' not found in local LLM")
         model = matching_models[0].id
     else:
+        if not models.data:
+            raise ValueError("No models returned from local LLM endpoint")
         model = models.data[0].id
 
     response = _create_completion(client, model, user_prompt, temperature)
