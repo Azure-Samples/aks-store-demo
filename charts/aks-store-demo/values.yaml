@@ -38,6 +38,11 @@ orderService:
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/order-service"
     tag: "" # defaults to Chart.AppVersion
+  initContainers:
+    waitForRabbitmq:
+      image:
+        repository: "mcr.microsoft.com/cbl-mariner/busybox"
+        tag: "2.0"
 
 makelineService:
   orderQueueUri: "amqp://rabbitmq:5672"
