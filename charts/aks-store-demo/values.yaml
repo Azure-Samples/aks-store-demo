@@ -9,6 +9,15 @@ namespace: "dev"
 useRabbitMQ: true # when true, local rabbitmq container will be used
 useMongoDB: true # when true, local mongodb container will be used
 
+mongodb:
+  resources:
+    requests:
+      cpu: 5m
+      memory: 75Mi
+    limits:
+      cpu: 25m
+      memory: 1024Mi
+
 useAzureAd: false # when true, Azure AD auth will be used for ai-service, order-service, and makeline-service
 managedIdentityName: "" # name of the Azure AD identity to use for the service account
 managedIdentityClientId: "" # client ID of the managed identity to use for the service account
