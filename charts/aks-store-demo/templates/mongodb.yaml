@@ -24,11 +24,11 @@ spec:
           name: mongodb
         resources:
           requests:
-            cpu: 5m
-            memory: 75Mi
+            cpu: {{ .Values.mongodb.resources.requests.cpu }}
+            memory: {{ .Values.mongodb.resources.requests.memory }}
           limits:
-            cpu: 25m
-            memory: 1024Mi
+            cpu: {{ .Values.mongodb.resources.limits.cpu }}
+            memory: {{ .Values.mongodb.resources.limits.memory }}
         livenessProbe:
           exec:
             command:
