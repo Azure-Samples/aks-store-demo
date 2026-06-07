@@ -60,3 +60,37 @@ spec:
     targetPort: 8081
   selector:
     app: store-admin
+{{- if .Values.storeAdmin.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: store-admin
+  {{- with .Values.storeAdmin.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.storeAdmin.ingress.className }}
+  ingressClassName: {{ .Values.storeAdmin.ingress.className }}
+  {{- end }}
+  {{- if .Values.storeAdmin.ingress.tls }}
+  tls:
+    {{- toYaml .Values.storeAdmin.ingress.tls | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.storeAdmin.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: store-admin
+                port:
+                  number: 80
+          {{- end }}
+    {{- end }}
+{{- end }}

@@ -60,3 +60,37 @@ spec:
     targetPort: 8080
   selector:
     app: store-front
+{{- if .Values.storeFront.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: store-front
+  {{- with .Values.storeFront.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.storeFront.ingress.className }}
+  ingressClassName: {{ .Values.storeFront.ingress.className }}
+  {{- end }}
+  {{- if .Values.storeFront.ingress.tls }}
+  tls:
+    {{- toYaml .Values.storeFront.ingress.tls | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.storeFront.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: store-front
+                port:
+                  number: 80
+          {{- end }}
+    {{- end }}
+{{- end }}
