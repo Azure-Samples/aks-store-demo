@@ -2,10 +2,10 @@
 module "aoai" {
   count                 = local.deploy_azure_openai ? 1 : 0
   source                = "Azure/avm-res-cognitiveservices-account/azurerm"
-  version               = "0.10.0"
+  version               = "0.11.0"
   name                  = "openai-${local.name}"
   custom_subdomain_name = "openai-${local.name}"
-  resource_group_name   = azurerm_resource_group.example.name
+  parent_id             = azurerm_resource_group.example.id
   location              = var.azure_openai_location
   kind                  = "OpenAI"
   sku_name              = "S0"

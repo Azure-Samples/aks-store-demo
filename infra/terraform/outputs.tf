@@ -23,7 +23,7 @@ output "AZURE_AKS_CLUSTER_ID" {
 }
 
 output "AZURE_AKS_OIDC_ISSUER_URL" {
-  value = module.aks.oidc_issuer_url
+  value = module.aks.oidc_issuer_profile_issuer_url
 }
 
 output "AZURE_OPENAI_ENDPOINT" {
