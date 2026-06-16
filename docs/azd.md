@@ -46,7 +46,6 @@ az login
 > - `Microsoft.AlertsManagement` (if using observability tools)
 > - `Microsoft.CognitiveServices` (for Azure OpenAI)
 > - `Microsoft.ContainerService` (for AKS)
-> - `Microsoft.Dashboard` (if using Grafana)
 > - `Microsoft.DocumentDB` (if using Cosmos DB)
 > - `Microsoft.KeyVault` (for Key Vault)
 > - `Microsoft.OperationalInsights` (if using observability tools)
@@ -58,14 +57,13 @@ az login
 > az provider register --namespace Microsoft.AlertsManagement
 > az provider register --namespace Microsoft.CognitiveServices
 > az provider register --namespace Microsoft.ContainerService
-> az provider register --namespace Microsoft.Dashboard
 > az provider register --namespace Microsoft.DocumentDB
 > az provider register --namespace Microsoft.KeyVault
 > az provider register --namespace Microsoft.OperationalInsights
 > az provider register --namespace Microsoft.ServiceBus
 > ```
 
-When selecting an Azure region, choose one that supports all services used here: Azure OpenAI, AKS, Key Vault, Service Bus, Cosmos DB, Log Analytics, Azure Monitor (managed Prometheus), and Managed Grafana.
+When selecting an Azure region, choose one that supports all services used here: Azure OpenAI, AKS, Key Vault, Service Bus, Cosmos DB, Log Analytics, Azure Monitor (managed Prometheus).
 
 ### Availability zone support
 
@@ -111,7 +109,7 @@ The following environment variables control what gets deployed:
 | `DEPLOY_AZURE_SERVICE_BUS`        | Set `true` to deploy Azure Service Bus (RabbitMQ disabled in app).                                                                                                 |
 | `DEPLOY_AZURE_COSMOSDB`           | Set `true` to deploy Azure Cosmos DB (MongoDB disabled in app).                                                                                                    |
 | `AZURE_COSMOSDB_ACCOUNT_KIND`     | Cosmos DB API kind: `MongoDB` or `GlobalDocumentDB` (SQL API). Default: `GlobalDocumentDB`.                                                                        |
-| `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, Managed Grafana, and enable Container Insights.                                                            |
+| `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, and enable Container Insights.                                                                             |
 | `SOURCE_REGISTRY`                 | Source container registry for images. Default: `ghcr.io/azure-samples`.                                                                                            |
 
 These environment variables listed above can be set with commands like this:
