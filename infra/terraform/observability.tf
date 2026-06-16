@@ -14,36 +14,6 @@ resource "azurerm_monitor_workspace" "example" {
   location            = azurerm_resource_group.example.location
 }
 
-resource "azurerm_dashboard_grafana" "example" {
-  count                 = local.deploy_observability_tools ? 1 : 0
-  name                  = "grafana-${substr(local.name, 0, 15)}"
-  resource_group_name   = azurerm_resource_group.example.name
-  location              = azurerm_resource_group.example.location
-  grafana_major_version = "11"
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  azure_monitor_workspace_integrations {
-    resource_id = azurerm_monitor_workspace.example[0].id
-  }
-}
-
-resource "azurerm_role_assignment" "example_amg_me" {
-  count                = local.deploy_observability_tools ? 1 : 0
-  scope                = azurerm_dashboard_grafana.example[0].id
-  role_definition_name = "Grafana Admin"
-  principal_id         = data.azurerm_client_config.current.object_id
-}
-
-resource "azurerm_role_assignment" "example_rg_amg" {
-  count                = local.deploy_observability_tools ? 1 : 0
-  principal_id         = azurerm_dashboard_grafana.example[0].identity[0].principal_id
-  role_definition_name = "Monitoring Data Reader"
-  scope                = azurerm_resource_group.example.id
-}
-
 resource "azurerm_monitor_data_collection_endpoint" "example_msprom" {
   count               = local.deploy_observability_tools ? 1 : 0
   name                = "MSProm-${azurerm_resource_group.example.location}-${module.aks.name}"
