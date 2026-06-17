@@ -41,24 +41,24 @@ param deployAzureOpenAI bool = false
 param azureOpenAILocation string = location
 
 @description('value of azure openai model name')
-param chatCompletionModelName string = 'gpt-5-mini'
+param chatCompletionModelName string = 'gpt-5.4-mini'
 
 @description('value of azure openai model version')
-param chatCompletionModelVersion string = '2025-08-07'
+param chatCompletionModelVersion string = '2026-03-17'
 
 @description('value of azure openai model capacity')
 param chatCompletionModelCapacity int = 8
 
-@description('value to determine if azure openai dall-e model should be deployed')
+@description('value to determine if azure openai image model should be deployed')
 param deployImageGenerationModel bool = false
 
-@description('value of azure openai dall-e model name')
-param imageGenerationModelName string = 'dall-e-3'
+@description('value of azure openai image model name')
+param imageGenerationModelName string = 'gpt-image-2'
 
-@description('value of azure openai dall-e model version')
-param imageGenerationModelVersion string = '3.0'
+@description('value of azure openai image model version')
+param imageGenerationModelVersion string = '2026-04-21'
 
-@description('value of azure openai dall-e model capacity')
+@description('value of azure openai image model capacity')
 param imageGenerationModelCapacity int = 1
 
 @description('value of the current IP address for network access')
@@ -197,10 +197,10 @@ output AZURE_AKS_CLUSTER_ID string = aks.outputs.id
 output AZURE_AKS_OIDC_ISSUER_URL string = aks.outputs.oidcIssuerUrl
 output AZURE_OPENAI_ENDPOINT string = deployAzureOpenAI ? openai!.outputs.endpoint : ''
 output AZURE_OPENAI_MODEL_NAME string = deployAzureOpenAI ? chatCompletionModelName : ''
-output AZURE_OPENAI_DALL_E_MODEL_NAME string = deployAzureOpenAI && deployImageGenerationModel
+output AZURE_OPENAI_IMAGE_MODEL_NAME string = deployAzureOpenAI && deployImageGenerationModel
   ? imageGenerationModelName
   : ''
-output AZURE_OPENAI_DALL_E_ENDPOINT string = deployAzureOpenAI && deployImageGenerationModel
+output AZURE_OPENAI_IMAGE_ENDPOINT string = deployAzureOpenAI && deployImageGenerationModel
   ? openai!.outputs.endpoint
   : ''
 output AZURE_IDENTITY_NAME string = (deployAzureCosmosDB || deployAzureServiceBus || deployAzureOpenAI)

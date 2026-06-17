@@ -17,8 +17,13 @@ impl Settings {
             var("WASM_RULE_ENGINE_PATH").unwrap_or_else(|_| "./tests/rule_engine.wasm".to_string());
         let ai_service_url =
             std::env::var("AI_SERVICE_URL").unwrap_or_else(|_| "http://127.0.0.1:5001".to_string());
+        let max_size = var("PRODUCT_MAX_SIZE_BYTES")
+            .ok()
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(10 * 1024 * 1024);
+
         Settings {
-            max_size: 262_144,
+            max_size,
             log_level: "info".to_string(),
             port: 3002,
             wasm_rules_engine_enabled: false,

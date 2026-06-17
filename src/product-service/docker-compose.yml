@@ -23,10 +23,12 @@ services:
       - USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
       - AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
       - AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
-      - OPENAI_API_KEY= # always required
-      - AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI DALL-E
-      - AZURE_OPENAI_API_VERSION=2024-12-01-preview # required if using Azure OpenAI
-      - AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI DALL-E
+      - AZURE_OPENAI_API_KEY= # required if using Azure OpenAI key auth (not needed with workload identity)
+      - OPENAI_API_KEY= # required if using OpenAI (or as fallback for Azure key auth)
+      - AZURE_OPENAI_IMAGE_ENDPOINT= # required if using Azure OpenAI image models
+      - AZURE_OPENAI_API_VERSION=2024-12-01-preview # optional override for text models
+      - AZURE_OPENAI_IMAGE_API_VERSION=2025-04-01-preview # required for gpt-image-2
+      - AZURE_OPENAI_IMAGE_DEPLOYMENT_NAME= # required if using Azure OpenAI image models
     networks:
       - backend_services
 networks:

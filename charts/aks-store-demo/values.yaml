@@ -21,9 +21,10 @@ aiService:
   openAiKey: ""
   openAiOrgId: ""
   useAzureOpenAi: false
-  openAiDalleEndpoint: ""
-  openAiDalleModelName: ""
+  openAiImageEndpoint: ""
+  openAiImageModelName: ""
   azureOpenAiApiVersion: "2024-12-01-preview"
+  azureOpenAiImageApiVersion: "2025-04-01-preview"
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/ai-service"
     tag: "" # defaults to Chart.AppVersion

@@ -23,16 +23,18 @@ source .venv/bin/activate
 pip3 install -r requirements.txt
 
 export USE_AZURE_OPENAI=True # set to False if you are not using Azure OpenAI
-export USE_AZURE_AD=True # set to True if you are using Azure OpenAI with Azure AD authentication
+export USE_AZURE_AD=False # set to True if you are using Azure OpenAI with Azure AD authentication
 export AZURE_OPENAI_API_VERSION=2024-12-01-preview # set to the version of the Azure OpenAI API you are using https://learn.microsoft.com/azure/ai-services/openai/reference#rest-api-versioning
-export AZURE_OPENAI_DEPLOYMENT_NAME= # required if using Azure OpenAI
-export AZURE_OPENAI_ENDPOINT= # required if using Azure OpenAI
-export AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI's DALL-E model
-export AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI's DALL-E model
-export OPENAI_API_KEY= # always required if using OpenAI if using Azure OpenAI, consider use Workload Identity https://learn.microsoft.com/azure/aks/open-ai-secure-access-quickstart
+export AZURE_OPENAI_DEPLOYMENT_NAME=gpt-5.4-mini # required if using Azure OpenAI
+export AZURE_OPENAI_ENDPOINT=https://<your-resource>.cognitiveservices.azure.com/ # required if using Azure OpenAI
+export AZURE_OPENAI_API_KEY=<your-azure-openai-key> # required if using key auth; not required with USE_AZURE_AD=True
+
+export AZURE_OPENAI_IMAGE_API_VERSION=2025-04-01-preview # required if using Azure OpenAI image models such as gpt-image-2
+export AZURE_OPENAI_IMAGE_ENDPOINT=https://<your-resource>.cognitiveservices.azure.com/ # optional override; defaults to AZURE_OPENAI_ENDPOINT
+export AZURE_OPENAI_IMAGE_DEPLOYMENT_NAME=gpt-image-2 # required if using Azure OpenAI image generation
+
+export OPENAI_API_KEY=<your-openai-key> # required if using OpenAI; optional fallback when using Azure OpenAI key auth
 export OPENAI_ORG_ID= # required if using OpenAI
-export AZURE_OPENAI_DALLE_ENDPOINT= # required if using Azure OpenAI's DALL-E model
-export AZURE_OPENAI_DALLE_DEPLOYMENT_NAME= # required if using Azure OpenAI's DALL-E model
 export USE_LOCAL_LLM=False # set to True if you are using a local KAITO LLM model
 export LOCAL_LLM_ENDPOINT= # optional if using a local KAITO LLM model (ex: http://<A_REACHABLE_IP>/v1)
 export LOCAL_LLM_MODEL= # optional if using a local KAITO LLM model (ex: phi-4-mini)

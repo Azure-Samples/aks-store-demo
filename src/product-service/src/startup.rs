@@ -24,12 +24,16 @@ pub fn run(mut settings: Settings) -> Result<Server, std::io::Error> {
     let server = HttpServer::new(move || {
         let cors = Cors::permissive();
 
+        // Raise the JSON body limit to 10 MB to accommodate base64-encoded product images.
+        let json_cfg = web::JsonConfig::default().limit(10 * 1024 * 1024);
+
         App::new()
             .wrap(cors)
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .wrap(middleware::DefaultHeaders::new().add(("X-Version", "0.2")))
             .app_data(product_state.clone())
+            .app_data(json_cfg)
             .route("/health", web::get().to(health))
             .route("/health", web::head().to(health))
             .route("/ai/health", web::get().to(ai_health))

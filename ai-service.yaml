@@ -28,13 +28,17 @@ spec:
               value: ""
             - name: AZURE_OPENAI_ENDPOINT # required if using Azure OpenAI
               value: ""
-            - name: OPENAI_API_KEY # required if using OpenAI or Azure OpenAI without workload identity
+            - name: AZURE_OPENAI_API_KEY # required if using Azure OpenAI key auth (not needed with workload identity)
               value: ""
-            - name: AZURE_OPENAI_DALLE_ENDPOINT # required if using Azure OpenAI DALL-E
+            - name: OPENAI_API_KEY # required if using OpenAI; optional fallback for Azure OpenAI key auth
               value: ""
-            - name: AZURE_OPENAI_API_VERSION # required if using Azure OpenAI DALL-E
+            - name: AZURE_OPENAI_IMAGE_ENDPOINT # required if using Azure OpenAI image models
+              value: ""
+            - name: AZURE_OPENAI_API_VERSION # optional override for text model API version
               value: "2024-12-01-preview"
-            - name: AZURE_OPENAI_DALLE_DEPLOYMENT_NAME # required if using Azure OpenAI DALL-E
+            - name: AZURE_OPENAI_IMAGE_API_VERSION # required if using Azure OpenAI image models such as gpt-image-2
+              value: "2025-04-01-preview"
+            - name: AZURE_OPENAI_IMAGE_DEPLOYMENT_NAME # required if using Azure OpenAI image models
               value: ""
             - name: USE_LOCAL_LLM # set to True if you are using a local LLM provided by KAITO
               value: "False"

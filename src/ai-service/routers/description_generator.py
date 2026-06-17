@@ -134,9 +134,11 @@ def _handle_azure_openai(user_prompt, use_azure_ad, temperature):
     else:
         logger.info("Using API key authentication")
 
-        api_key = os.environ.get("OPENAI_API_KEY")
+        api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get(
+            "AZURE_OPENAI_API_KEY"
+        )
         if not api_key:
-            raise ValueError("OPENAI_API_KEY must be provided")
+            raise ValueError("OPENAI_API_KEY or AZURE_OPENAI_API_KEY must be provided")
 
         client = AzureOpenAI(
             api_version=api_version,

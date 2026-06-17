@@ -6,6 +6,7 @@ metadata:
 data:
   AZURE_OPENAI_ENDPOINT: "{{ .Values.aiService.openAiEndpoint }}"
   AZURE_OPENAI_DEPLOYMENT_NAME: "{{ .Values.aiService.modelDeploymentName }}"
+  AZURE_OPENAI_API_VERSION: "{{ .Values.aiService.azureOpenAiApiVersion }}"
   {{- /*
   Use Azure OpenAI or OpenAI  
   */}}
@@ -24,12 +25,12 @@ data:
   USE_AZURE_AD: "False"
   {{- end }}
   {{- /*
-  If DALL-E model is used, set the model name
+  If OpenAI image model is used, set the model name
   */}}
-  {{- if and .Values.aiService.openAiDalleEndpoint .Values.aiService.openAiDalleModelName }}
-  AZURE_OPENAI_DALLE_ENDPOINT: "{{ .Values.aiService.openAiDalleEndpoint }}"
-  AZURE_OPENAI_DALLE_DEPLOYMENT_NAME: "{{ .Values.aiService.openAiDalleModelName }}"
-  AZURE_OPENAI_API_VERSION: "{{ .Values.aiService.azureOpenAiApiVersion }}"
+  {{- if and .Values.aiService.openAiImageEndpoint .Values.aiService.openAiImageModelName }}
+  AZURE_OPENAI_IMAGE_ENDPOINT: "{{ .Values.aiService.openAiImageEndpoint }}"
+  AZURE_OPENAI_IMAGE_DEPLOYMENT_NAME: "{{ .Values.aiService.openAiImageModelName }}"
+  AZURE_OPENAI_IMAGE_API_VERSION: "{{ .Values.aiService.azureOpenAiImageApiVersion }}"
   {{- end }}
 ---
 {{- /*
@@ -41,6 +42,7 @@ kind: Secret
 metadata:
   name: ai-service-secrets
 data:
+  AZURE_OPENAI_API_KEY: "{{ .Values.aiService.openAiKey | b64enc }}"
   OPENAI_API_KEY: "{{ .Values.aiService.openAiKey | b64enc }}"
 ---
 {{- end }}

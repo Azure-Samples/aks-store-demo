@@ -70,13 +70,13 @@ variable "azure_openai_location" {
 variable "chat_completion_model_name" {
   description = "value of chat completion model name"
   type        = string
-  default     = "gpt-5-mini"
+  default     = "gpt-5.4-mini"
 }
 
 variable "chat_completion_model_version" {
   description = "value of chat completion model version"
   type        = string
-  default     = "2025-08-07"
+  default     = "2026-03-17"
 }
 
 variable "chat_completion_model_capacity" {
@@ -100,13 +100,13 @@ variable "deploy_image_generation_model" {
 variable "image_generation_model_name" {
   description = "value of image generation model name"
   type        = string
-  default     = "dall-e-3"
+  default     = "gpt-image-2"
 }
 
 variable "image_generation_model_version" {
   description = "value of image generation model version"
   type        = string
-  default     = "3.0"
+  default     = "2026-04-21"
 }
 
 variable "image_generation_model_capacity" {
@@ -118,7 +118,7 @@ variable "image_generation_model_capacity" {
 variable "image_generation_model_type" {
   description = "value of image generation model type"
   type        = string
-  default     = "Standard"
+  default     = "GlobalStandard"
 }
 
 variable "source_registry" {

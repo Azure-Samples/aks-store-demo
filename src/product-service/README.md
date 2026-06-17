@@ -22,6 +22,7 @@ If you are testing the proxy for ai-service, you will need to run the ai-service
 
 ```bash
 export AI_SERVICE_URL=http://ai-service:5001/
+export PRODUCT_MAX_SIZE_BYTES=10485760 # optional; default is 10 MB for product create/update payloads
 docker compose up
 ```
 

@@ -39,7 +39,7 @@
       "value": "${AZURE_OPENAI_LOCATION}"
     },
     "deployImageGenerationModel": {
-      "value": "${DEPLOY_AZURE_OPENAI_DALL_E_MODEL}"
+      "value": "${DEPLOY_AZURE_OPENAI_IMAGE_MODEL}"
     },
     "sourceRegistry": {
       "value": "${SOURCE_REGISTRY}"

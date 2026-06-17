@@ -66,11 +66,11 @@ aiService:
   useAzureOpenAi: true
 "@ | Out-File -FilePath custom-values.yaml -Append -Encoding utf8
 
-  # If DALL-E model endpoint and name exist
-  if ($env:AZURE_OPENAI_DALL_E_ENDPOINT -and $env:AZURE_OPENAI_DALL_E_MODEL_NAME) {
+  # If OpenAI image model endpoint and name exist
+  if ($env:AZURE_OPENAI_IMAGE_ENDPOINT -and $env:AZURE_OPENAI_IMAGE_MODEL_NAME) {
 @"
-  openAiDalleEndpoint: ${env:AZURE_OPENAI_DALL_E_ENDPOINT}
-  openAiDalleModelName: ${env:AZURE_OPENAI_DALL_E_MODEL_NAME}
+  openAiImageEndpoint: ${env:AZURE_OPENAI_IMAGE_ENDPOINT}
+  openAiImageModelName: ${env:AZURE_OPENAI_IMAGE_MODEL_NAME}
 "@ | Out-File -FilePath custom-values.yaml -Append -Encoding utf8
   }
 }

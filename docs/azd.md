@@ -105,7 +105,7 @@ The following environment variables control what gets deployed:
 | `BUILD_CONTAINERS`                | With ACR enabled (above), set `true` to build images from `src/*` using `az acr build`. If `false`/unset, images are imported from GHCR into ACR.                  |
 | `DEPLOY_AZURE_OPENAI`             | Set `true` to deploy Azure OpenAI and enable `ai-service` with workload identity.                                                                                  |
 | `AZURE_OPENAI_LOCATION`           | Region for Azure OpenAI. See [model availability](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#provisioned-deployment-model-availability). |
-| `DEPLOY_IMAGE_GENERATION_MODEL`   | Set `true` to deploy DALL‑E 3 (image generation) along with Azure OpenAI.                                                                                          |
+| `DEPLOY_IMAGE_GENERATION_MODEL`   | Set `true` to deploy an Azure OpenAI image generation model (for example `gpt-image-2`) along with Azure OpenAI.                                                   |
 | `DEPLOY_AZURE_SERVICE_BUS`        | Set `true` to deploy Azure Service Bus (RabbitMQ disabled in app).                                                                                                 |
 | `DEPLOY_AZURE_COSMOSDB`           | Set `true` to deploy Azure Cosmos DB (MongoDB disabled in app).                                                                                                    |
 | `AZURE_COSMOSDB_ACCOUNT_KIND`     | Cosmos DB API kind: `MongoDB` or `GlobalDocumentDB` (SQL API). Default: `GlobalDocumentDB`.                                                                        |

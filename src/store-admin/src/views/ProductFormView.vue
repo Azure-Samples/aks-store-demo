@@ -9,6 +9,16 @@
     </ul>
   </div>
 
+  <div
+    v-if="aiNoticeMessage"
+    class="ai-notice"
+    :class="`ai-notice-${aiNoticeType}`"
+    role="status"
+    aria-live="polite"
+  >
+    {{ aiNoticeMessage }}
+  </div>
+
   <div class="product-form-container">
     <div class="product-info-section">
       <div class="form-group">
@@ -50,6 +60,7 @@
             v-if="aiCapabilities.includes('description')"
             @click="generateDescription"
             class="button ai-button"
+            :disabled="isLoadingDescription"
           >
             <span class="ai-icon">✨</span> Ask AI Assistant
           </button>
@@ -77,6 +88,7 @@
             id="product-image-btn"
             @click="generateImage"
             class="button ai-button"
+            :disabled="isLoadingImage"
           >
             <span class="ai-icon">✨</span> Generate Image
           </button>
@@ -129,8 +141,68 @@ const product = ref<Product>({ ...DEFAULT_PRODUCT })
 
 const aiCapabilities = ref<string[]>([])
 const showValidationErrors = ref(false)
+const isLoadingDescription = ref(false)
 const isLoadingImage = ref(false)
 const overlayText = ref('')
+const aiNoticeMessage = ref('')
+const aiNoticeType = ref<'info' | 'success' | 'error'>('info')
+
+const DESCRIPTION_TIMEOUT_MS = 45_000
+const IMAGE_TIMEOUT_MS = 240_000
+
+const fetchWithTimeout = async (
+  url: string,
+  options: RequestInit,
+  timeoutMs: number,
+): Promise<Response> => {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    })
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+const getApiErrorMessage = async (response: Response): Promise<string> => {
+  try {
+    const data = await response.json()
+    if (typeof data?.detail === 'string' && data.detail.length > 0) {
+      return data.detail
+    }
+    if (typeof data?.error === 'string' && data.error.length > 0) {
+      return data.error
+    }
+    if (typeof data?.message === 'string' && data.message.length > 0) {
+      return data.message
+    }
+  } catch {
+    // Ignore JSON parse errors and fallback to status text.
+  }
+
+  if (response.statusText) {
+    return response.statusText
+  }
+
+  return `Request failed with status ${response.status}`
+}
+
+const isAbortError = (error: unknown): boolean => {
+  return error instanceof DOMException && error.name === 'AbortError'
+}
+
+const setAiNotice = (message: string, type: 'info' | 'success' | 'error' = 'info'): void => {
+  aiNoticeMessage.value = message
+  aiNoticeType.value = type
+}
+
+const clearAiNotice = (): void => {
+  aiNoticeMessage.value = ''
+}
 
 const validationErrors = computed(() => {
   const errors: string[] = []
@@ -156,11 +228,18 @@ const generateDescription = (): void => {
     (Array.isArray(product.value.tags) && product.value.tags.length === 0) ||
     (typeof product.value.tags === 'string' && product.value.tags === '')
   ) {
-    alert('Please enter a value for the keywords field')
+    setAiNotice('Please enter a value for the keywords field before using AI.', 'error')
     return
   }
 
+  if (isLoadingDescription.value) {
+    return
+  }
+
+  clearAiNotice()
   const intervalId = waitForAI()
+  isLoadingDescription.value = true
+  setAiNotice('Generating description...', 'info')
 
   const tags =
     typeof product.value.tags === 'string'
@@ -172,24 +251,48 @@ const generateDescription = (): void => {
     tags,
   }
 
+  const previousDescription = product.value.description
   product.value.description = ''
 
-  fetch(`${aiServiceUrl}/generate/description`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  fetchWithTimeout(
+    `${aiServiceUrl}/generate/description`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
     },
-    body: JSON.stringify(requestBody),
-  })
-    .then((response) => response.json())
-    .then((productResponse) => {
-      product.value.description = productResponse.description
+    DESCRIPTION_TIMEOUT_MS,
+  )
+    .then(async (response) => {
+      if (!response.ok) {
+        const apiError = await getApiErrorMessage(response)
+        throw new Error(apiError)
+      }
+      return response.json()
     })
-    .catch((error) => {
+    .then((productResponse) => {
+      if (typeof productResponse?.description !== 'string') {
+        throw new Error('AI service returned an invalid description payload')
+      }
+      product.value.description = productResponse.description
+      setAiNotice('Description generated successfully.', 'success')
+    })
+    .catch((error: unknown) => {
       console.log(error)
-      alert('Error occurred while generating product description')
+      product.value.description = previousDescription
+
+      if (isAbortError(error)) {
+        setAiNotice('Description generation timed out. Please try again.', 'error')
+        return
+      }
+
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      setAiNotice(`Unable to generate description: ${message}`, 'error')
     })
     .finally(() => {
+      isLoadingDescription.value = false
       clearInterval(intervalId)
     })
 }
@@ -197,38 +300,62 @@ const generateDescription = (): void => {
 const generateImage = (): void => {
   // ensure the tag has a value
   if (!product.value.description || product.value.description === '') {
-    alert('Please enter a product description')
+    setAiNotice('Please enter a product description before generating an image.', 'error')
     return
   }
 
+  clearAiNotice()
   isLoadingImage.value = true
   overlayText.value = 'Drawing...'
+  setAiNotice('Generating image. This can take a couple of minutes...', 'info')
 
   const requestBody = {
     name: product.value.name,
     description: product.value.description,
   }
 
-  fetch(`${aiServiceUrl}/generate/image`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  fetchWithTimeout(
+    `${aiServiceUrl}/generate/image`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
     },
-    body: JSON.stringify(requestBody),
-  })
-    .then((response) => {
+    IMAGE_TIMEOUT_MS,
+  )
+    .then(async (response) => {
+      if (!response.ok) {
+        const apiError = await getApiErrorMessage(response)
+        throw new Error(apiError)
+      }
       return response.json()
     })
     .then((productResponse) => {
       overlayText.value = 'Downloading...'
+
+      if (typeof productResponse?.image !== 'string') {
+        throw new Error('AI service returned an invalid image payload')
+      }
+
       product.value.image = ''
       product.value.image = productResponse.image
+      setAiNotice('Image generated successfully.', 'success')
     })
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.log(error)
-      alert('Error occurred while generating product image')
+
+      if (isAbortError(error)) {
+        setAiNotice('Image generation timed out. Please try again.', 'error')
+        return
+      }
+
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      setAiNotice(`Unable to generate image: ${message}`, 'error')
     })
     .finally(() => {
+      overlayText.value = ''
       isLoadingImage.value = false
     })
 }
@@ -269,7 +396,7 @@ const saveProduct = (): void => {
   })
     .then((response) => response.json())
     .then((data) => {
-      alert('Product saved successfully')
+      setAiNotice('Product saved successfully.', 'success')
       // update or add the product to the list
       if (method === 'PUT') {
         productStore.updateProduct(data)
@@ -280,7 +407,7 @@ const saveProduct = (): void => {
     })
     .catch((error) => {
       console.log(error)
-      alert('Error occurred while saving product')
+      setAiNotice('Error occurred while saving product.', 'error')
     })
 }
 
@@ -291,7 +418,7 @@ onMounted(() => {
       // Copy all properties from the found product to our local product
       Object.assign(product.value, foundProduct)
     } else {
-      alert('Product not found')
+      setAiNotice('Product not found.', 'error')
     }
   }
 
@@ -435,6 +562,35 @@ onMounted(() => {
   width: 91vw;
   max-width: 100%;
   margin-left: 2rem;
+}
+
+.ai-notice {
+  border-left: 5px solid;
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  border-radius: var(--border-radius);
+  text-align: left;
+  width: 91vw;
+  max-width: 100%;
+  margin-left: 2rem;
+}
+
+.ai-notice-info {
+  background-color: #e7f3ff;
+  border-left-color: #1890ff;
+  color: #0b4f8a;
+}
+
+.ai-notice-success {
+  background-color: #e9f9ef;
+  border-left-color: #16a34a;
+  color: #166534;
+}
+
+.ai-notice-error {
+  background-color: #ffeded;
+  border-left-color: #dc2626;
+  color: #991b1b;
 }
 
 .validation-errors ul {
