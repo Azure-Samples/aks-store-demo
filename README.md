@@ -30,7 +30,7 @@ description: This sample demo app consists of a group of containerized microserv
 
 # AKS Store Demo
 
-This sample demo app consists of a group of containerized microservices that can be easily deployed into an Azure Kubernetes Service (AKS) cluster. This is meant to show a realistic scenario using a polyglot architecture, event-driven design, and common open source back-end services (eg - RabbitMQ, MongoDB). The application also leverages OpenAI-compatible models to generate product descriptions and images. This can be done using either [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) or [OpenAI](https://openai.com/).
+This sample demo app consists of a group of containerized microservices that can be easily deployed into an Azure Kubernetes Service (AKS) cluster. This is meant to show a realistic scenario using a polyglot architecture, event-driven design, and common open source back-end services (eg - RabbitMQ, DocumentDB). The application also leverages OpenAI-compatible models to generate product descriptions and images. This can be done using either [Azure OpenAI](https://learn.microsoft.com/azure/ai-services/openai/overview) or [OpenAI](https://openai.com/).
 
 This application is inspired by another demo app called [Red Dog](https://github.com/Azure/reddog-code).
 
@@ -58,7 +58,7 @@ The application has the following services:
 | `virtual-customer` | Simulates order creation on a scheduled basis (Rust)                                 |
 | `virtual-worker`   | Simulates order completion on a scheduled basis (Rust)                               |
 | `ai-service`       | Optional service for adding generative text and graphics creation (Python)           |
-| `mongodb`          | MongoDB instance for persisted data                                                  |
+| `documentdb`       | DocumentDB instance for persisted data                                               |
 | `rabbitmq`         | RabbitMQ for an order queue                                                          |
 
 ![Logical Application Architecture Diagram](assets/demo-arch-with-openai.png)

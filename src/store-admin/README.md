@@ -15,7 +15,7 @@ This is a Vue.js app that simulates a store admin portal where users can manuall
 
 ### Running the app
 
-The app relies on the [product-service](../product-service), [makeline-service](../order-service), and optionally the [ai-service](../ai-service) along with mongodb and rabbitmq instances running. A docker-compose file is provided to make this easy.
+The app relies on the [product-service](../product-service), [makeline-service](../order-service), and optionally the [ai-service](../ai-service) along with DocumentDB and RabbitMQ instances running. A docker-compose file is provided to make this easy.
 
 To run the necessary services, clone the repo, open a terminal, and navigate to the `store-admin` directory.
 

@@ -1,26 +1,31 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mongodb
+  name: documentdb
 spec:
-  serviceName: mongodb
+  serviceName: documentdb
   replicas: 1
   selector:
     matchLabels:
-      app: mongodb
+      app: documentdb
   template:
     metadata:
       labels:
-        app: mongodb
+        app: documentdb
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-        - name: mongodb
-          image: mcr.microsoft.com/mirror/docker/library/mongo:4.2
+        - name: documentdb
+          image: ghcr.io/documentdb/documentdb/documentdb-local:pg17-0.112.0
+          args:
+            - "--username"
+            - "username"
+            - "--password"
+            - "password"
           ports:
-            - containerPort: 27017
-              name: mongodb
+            - containerPort: 10260
+              name: documentdb
           resources:
             requests:
               cpu: 5m
@@ -29,21 +34,15 @@ spec:
               cpu: 25m
               memory: 1024Mi
           livenessProbe:
-            exec:
-              command:
-                - mongo
-                - "--eval"
-                - db.runCommand('ping').ok
+            tcpSocket:
+              port: 10260
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
-            exec:
-              command:
-                - mongo
-                - "--eval"
-                - db.runCommand('ping').ok
+            tcpSocket:
+              port: 10260
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 5
@@ -52,12 +51,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb
+  name: documentdb
 spec:
   ports:
-    - port: 27017
+    - port: 10260
   selector:
-    app: mongodb
+    app: documentdb
   type: ClusterIP
 ---
 apiVersion: v1
@@ -286,11 +285,15 @@ spec:
             - name: ORDER_QUEUE_NAME
               value: "orders"
             - name: ORDER_DB_URI
-              value: "mongodb://mongodb:27017"
+              value: "mongodb://documentdb:10260/?tls=true&tlsAllowInvalidCertificates=true"
             - name: ORDER_DB_NAME
               value: "orderdb"
             - name: ORDER_DB_COLLECTION_NAME
               value: "orders"
+            - name: ORDER_DB_USERNAME
+              value: "username"
+            - name: ORDER_DB_PASSWORD
+              value: "password"
           resources:
             requests:
               cpu: 1m

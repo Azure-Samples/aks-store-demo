@@ -1,13 +1,14 @@
 version: "3.7"
 services:
-  mongodb:
-    image: mongo:6.0.6
-    container_name: mongo
+  documentdb:
+    image: ghcr.io/documentdb/documentdb/documentdb-local:pg17-0.112.0
+    container_name: documentdb
     restart: always
     ports:
-      - 27017:27017
+      - 10260:10260
+    command: ["--username", "username", "--password", "password"]
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      test: ["CMD-SHELL", "echo | openssl s_client -connect localhost:10260 -brief 2>/dev/null | grep -q CONNECTED"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -71,15 +72,17 @@ services:
       - ORDER_QUEUE_USERNAME=username
       - ORDER_QUEUE_PASSWORD=password
       - ORDER_QUEUE_NAME=orders
-      - ORDER_DB_URI=mongodb://mongodb:27017
+      - ORDER_DB_URI=mongodb://documentdb:10260/?tls=true&tlsAllowInvalidCertificates=true
       - ORDER_DB_NAME=orderdb
       - ORDER_DB_COLLECTION_NAME=orders
+      - ORDER_DB_USERNAME=username
+      - ORDER_DB_PASSWORD=password
     networks:
       - backend_services
     depends_on:
       rabbitmq:
         condition: service_healthy
-      mongodb:
+      documentdb:
         condition: service_healthy
   virtual-customer:
     build: ../virtual-customer

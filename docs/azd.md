@@ -1,6 +1,6 @@
 # Deploying the AKS Store Demo app to Azure using Azure Developer CLI
 
-Using the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview), you can deploy this solution to Azure in minutes. By default it ships prebuilt container images and RabbitMQ/MongoDB; you can also opt into Azure Service Bus and Azure Cosmos DB, and even build app images from source.
+Using the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview), you can deploy this solution to Azure in minutes. By default it ships prebuilt container images and RabbitMQ/DocumentDB; you can also opt into Azure Service Bus and Azure Cosmos DB, and even build app images from source.
 
 ## Prerequisites
 
@@ -107,7 +107,7 @@ The following environment variables control what gets deployed:
 | `AZURE_OPENAI_LOCATION`           | Region for Azure OpenAI. See [model availability](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#provisioned-deployment-model-availability). |
 | `DEPLOY_IMAGE_GENERATION_MODEL`   | Set `true` to deploy an Azure OpenAI image generation model (for example `gpt-image-2`) along with Azure OpenAI.                                                   |
 | `DEPLOY_AZURE_SERVICE_BUS`        | Set `true` to deploy Azure Service Bus (RabbitMQ disabled in app).                                                                                                 |
-| `DEPLOY_AZURE_COSMOSDB`           | Set `true` to deploy Azure Cosmos DB (MongoDB disabled in app).                                                                                                    |
+| `DEPLOY_AZURE_COSMOSDB`           | Set `true` to deploy Azure Cosmos DB (DocumentDB disabled in app).                                                                                                 |
 | `AZURE_COSMOSDB_ACCOUNT_KIND`     | Cosmos DB API kind: `MongoDB` or `GlobalDocumentDB` (SQL API). Default: `GlobalDocumentDB`.                                                                        |
 | `DEPLOY_OBSERVABILITY_TOOLS`      | Set `true` to deploy Log Analytics, managed Prometheus, and enable Container Insights.                                                                             |
 | `SOURCE_REGISTRY`                 | Source container registry for images. Default: `ghcr.io/azure-samples`.                                                                                            |

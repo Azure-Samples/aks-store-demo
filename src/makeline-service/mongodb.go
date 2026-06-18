@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -132,13 +133,17 @@ func NewMongoDBOrderRepo(mongoUri string, mongoDb string, mongoCollection string
 	if mongoUser == "" && mongoPassword == "" {
 		clientOptions = options.Client().ApplyURI(mongoUri)
 	} else {
+		insecure := false
+		if u, err := url.Parse(mongoUri); err == nil {
+			insecure = u.Query().Get("tlsAllowInvalidCertificates") == "true"
+		}
 		clientOptions = options.Client().ApplyURI(mongoUri).
 			SetAuth(options.Credential{
 				AuthSource: mongoDb,
 				Username:   mongoUser,
 				Password:   mongoPassword,
 			}).
-			SetTLSConfig(&tls.Config{InsecureSkipVerify: false})
+			SetTLSConfig(&tls.Config{InsecureSkipVerify: insecure})
 	}
 
 	mongoClient, err := mongo.Connect(ctx, clientOptions)

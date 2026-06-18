@@ -128,10 +128,10 @@ EOF
 fi
 
 ###########################################################
-# Do not deploy MongoDB when using Azure Cosmos DB
+# Do not deploy DocumentDB when using Azure Cosmos DB
 ###########################################################
 if [ -n "${AZURE_COSMOS_DATABASE_URI}" ]; then
   cat << EOF >> custom-values.yaml
-useMongoDB: false
+useDocumentDB: false
 EOF
 fi

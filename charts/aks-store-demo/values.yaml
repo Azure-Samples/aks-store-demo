@@ -7,7 +7,7 @@ replicaCount: 1
 namespace: "dev"
 
 useRabbitMQ: true # when true, local rabbitmq container will be used
-useMongoDB: true # when true, local mongodb container will be used
+useDocumentDB: true # when true, local documentdb container will be used
 
 useAzureAd: false # when true, Azure AD auth will be used for ai-service, order-service, and makeline-service
 managedIdentityName: "" # name of the Azure AD identity to use for the service account
@@ -47,13 +47,13 @@ makelineService:
   orderQueueName: "orders"
   orderQueueHost: ""
   orderDBApi: "mongodb"
-  orderDBUri: "mongodb://mongodb:27017"
+  orderDBUri: "mongodb://documentdb:10260/?tls=true&tlsAllowInvalidCertificates=true"
   orderDBListConnectionStringsUrl: ""
   orderDBName: "orderdb"
   orderDBCollectionName: "orders"
   orderDBContainerName: "orders"
-  orderDBUsername: ""
-  orderDBPassword: ""
+  orderDBUsername: "username"
+  orderDBPassword: "password"
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/makeline-service"
     tag: "" # defaults to Chart.AppVersion

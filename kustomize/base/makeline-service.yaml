@@ -29,11 +29,15 @@ spec:
             - name: ORDER_QUEUE_NAME
               value: "orders"
             - name: ORDER_DB_URI
-              value: "mongodb://mongodb:27017"
+              value: "mongodb://documentdb:10260/?tls=true&tlsAllowInvalidCertificates=true"
             - name: ORDER_DB_NAME
               value: "orderdb"
             - name: ORDER_DB_COLLECTION_NAME
               value: "orders"
+            - name: ORDER_DB_USERNAME
+              value: "username"
+            - name: ORDER_DB_PASSWORD
+              value: "password"
           resources:
             requests:
               cpu: 1m

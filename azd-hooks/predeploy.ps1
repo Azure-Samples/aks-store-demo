@@ -126,10 +126,10 @@ useRabbitMQ: false
 }
 
 ###########################################################
-# Do not deploy MongoDB when using Azure Cosmos DB
+# Do not deploy DocumentDB when using Azure Cosmos DB
 ###########################################################
 if ($env:AZURE_COSMOS_DATABASE_URI) {
 @"
-useMongoDB: false
+useDocumentDB: false
 "@ | Out-File -FilePath custom-values.yaml -Append -Encoding utf8
 }
