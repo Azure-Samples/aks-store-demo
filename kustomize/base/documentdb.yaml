@@ -13,6 +13,7 @@ spec:
       labels:
         app: documentdb
     spec:
+      enableServiceLinks: false
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
@@ -33,10 +34,14 @@ spec:
             limits:
               cpu: 25m
               memory: 1024Mi
+          startupProbe:
+            tcpSocket:
+              port: 10260
+            failureThreshold: 30
+            periodSeconds: 5
           livenessProbe:
             tcpSocket:
               port: 10260
-            initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3

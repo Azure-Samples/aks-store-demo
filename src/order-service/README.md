@@ -10,14 +10,13 @@ It is a simple REST API that allows you to add an order to a message queue that 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-
 ## Message queue options
 
 This app can connect to either RabbitMQ or Azure Service Bus using AMQP 1.0. To connect to either of these services, you will need to provide appropriate environment variables for connecting to the message queue.
 
 ### Option 1: RabbitMQ
 
-To run this against RabbitMQ. A docker-compose file is provided to make this easy. This will run RabbitMQ, the RabbitMQ Management UI, and enable the `rabbitmq_amqp1_0` plugin. The plugin is necessary to connect to RabbitMQ using AMQP 1.0.
+To run this against RabbitMQ. A docker-compose file is provided to make this easy. This will run RabbitMQ 4.x with the Management UI. AMQP 1.0 is supported natively in RabbitMQ 4.0 and later without any additional plugins.
 
 To run the necessary services, clone the repo, open a terminal, and navigate to the `order-service` directory. Then run the following command:
 
@@ -42,7 +41,7 @@ source .env
 
 ### Option 2: Azure Service Bus
 
-To run this against Azure Service Bus, you will need to create a Service Bus namespace and a queue. You can do this using the Azure CLI. 
+To run this against Azure Service Bus, you will need to create a Service Bus namespace and a queue. You can do this using the Azure CLI.
 
 ```bash
 az group create --name <resource-group-name> --location <location>
@@ -101,11 +100,8 @@ Finally, save the environment variables to a `.env` file.
 ```bash
 cat << EOF > .env
 ORDER_QUEUE_HOSTNAME=$HOSTNAME
-ORDER_QUEUE_PORT=5671
 ORDER_QUEUE_USERNAME=sender
 ORDER_QUEUE_PASSWORD="$PASSWORD"
-ORDER_QUEUE_TRANSPORT=tls
-ORDER_QUEUE_RECONNECT_LIMIT=10
 ORDER_QUEUE_NAME=orders
 EOF
 

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync/atomic"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -16,7 +18,6 @@ const (
 )
 
 func main() {
-	var orderService *OrderService
 
 	// Get the database API type
 	apiType := os.Getenv("ORDER_DB_API")
@@ -27,20 +28,54 @@ func main() {
 		log.Printf("Using MongoDB API")
 	}
 
-	// Initialize the database
-	orderService, err := initDatabase(apiType)
-	if err != nil {
-		log.Printf("Failed to initialize database: %s", err)
-		os.Exit(1)
-	}
+	// Initialize the database with retry logic in the background
+	var orderService *OrderService
+	var dbReady atomic.Bool
+	go func() {
+		var err error
+		maxRetries := 10
+		for i := 0; i < maxRetries; i++ {
+			orderService, err = initDatabase(apiType)
+			if err == nil {
+				dbReady.Store(true)
+				log.Printf("Database initialized successfully")
+				return
+			}
+			backoff := time.Duration(min(2<<i, 30)) * time.Second
+			log.Printf("Failed to initialize database (attempt %d/%d): %s. Retrying in %s...", i+1, maxRetries, err, backoff)
+			time.Sleep(backoff)
+		}
+		log.Fatalf("Failed to initialize database after %d attempts: %s", maxRetries, err)
+	}()
 
 	router := gin.Default()
 	router.Use(cors.Default())
-	router.Use(OrderMiddleware(orderService))
+	router.Use(func(c *gin.Context) {
+		if c.FullPath() == "/health" || c.FullPath() == "/liveness" {
+			c.Next()
+			return
+		}
+		if !dbReady.Load() {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "database not ready"})
+			c.Abort()
+			return
+		}
+		OrderMiddleware(orderService)(c)
+	})
 	router.GET("/order/fetch", fetchOrders)
 	router.GET("/order/:id", getOrder)
 	router.PUT("/order", updateOrder)
+	router.GET("/liveness", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "alive"})
+	})
 	router.GET("/health", func(c *gin.Context) {
+		if !dbReady.Load() {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"status":  "unavailable",
+				"version": os.Getenv("APP_VERSION"),
+			})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "ok",
 			"version": os.Getenv("APP_VERSION"),

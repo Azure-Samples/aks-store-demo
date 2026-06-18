@@ -8,9 +8,6 @@ data:
   {{- else }}
   ORDER_QUEUE_PORT: "{{ .Values.orderService.queuePort }}"
   {{- end }}
-  {{- if .Values.orderService.queueTransport }}
-  ORDER_QUEUE_TRANSPORT: "{{ .Values.orderService.queueTransport }}"
-  {{- end }}
   ORDER_QUEUE_HOSTNAME: "{{ .Values.orderService.queueHost }}"
   ORDER_QUEUE_NAME: "{{ .Values.orderService.queueName }}"
   FASTIFY_ADDRESS: "0.0.0.0"

@@ -146,3 +146,8 @@ playwright/.cache/
 
 # custom helm values
 custom-values.yaml
+
+# make binaries
+kind
+kustomize
+kustomization.yaml

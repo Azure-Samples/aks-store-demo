@@ -17,7 +17,7 @@ This app can connect to either RabbitMQ or Azure Service Bus using AMQP 1.0. To 
 
 ### Option 1: RabbitMQ
 
-To run this against RabbitMQ. A docker-compose file is provided to make this easy. This will run RabbitMQ, the RabbitMQ Management UI, and enable the `rabbitmq_amqp1_0` plugin. The plugin is necessary to connect to RabbitMQ using AMQP 1.0.
+To run this against RabbitMQ. A docker-compose file is provided to make this easy. This will run RabbitMQ 4.x with the Management UI. AMQP 1.0 is supported natively in RabbitMQ 4.0 and later without any additional plugins.
 
 With the services running, open a new terminal and navigate to the `makeline-service` directory.
 
@@ -90,7 +90,7 @@ export ORDER_QUEUE_PASSWORD=$PASSWORD
 export ORDER_QUEUE_NAME=orders
 ```
 
-> NOTE: If you are using Azure Service Bus, you will want your `order-service` to write orders to it instead of RabbitMQ. If that is the case, then you'll need to update the [`docker-compose.yml`](./docker-compose.yml) and modify the environment variables for the `order-service` to include the proper connection info to connect to Azure Service Bus. Also you will need to add the `ORDER_QUEUE_TRANSPORT=tls` configuration to connect over TLS.
+> NOTE: If you are using Azure Service Bus, you will want your `order-service` to write orders to it instead of RabbitMQ. If that is the case, then you'll need to update the [`docker-compose.yml`](./docker-compose.yml) and modify the environment variables for the `order-service` to include the proper connection info to connect to Azure Service Bus.
 
 ## Database options
 

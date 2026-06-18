@@ -128,7 +128,8 @@ func getOrdersFromQueue() ([]Order, error) {
 
 		{
 			// create a receiver
-			receiver, err := session.NewReceiver(ctx, orderQueueName, nil)
+			// RabbitMQ 4.x requires AMQP 1.0 address v2 format: /queues/<name>
+			receiver, err := session.NewReceiver(ctx, "/queues/"+orderQueueName, nil)
 			if err != nil {
 				log.Printf("creating receiver link: %s", err)
 				return nil, err

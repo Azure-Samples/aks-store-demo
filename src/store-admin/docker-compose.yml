@@ -15,7 +15,7 @@ services:
     networks:
       - backend_services
   rabbitmq:
-    image: rabbitmq:3.11.17-management-alpine
+    image: rabbitmq:4.3.2-management-alpine
     container_name: "rabbitmq"
     restart: always
     environment:
@@ -29,8 +29,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    volumes:
-      - ../../rabbitmq_enabled_plugins:/etc/rabbitmq/enabled_plugins
     networks:
       - backend_services
   order-service:
@@ -58,7 +56,6 @@ services:
       - ORDER_QUEUE_USERNAME=username
       - ORDER_QUEUE_PASSWORD=password
       - ORDER_QUEUE_NAME=orders
-      - ORDER_QUEUE_RECONNECT_LIMIT=3
     networks:
       - backend_services
     depends_on:

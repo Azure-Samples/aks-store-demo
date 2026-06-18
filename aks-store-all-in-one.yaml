@@ -13,6 +13,7 @@ spec:
       labels:
         app: documentdb
     spec:
+      enableServiceLinks: false
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
@@ -33,10 +34,14 @@ spec:
             limits:
               cpu: 25m
               memory: 1024Mi
+          startupProbe:
+            tcpSocket:
+              port: 10260
+            failureThreshold: 30
+            periodSeconds: 5
           livenessProbe:
             tcpSocket:
               port: 10260
-            initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
@@ -59,13 +64,6 @@ spec:
     app: documentdb
   type: ClusterIP
 ---
-apiVersion: v1
-data:
-  rabbitmq_enabled_plugins: |
-    [rabbitmq_management,rabbitmq_prometheus,rabbitmq_amqp1_0].
-kind: ConfigMap
-metadata:
-  name: rabbitmq-enabled-plugins
 ---
 apiVersion: v1
 kind: Secret
@@ -94,7 +92,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: rabbitmq
-          image: mcr.microsoft.com/azurelinux/base/rabbitmq-server:3.13
+          image: rabbitmq:4.3.2-management-alpine
           ports:
             - containerPort: 5672
               name: rabbitmq-amqp
@@ -128,17 +126,6 @@ spec:
             failureThreshold: 3
             initialDelaySeconds: 30
             periodSeconds: 10
-          volumeMounts:
-            - name: rabbitmq-enabled-plugins
-              mountPath: /etc/rabbitmq/enabled_plugins
-              subPath: enabled_plugins
-      volumes:
-        - name: rabbitmq-enabled-plugins
-          configMap:
-            name: rabbitmq-enabled-plugins
-            items:
-              - key: rabbitmq_enabled_plugins
-                path: enabled_plugins
 ---
 apiVersion: v1
 kind: Service
@@ -303,7 +290,7 @@ spec:
               memory: 20Mi
           startupProbe:
             httpGet:
-              path: /health
+              path: /liveness
               port: 3001
             failureThreshold: 10
             periodSeconds: 5
@@ -316,7 +303,7 @@ spec:
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: /liveness
               port: 3001
             failureThreshold: 5
             initialDelaySeconds: 3

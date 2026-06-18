@@ -35,7 +35,6 @@ orderService:
   queueUsername: "username"
   queuePassword: "password"
   queueName: "orders"
-  queueTransport: ""
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/order-service"
     tag: "" # defaults to Chart.AppVersion

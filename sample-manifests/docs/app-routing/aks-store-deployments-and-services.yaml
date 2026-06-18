@@ -18,7 +18,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: rabbitmq
-          image: mcr.microsoft.com/azurelinux/base/rabbitmq-server:3.13
+          image: rabbitmq:4.3.2-management-alpine
           ports:
             - containerPort: 5672
               name: rabbitmq-amqp
@@ -36,25 +36,6 @@ spec:
             limits:
               cpu: 250m
               memory: 256Mi
-          volumeMounts:
-            - name: rabbitmq-enabled-plugins
-              mountPath: /etc/rabbitmq/enabled_plugins
-              subPath: enabled_plugins
-      volumes:
-        - name: rabbitmq-enabled-plugins
-          configMap:
-            name: rabbitmq-enabled-plugins
-            items:
-              - key: rabbitmq_enabled_plugins
-                path: enabled_plugins
----
-apiVersion: v1
-data:
-  rabbitmq_enabled_plugins: |
-    [rabbitmq_management,rabbitmq_prometheus,rabbitmq_amqp1_0].
-kind: ConfigMap
-metadata:
-  name: rabbitmq-enabled-plugins
 ---
 apiVersion: apps/v1
 kind: Deployment

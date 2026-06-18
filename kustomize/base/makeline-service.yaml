@@ -47,7 +47,7 @@ spec:
               memory: 20Mi
           startupProbe:
             httpGet:
-              path: /health
+              path: /liveness
               port: 3001
             failureThreshold: 10
             periodSeconds: 5
@@ -60,7 +60,7 @@ spec:
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: /liveness
               port: 3001
             failureThreshold: 5
             initialDelaySeconds: 3
