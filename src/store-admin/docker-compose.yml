@@ -1,13 +1,13 @@
-version: '3.7'
+version: "3.7"
 services:
   mongodb:
     image: mongo:6.0.6
-    container_name: 'mongo'
+    container_name: "mongo"
     restart: always
     ports:
       - 27017:27017
     healthcheck:
-      test: ['CMD', 'mongosh', '--eval', "db.runCommand('ping').ok"]
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -15,16 +15,16 @@ services:
       - backend_services
   rabbitmq:
     image: rabbitmq:3.11.17-management-alpine
-    container_name: 'rabbitmq'
+    container_name: "rabbitmq"
     restart: always
     environment:
-      - 'RABBITMQ_DEFAULT_USER=username'
-      - 'RABBITMQ_DEFAULT_PASS=password'
+      - "RABBITMQ_DEFAULT_USER=username"
+      - "RABBITMQ_DEFAULT_PASS=password"
     ports:
       - 15672:15672
       - 5672:5672
     healthcheck:
-      test: ['CMD', 'rabbitmqctl', 'status']
+      test: ["CMD", "rabbitmqctl", "status"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -34,12 +34,20 @@ services:
       - backend_services
   order-service:
     build: ../order-service
-    container_name: 'order-service'
+    container_name: "order-service"
     restart: always
     ports:
       - 3000:3000
     healthcheck:
-      test: ['CMD', 'wget', '-O', '/dev/null', '-q', 'http://order-service:3000/health']
+      test:
+        [
+          "CMD",
+          "wget",
+          "-O",
+          "/dev/null",
+          "-q",
+          "http://order-service:3000/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -57,12 +65,20 @@ services:
         condition: service_healthy
   makeline-service:
     build: ../makeline-service
-    container_name: 'makeline-service'
+    container_name: "makeline-service"
     restart: always
     ports:
       - 3001:3001
     healthcheck:
-      test: ['CMD', 'wget', '-O', '/dev/null', '-q', 'http://makeline-service:3001/health']
+      test:
+        [
+          "CMD",
+          "wget",
+          "-O",
+          "/dev/null",
+          "-q",
+          "http://makeline-service:3001/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -83,12 +99,20 @@ services:
         condition: service_healthy
   product-service:
     build: ../product-service
-    container_name: 'product-service'
+    container_name: "product-service"
     restart: always
     ports:
       - 3002:3002
     healthcheck:
-      test: ['CMD', 'wget', '-O', '/dev/null', '-q', 'http://product-service:3002/health']
+      test:
+        [
+          "CMD",
+          "wget",
+          "-O",
+          "/dev/null",
+          "-q",
+          "http://product-service:3002/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -98,7 +122,7 @@ services:
       - backend_services
   virtual-customer:
     build: ../virtual-customer
-    container_name: 'virtual-customer'
+    container_name: "virtual-customer"
     restart: always
     environment:
       - ORDER_SERVICE_URL=http://order-service:3000/

@@ -22,6 +22,7 @@ If you are testing the proxy for ai-service, you will need to run the ai-service
 
 ```bash
 export AI_SERVICE_URL=http://ai-service:5001/
+export AI_REQUEST_TIMEOUT_SECS=300 # optional; default is 300s for image-generation proxy calls
 export PRODUCT_MAX_SIZE_BYTES=10485760 # optional; default is 10 MB for product create/update payloads
 docker compose up
 ```

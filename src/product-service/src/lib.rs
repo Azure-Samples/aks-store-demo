@@ -1,6 +1,4 @@
-pub mod configuration;
-pub mod data;
-pub mod localwasmtime;
-pub mod model;
+pub mod app;
+pub mod config;
+pub mod models;
 pub mod routes;
-pub mod startup;
