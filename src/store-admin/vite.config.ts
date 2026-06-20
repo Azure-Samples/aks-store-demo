@@ -40,7 +40,12 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       server.middlewares.use('/api/makeline/order/fetch', (req: IncomingMessage, res: ServerResponse) => {
         if (req.method === 'GET') {
           fetch(`${MAKELINE_SERVICE_URL}order/fetch`)
-            .then((response: Response) => response.json())
+            .then((response: Response) => {
+              if (!response.ok) {
+                throw new Error(`makeline-service returned ${response.status}`)
+              }
+              return response.json()
+            })
             .then((data: unknown) => {
               const orders = data as Order[]
               res.setHeader('Content-Type', 'application/json')
@@ -49,6 +54,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
             .catch((error: Error) => {
               console.error(error)
               res.statusCode = 500
+              res.setHeader('Content-Type', 'application/json')
               res.end(JSON.stringify({ error: 'Failed to fetch orders' }))
             })
         }

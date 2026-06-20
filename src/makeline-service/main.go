@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -39,6 +40,9 @@ func main() {
 			if err == nil {
 				dbReady.Store(true)
 				log.Printf("Database initialized successfully")
+
+				// Start the background queue consumer once DB is ready
+				go startConsumer(context.Background(), orderService.repo)
 				return
 			}
 			backoff := time.Duration(min(2<<i, 30)) * time.Second
@@ -92,7 +96,8 @@ func OrderMiddleware(orderService *OrderService) gin.HandlerFunc {
 	}
 }
 
-// Fetches orders from the order queue and stores them in database
+// Returns pending orders from the database. Queue consumption happens in the
+// background consumer goroutine, so this handler is read-only and fast.
 func fetchOrders(c *gin.Context) {
 	client, ok := c.MustGet("orderService").(*OrderService)
 	if !ok {
@@ -101,24 +106,7 @@ func fetchOrders(c *gin.Context) {
 		return
 	}
 
-	// Get orders from the queue
-	orders, err := getOrdersFromQueue()
-	if err != nil {
-		log.Printf("Failed to fetch orders from queue: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Save orders to database
-	err = client.repo.InsertOrders(orders)
-	if err != nil {
-		log.Printf("Failed to save orders to database: %s", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	// Return the orders to be processed
-	orders, err = client.repo.GetPendingOrders()
+	orders, err := client.repo.GetPendingOrders()
 	if err != nil {
 		log.Printf("Failed to get pending orders from database: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)

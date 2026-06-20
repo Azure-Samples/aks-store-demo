@@ -31,6 +31,7 @@ export const useOrderStore = defineStore('order', () => {
   const count = computed(() => orders.value.length)
   const addOrders = (data: Order[]) => {
     orders.value.push(...data)
+    initialized.value = true
   }
   const addOrder = (order: Order) => {
     orders.value.push(order)
