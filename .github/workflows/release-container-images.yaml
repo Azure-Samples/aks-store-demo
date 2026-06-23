@@ -79,6 +79,7 @@ jobs:
     needs: publish-container-image
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -192,17 +193,52 @@ jobs:
           # kaito overlay uses full ghcr.io path
           update_full_image_ref "kustomize/overlays/kaito/ai-service.yaml" "ai-service" "$VERSION"
 
+          # =============================================================================
+          # Update Helm chart appVersion
+          # =============================================================================
+
+          echo "Updating Helm chart appVersion..."
+          # Image tags in values.yaml default to Chart.AppVersion, so bump appVersion.
+          # The chart's own 'version' field follows independent semver and is left untouched.
+          CHART_FILE="charts/aks-store-demo/Chart.yaml"
+          if [ -f "$CHART_FILE" ]; then
+            sed -i "s|^appVersion:.*|appVersion: \"${VERSION}\"|" "$CHART_FILE"
+            echo "Updated appVersion in ${CHART_FILE}"
+          fi
+
           echo "Manifest updates complete!"
 
-      - name: Commit and push changes
+      - name: Commit, push branch, and open PR
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+
+          VERSION="${{ steps.set-version.outputs.VERSION }}"
+          BRANCH="chore/update-image-tags-${VERSION}"
+          HEAD_REF="${{ github.repository_owner }}:${BRANCH}"
+
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+          git checkout -b "$BRANCH"
           git add -A
+
           if git diff --staged --quiet; then
             echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "chore: update container image tags to ${VERSION}"
+          git push -u origin "$BRANCH" --force-with-lease
+
+          # Create PR only if one doesn't already exist for this head branch
+          if gh pr list --state open --head "$BRANCH" --json number --jq 'length > 0' | grep -q true; then
+            echo "PR already exists for branch $BRANCH"
           else
-            git commit -m "chore: update container image tags to ${{ steps.set-version.outputs.VERSION }}"
-            git push origin HEAD:main
+            gh pr create \
+              --base "${{ github.event.repository.default_branch }}" \
+              --head "$HEAD_REF" \
+              --title "chore: update container image tags to ${VERSION}" \
+              --body "Automated manifest image tag update for release ${VERSION}."
           fi

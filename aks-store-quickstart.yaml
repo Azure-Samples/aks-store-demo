@@ -88,7 +88,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: order-service
-          image: ghcr.io/azure-samples/aks-store-demo/order-service:2.1.0
+          image: ghcr.io/azure-samples/aks-store-demo/order-service:2.2.0
           ports:
             - containerPort: 3000
           env:
@@ -176,7 +176,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: product-service
-          image: ghcr.io/azure-samples/aks-store-demo/product-service:2.1.0
+          image: ghcr.io/azure-samples/aks-store-demo/product-service:2.2.0
           ports:
             - containerPort: 3002
           env:
@@ -235,7 +235,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: store-front
-          image: ghcr.io/azure-samples/aks-store-demo/store-front:2.1.0
+          image: ghcr.io/azure-samples/aks-store-demo/store-front:2.2.0
           ports:
             - containerPort: 8080
               name: store-front
