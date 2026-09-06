@@ -1,0 +1,89 @@
+name: package-oci-artifact
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "charts/**"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: package-oci-artifact-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package-oci-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
+
+      - name: Set up ORAS CLI
+        uses: oras-project/setup-oras@v1
+
+      - name: Set artifact metadata
+        id: metadata
+        shell: bash
+        run: |
+          repository="$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+          tag="$(yq -r .appVersion ./charts/aks-store-demo/Chart.yaml)"
+
+          if [[ -z "$tag" || "$tag" == "null" ]]; then
+            echo "Could not read appVersion from charts/aks-store-demo/Chart.yaml" >&2
+            exit 1
+          fi
+
+          echo "artifact=ghcr.io/$repository" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "revision=$tag@sha1:$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+          echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Package and push Flux OCI artifact
+        env:
+          ARTIFACT: ${{ steps.metadata.outputs.artifact }}
+          TAG: ${{ steps.metadata.outputs.tag }}
+          REVISION: ${{ steps.metadata.outputs.revision }}
+          CREATED: ${{ steps.metadata.outputs.created }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          workdir="$(mktemp -d)"
+          # Layer layout and media types must match what Flux source-controller expects.
+          tar -czf "$workdir/artifact.tgz" -C "$GITHUB_WORKSPACE/kustomize/base" .
+          echo '{}' > "$workdir/config.json"
+
+          cd "$workdir"
+
+          oras push "$ARTIFACT:$TAG" \
+            --config "config.json:application/vnd.cncf.flux.config.v1+json" \
+            --annotation "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --annotation "org.opencontainers.image.revision=$REVISION" \
+            --annotation "org.opencontainers.image.created=$CREATED" \
+            --annotation "org.opencontainers.image.description=AKS Store Demo application" \
+            "artifact.tgz:application/vnd.cncf.flux.content.v1.tar+gzip"
+
+          oras tag "$ARTIFACT:$TAG" latest
+
+      - name: Show artifact reference
+        env:
+          ARTIFACT: ${{ steps.metadata.outputs.artifact }}
+          TAG: ${{ steps.metadata.outputs.tag }}
+        run: echo "Published oci://$ARTIFACT:$TAG"
