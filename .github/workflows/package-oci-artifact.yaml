@@ -1,15 +1,15 @@
 name: package-oci-artifact
 
 on:
-  release:
-    types: [published]
-
+  release:
+    types: [published]
+
   push:
     branches:
       - main
     paths:
       - "charts/**"
-      - "kustomize/**"
+      - "kustomize/**"
 
   workflow_dispatch:
 
@@ -33,7 +33,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up ORAS CLI
-        uses: oras-project/setup-oras@v1
+        uses: oras-project/setup-oras@1d808f7d7f6995cc68b7bf507bfe5c5446e1dc9d # v2.0.1
 
       - name: Set artifact metadata
         id: metadata
