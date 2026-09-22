@@ -19,7 +19,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Run PSRule analysis
         uses: microsoft/ps-rule@46451b8f5258c41beb5ae69ed7190ccbba84112c # v2.9.0
@@ -35,7 +35,7 @@ jobs:
           PSRULE_AZURE_BICEP_PATH: "/usr/local/bin/bicep"
 
       - name: Upload alerts to Security tab
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         if: github.repository_owner == 'Azure-Samples'
         with:
           sarif_file: infra/bicep/reports/ps-rule-results.sarif
