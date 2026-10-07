@@ -3,6 +3,7 @@ import base64
 import contextlib
 import io
 import json
+import re
 import socket
 import ssl
 import subprocess
@@ -18,8 +19,40 @@ import prepare_secrets
 import render
 
 
+# Verbatim declaration excerpt from the chart's released CRD, not a plural
+# inferred from kind/shortName. Keep the fixture offline and release-pinned:
+# https://github.com/documentdb/documentdb-kubernetes-operator/blob/e05d6b1b0a0bc1fa2d79cf81ad390849d963b66c/operator/documentdb-helm-chart/crds/documentdb.io_dbs.yaml
+RELEASE_CRD_DECLARATION = """---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.2
+  labels:
+    app: documentdb-operator
+  name: dbs.documentdb.io
+spec:
+  group: documentdb.io
+  names:
+    kind: DocumentDB
+    listKind: DocumentDBList
+    plural: dbs
+    shortNames:
+    - documentdb
+    singular: documentdb
+  scope: Namespaced
+"""
+
+
 class ManifestTests(unittest.TestCase):
     def test_database_pin_and_tls_mount(self):
+        readme = (render.ROOT / "README.md").read_text()
+        crd_name = re.search(r"^  name: (.+)$", RELEASE_CRD_DECLARATION, re.MULTILINE).group(1)
+        self.assertIn("wait --for=condition=Established crd/" + crd_name + " --timeout=120s", readme)
+        self.assertIn('k -n "$NS" delete pod "$DB_POD" --wait=true\n'
+                      'k -n "$NS" wait --for=create "pod/$DB_POD" --timeout=600s\n'
+                      'k -n "$NS" wait --for=condition=Ready "pod/$DB_POD" --timeout=600s', readme)
+
         db = render.render(component="database")["items"][0]["spec"]
         self.assertEqual(db["image"]["postgres"], render.POSTGRES)
         self.assertIn("18.3-system-trixie@sha256:", render.POSTGRES)

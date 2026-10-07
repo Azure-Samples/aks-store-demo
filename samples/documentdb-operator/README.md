@@ -126,7 +126,7 @@ h install documentdb-operator oci://ghcr.io/documentdb/documentdb-operator \
 k -n documentdb-operator rollout status deployment/documentdb-operator --timeout=600s
 k -n cnpg-system rollout status deployment/documentdb-operator-cloudnative-pg --timeout=600s
 k -n cnpg-system rollout status deployment/sidecar-injector --timeout=600s
-k wait --for=condition=Established crd/documentdbs.documentdb.io --timeout=120s
+k wait --for=condition=Established crd/dbs.documentdb.io --timeout=120s
 k wait --for=condition=Established crd/clusters.postgresql.cnpg.io --timeout=120s
 k -n documentdb-operator get certificates,issuers
 k -n cnpg-system get certificates,issuers
@@ -305,8 +305,9 @@ only that exact pod (not the DocumentDB CR, CNPG Cluster, PVC, PV or namespace):
 
 ```bash
 : "${DB_POD:?Set to the exact inspected evaluation database pod name}"
-k -n "$NS" delete pod "$DB_POD"
-k -n "$NS" wait --for=condition=Ready pod -l cnpg.io/cluster=store-db --timeout=600s
+k -n "$NS" delete pod "$DB_POD" --wait=true
+k -n "$NS" wait --for=create "pod/$DB_POD" --timeout=600s
+k -n "$NS" wait --for=condition=Ready "pod/$DB_POD" --timeout=600s
 k -n "$NS" get pod -l cnpg.io/cluster=store-db -o json > db-after.generated.json
 k -n "$NS" get pvc -l cnpg.io/cluster=store-db -o json > pvc-after.generated.json
 python3 smoke.py readback
