@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Plan-only by default. Opt-in deletion of one freshly created evaluation namespace.
 
-Never deletes cluster-scoped resources, PVs, disks, Helm releases or Azure resources.
+Makes no direct API requests to delete cluster-scoped resources, PVs, disks,
+Helm releases or Azure resources. Namespace deletion removes PVCs and can
+indirectly delete bound PVs and Azure disks under a Delete reclaim policy.
+Storage retention is not guaranteed; it depends on reclaim policy.
 Requires a recorded namespace UID and an exact confirmation; a recreated namespace
 cannot match. Deletion goes through the Kubernetes API with a UID precondition.
 Use a loopback kubectl proxy scoped to your explicit kubeconfig/context (README).
@@ -33,7 +36,10 @@ def cleanup(ns, uid, port=18001, confirm=None):
             or meta.get("labels", {}).get(OWNER_LABEL) != OWNER_VALUE):
         raise ValueError("Refusing: namespace name, recorded UID or evaluation label does not match")
     if confirm is None:
-        print("PLAN ONLY: would delete evaluation namespace " + ns + "; retained PVs/disks and cluster dependencies are NOT deleted.")
+        print("PLAN ONLY: would delete evaluation namespace " + ns +
+              "; this removes PVCs and can indirectly delete bound PVs/Azure disks under a Delete reclaim policy. "
+              "Storage retention is not guaranteed. No direct cluster-scoped resource, PV, disk, "
+              "Helm release or Azure resource deletion requests are made.")
         return
     if confirm != ns + ":" + uid:
         raise ValueError("Refusing: confirmation must equal namespace:recorded-uid")

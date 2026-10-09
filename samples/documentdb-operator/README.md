@@ -109,27 +109,36 @@ If preparation fails part-way, inspect it; do not blindly rerun or delete it.
 ## 1. Install and verify the pinned dependencies
 
 These commands are **initial installs only**, not upgrades. Do not disable the
-operator's cert-manager preflight check during a live install.
+operator's cert-manager preflight check during a live install. Each function below
+returns immediately on any failed command, without relying on `set -e` or closing
+your interactive shell. Do not run later steps after a failure. The in-shell
+readiness markers bind later steps to this kubeconfig/context/namespace; run these
+blocks in the same Bash session, and do not set those markers yourself.
 
 ```bash
-h install cert-manager oci://quay.io/jetstack/charts/cert-manager \
-  --version v1.19.0 --namespace cert-manager --create-namespace \
-  --set crds.enabled=true --wait --timeout 10m
-k -n cert-manager rollout status deployment/cert-manager --timeout=600s
-k -n cert-manager rollout status deployment/cert-manager-webhook --timeout=600s
-k -n cert-manager rollout status deployment/cert-manager-cainjector --timeout=600s
-k wait --for=condition=Established crd/certificates.cert-manager.io --timeout=120s
+install_dependencies() {
+  unset STORE_DEPENDENCIES_READY STORE_DATABASE_READY NS_UID
+  h install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+    --version v1.19.0 --namespace cert-manager --create-namespace \
+    --set crds.enabled=true --wait --timeout 10m || return
+  k -n cert-manager rollout status deployment/cert-manager --timeout=600s || return
+  k -n cert-manager rollout status deployment/cert-manager-webhook --timeout=600s || return
+  k -n cert-manager rollout status deployment/cert-manager-cainjector --timeout=600s || return
+  k wait --for=condition=Established crd/certificates.cert-manager.io --timeout=120s || return
 
-h install documentdb-operator oci://ghcr.io/documentdb/documentdb-operator \
-  --version 0.3.0 --namespace documentdb-operator --create-namespace \
-  --wait --timeout 10m
-k -n documentdb-operator rollout status deployment/documentdb-operator --timeout=600s
-k -n cnpg-system rollout status deployment/documentdb-operator-cloudnative-pg --timeout=600s
-k -n cnpg-system rollout status deployment/sidecar-injector --timeout=600s
-k wait --for=condition=Established crd/dbs.documentdb.io --timeout=120s
-k wait --for=condition=Established crd/clusters.postgresql.cnpg.io --timeout=120s
-k -n documentdb-operator get certificates,issuers
-k -n cnpg-system get certificates,issuers
+  h install documentdb-operator oci://ghcr.io/documentdb/documentdb-operator \
+    --version 0.3.0 --namespace documentdb-operator --create-namespace \
+    --wait --timeout 10m || return
+  k -n documentdb-operator rollout status deployment/documentdb-operator --timeout=600s || return
+  k -n cnpg-system rollout status deployment/documentdb-operator-cloudnative-pg --timeout=600s || return
+  k -n cnpg-system rollout status deployment/sidecar-injector --timeout=600s || return
+  k wait --for=condition=Established crd/dbs.documentdb.io --timeout=120s || return
+  k wait --for=condition=Established crd/clusters.postgresql.cnpg.io --timeout=120s || return
+  k -n documentdb-operator get certificates,issuers || return
+  k -n cnpg-system get certificates,issuers || return
+  STORE_DEPENDENCIES_READY="$KUBECONFIG|$CTX"
+}
+install_dependencies
 ```
 
 Inspect that issued certificates are Ready, the issuer conditions are healthy,
@@ -147,18 +156,32 @@ than being overwritten. Do not enable shell tracing or print Secret objects.
 The helpers intentionally do not perform a destructive rollback on errors.
 
 ```bash
-python3 prepare_secrets.py --kubeconfig "$KUBECONFIG" --context "$CTX" --namespace "$NS"
-# Keep this original UID for guarded cleanup; do not recapture it at cleanup time.
-export NS_UID="$(k get namespace "$NS" -o jsonpath='{.metadata.uid}')"
+create_database() {
+  unset STORE_DATABASE_READY NS_UID
+  if [ "${STORE_DEPENDENCIES_READY:-}" != "$KUBECONFIG|$CTX" ]; then
+    printf '%s\n' 'Stop: complete the dependency block in this shell first.' >&2
+    return 1
+  fi
+  python3 prepare_secrets.py --kubeconfig "$KUBECONFIG" --context "$CTX" --namespace "$NS" || return
+  # Keep this original UID for guarded cleanup; do not recapture it at cleanup time.
+  NS_UID="$(k get namespace "$NS" -o jsonpath='{.metadata.uid}')" || return
+  if [ -z "$NS_UID" ]; then
+    printf '%s\n' 'Stop: namespace UID lookup returned an empty value.' >&2
+    return 1
+  fi
+  export NS_UID
 
-python3 render.py --namespace "$NS" --component policy > policy.generated.json
-k create --dry-run=server -f policy.generated.json
-k create -f policy.generated.json
-k -n "$NS" get networkpolicy isolate-documentdb-ingress
+  python3 render.py --namespace "$NS" --component policy > policy.generated.json || return
+  k create --dry-run=server -f policy.generated.json || return
+  k create -f policy.generated.json || return
+  k -n "$NS" get networkpolicy isolate-documentdb-ingress || return
 
-python3 render.py --namespace "$NS" --component database > database.generated.json
-k create --dry-run=server -f database.generated.json
-k create -f database.generated.json
+  python3 render.py --namespace "$NS" --component database > database.generated.json || return
+  k create --dry-run=server -f database.generated.json || return
+  k create -f database.generated.json || return
+  STORE_DATABASE_READY="$KUBECONFIG|$CTX|$NS|$NS_UID"
+}
+create_database
 ```
 
 The policy is installed **before** the database. It allows gateway TCP 10260 only
@@ -188,13 +211,20 @@ on a nested CRD default that may not populate when `spec.image` is absent.
 Never substitute the baseline `documentdb-local` image for the CNPG image.
 
 ```bash
-python3 render.py --namespace "$NS" --component apps > apps.generated.json
-k create --dry-run=server -f apps.generated.json
-k create -f apps.generated.json
-for app in rabbitmq order-service makeline-service product-service; do
-  k -n "$NS" rollout status "deployment/$app" --timeout=600s || break
-done
-k -n "$NS" get pods,services
+create_apps() {
+  if [ -z "${NS_UID:-}" ] || [ "${STORE_DATABASE_READY:-}" != "$KUBECONFIG|$CTX|$NS|$NS_UID" ]; then
+    printf '%s\n' 'Stop: complete the database block in this shell first.' >&2
+    return 1
+  fi
+  python3 render.py --namespace "$NS" --component apps > apps.generated.json || return
+  k create --dry-run=server -f apps.generated.json || return
+  k create -f apps.generated.json || return
+  for app in rabbitmq order-service makeline-service product-service; do
+    k -n "$NS" rollout status "deployment/$app" --timeout=600s || return
+  done
+  k -n "$NS" get pods,services || return
+}
+create_apps
 ```
 
 Require **all four** deployments Ready and **every service ClusterIP**, without
@@ -337,7 +367,10 @@ The optional helper below operates through a loopback-only `kubectl proxy` start
 with your explicit context. It is **plan-only by default** and refuses a wrong
 name, original UID, ownership label or confirmation. Its namespace DELETE also
 has a server-side UID precondition, protecting a namespace recreated since the
-check. It does not remove PVs, disks, Helm releases, or any Azure resources.
+check. It makes no **direct** API requests to delete cluster-scoped resources,
+PVs, disks, Helm releases, or Azure resources. **Namespace deletion removes its
+PVCs and can indirectly delete bound PVs and Azure disks under a `Delete` reclaim
+policy. Storage retention is not guaranteed; it depends on reclaim policy.**
 Do not set up this proxy on a shared/untrusted host; close it afterwards.
 
 In a separate terminal:
@@ -371,8 +404,10 @@ python3 -m json.tool check.generated.json > /dev/null
 ```
 
 The tests cover manifest pins, TLS/URI boundaries, policy selectors/ports,
-create-only secret handling (including failure-output suppression), guarded
-cleanup refusal/UID preconditions, and the Store contract against a **mock** API.
+create-only secret handling (including failure-output suppression), the actual
+README setup blocks with offline command-failure injection, guarded cleanup
+refusal/UID preconditions and storage-loss warnings, and the Store contract
+against a **mock** API.
 Mock passes are not real AKS or database evidence. Run Python without `-O`, since
 the synthetic smoke checks use assertions.
 

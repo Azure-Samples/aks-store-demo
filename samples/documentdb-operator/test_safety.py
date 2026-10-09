@@ -146,10 +146,42 @@ class CleanupTests(unittest.TestCase):
                              "labels": {render.OWNER_LABEL: label}}}
 
     def test_default_is_plan_only(self):
+        output = io.StringIO()
         with patch.object(cleanup, "request", return_value=self.owned()) as request:
-            with contextlib.redirect_stdout(io.StringIO()):
+            with contextlib.redirect_stdout(output):
                 cleanup.cleanup("store-operator", "unit-uid")
         request.assert_called_once_with(18001, "store-operator")
+        self.assertIn("PLAN ONLY", output.getvalue())
+        self.assertIn("indirectly delete bound PVs/Azure disks", output.getvalue())
+        self.assertIn("Delete reclaim policy", output.getvalue())
+        self.assertIn("Storage retention is not guaranteed", output.getvalue())
+
+    def test_help_and_readme_warn_about_indirect_storage_deletion(self):
+        result = subprocess.run([sys.executable, str(render.ROOT / "cleanup.py"), "--help"],
+                                text=True, capture_output=True, check=True)
+        readme = (render.ROOT / "README.md").read_text()
+        for text in (cleanup.__doc__, result.stdout, readme):
+            text = " ".join(text.replace("**", "").replace("`", "").split()).lower()
+            self.assertIn("no direct api requests to delete cluster-scoped resources", text)
+            self.assertIn("pvcs", text)
+            self.assertIn("indirectly delete bound pvs and azure disks", text)
+            self.assertIn("delete reclaim policy", text)
+            self.assertIn("storage retention is not guaranteed", text)
+
+    def test_http_delete_is_namespace_only_with_real_precondition_body(self):
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = b'{}'
+        opener = MagicMock()
+        opener.open.return_value = response
+        body = {"apiVersion": "v1", "kind": "DeleteOptions", "preconditions": {"uid": "unit-uid"},
+                "propagationPolicy": "Foreground"}
+        with patch.object(cleanup.urllib.request, "build_opener", return_value=opener):
+            cleanup.request(18001, "store-operator", body)
+        request = opener.open.call_args.args[0]
+        self.assertEqual(request.full_url, "http://127.0.0.1:18001/api/v1/namespaces/store-operator")
+        self.assertEqual(request.get_method(), "DELETE")
+        self.assertEqual(json.loads(request.data), body)
+        self.assertEqual(opener.open.call_count, 1)
 
     def test_refuses_wrong_uid_label_or_confirmation(self):
         cases = [(self.owned("recreated-uid"), "store-operator:unit-uid"),
