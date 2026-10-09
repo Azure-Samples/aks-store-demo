@@ -1,0 +1,82 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": {
+    "name": "isolate-documentdb-ingress",
+    "namespace": "store-operator"
+  },
+  "spec": {
+    "podSelector": {
+      "matchLabels": {
+        "cnpg.io/cluster": "store-db"
+      }
+    },
+    "policyTypes": [
+      "Ingress"
+    ],
+    "ingress": [
+      {
+        "from": [
+          {
+            "podSelector": {
+              "matchLabels": {
+                "app": "makeline-service"
+              }
+            }
+          },
+          {
+            "podSelector": {
+              "matchLabels": {
+                "app": "documentdb-test-client"
+              }
+            }
+          }
+        ],
+        "ports": [
+          {
+            "protocol": "TCP",
+            "port": 10260
+          }
+        ]
+      },
+      {
+        "from": [
+          {
+            "podSelector": {
+              "matchLabels": {
+                "cnpg.io/cluster": "store-db"
+              }
+            }
+          }
+        ],
+        "ports": [
+          {
+            "protocol": "TCP",
+            "port": 5432
+          }
+        ]
+      },
+      {
+        "from": [
+          {
+            "namespaceSelector": {
+              "matchLabels": {
+                "kubernetes.io/metadata.name": "cnpg-system"
+              }
+            }
+          }
+        ],
+        "ports": [
+          {
+            "protocol": "TCP",
+            "port": 8000
+          },
+          {
+            "protocol": "TCP",
+            "port": 9187
+          }
+        ]
+      }
+    ]
+  }
+}
