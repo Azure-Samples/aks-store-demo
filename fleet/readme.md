@@ -1,5 +1,33 @@
 # Deploy AKS Store Demo to multiple clusters using GitOps
 
+Stage changes on hub cluster.
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: git-repo-fleet-config
+  namespace: aks-store-demo
+spec:
+  interval: 1m
+  url: https://github.com/sjwaight/aks-store-demo
+  ref:
+    branch: add-fleet-gitops
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kustomize-fleet-config
+  namespace: aks-store-demo
+spec:
+  interval: 1m
+  prune: true
+  path: ./fleet/aks-store-demo-helm
+  sourceRef:
+    kind: GitRepository
+    name: git-repo-fleet-config
+```
+
 1. Enable Flux extension on the Azure Kubernetes Fleet Manager - requires a hub cluster.
 
 ```bash
