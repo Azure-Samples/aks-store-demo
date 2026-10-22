@@ -1,0 +1,19 @@
+apiVersion: placement.kubernetes-fleet.io/v1
+kind: ResourcePlacement
+metadata:
+  name: aks-store-demo-flux-placement
+  namespace: aks-store-demo
+spec:
+  resourceSelectors:
+    - group: source.toolkit.fluxcd.io
+      version: v1
+      kind: HelmRepository
+      name: aks-store-demo-source
+
+    - group: helm.toolkit.fluxcd.io
+      version: v2
+      kind: HelmRelease
+      name: aks-store-demo-rel
+
+  policy:
+    placementType: PickAll
