@@ -56,7 +56,7 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
 
 1. Authorize the `flux-applier` user on the hub cluster to manage resources in the newly created namespace. Modify `rules` to meet your requirements. In this configuration Flux can manage any resoure type in the `aks-store-demo` namespace. You can apply via `kubectl` on the hub cluster, or via the Azure portal by using the _Apply YAML_ option, pasting in the below and then applying.
 
-   > NOTE: you can use a `ResourcePlacement` to distribute this authorization across member clusters as required.
+   > NOTE: you could also use a `ResourcePlacement` to distribute this authorization across member clusters so that Flux is authorized to reconcile resources there also.
 
    ```yaml
    apiVersion: v1
@@ -108,13 +108,9 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
        placementType: PickAll
    ```
 
-1. Bootstrap your configuration by applying these resources to the `aks-store-demo` namespace on the Fleet Manager hub cluster. You can create the on the Fleet Manager hub cluster manually via `kubectl` or via the Azure portal by using the _Apply YAML_ option, pasting in the below and then applying.
-   1. Try the OCI deployment by setting `spec.path` in the `Kustomization` to point at [./aks-store-demo-oci](./aks-store-demo-oci).
-   1. Try the Helm deployment by setting `spec.path` in the `Kustomization` to point at [./aks-store-demo-helm](./aks-store-demo-helm).
-
 1. Connect the source repository with the hub cluster, selecting the artifacts to deploy. You can create these on the Fleet Manager hub cluster manually via `kubectl` or via the Azure portal by using the _Apply YAML_ option under **Namespaces**, pasting in the below and then applying.
-   1. Try the OCI deployment by setting `spec.path` in the `Kustomization` to point at [./fleet/aks-store-fleet-oci](./aks-store-demo-oci).
-   1. Try the Helm deployment by setting `spec.path` in the `Kustomization` to point at [./fleet/aks-store-fleet-helm](./aks-store-demo-helm).
+   1. Try the OCI deployment by setting `spec.path` in the `Kustomization` to point at [./fleet/aks-store-fleet-oci](./aks-store-fleet-oci).
+   1. Try the Helm deployment by setting `spec.path` in the `Kustomization` to point at [./fleet/aks-store-fleet-helm](./aks-store-fleet-helm).
 
    ```yaml
    apiVersion: source.toolkit.fluxcd.io/v1
@@ -142,10 +138,9 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
        name: git-repo-fleet-config
    ```
 
-   > [!NOTE]
-   > You can use other supported source and release types as required.
+   > NOTE: You can use other supported Flux source and release types as required.
 
-The resources contained in the aks-store-demo folder will be syncronized by Flux to the Fleet Manager hub cluster, then distributed to member clusters using Fleet Manager resource placement.
+   The resources contained in the aks-store-demo folder will be syncronized by Flux to the Fleet Manager hub cluster, then distributed to member clusters using Fleet Manager resource placement.
 
 ### What happens on the hub cluster?
 
