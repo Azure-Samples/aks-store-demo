@@ -196,3 +196,11 @@ You can view the workloads and services configured by the sample application on 
    ```
 
    Open either the `store-admin` or `store-front` external IP addresses to view the resulting web experiences for the two services.
+
+## Other things to try out
+
+Fleet Manager resource placement includes the concept of staged rollouts that provide additional controls beyond the default `RollingUpdate` that is used in this sample.
+
+You can group clusters and add approvals to the rollout of your application updates without the overhead of managing branch merges. Rolling back becomes a matter of cancelling the rollout and re-applying the last good version.
+
+Read more about staged rollouts with Fleet Manager resource placement on [Microsoft Learn](https://aka.ms/kubernetes-fleet/placement/staged-rollout)
