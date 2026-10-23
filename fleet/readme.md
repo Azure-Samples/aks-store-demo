@@ -14,17 +14,17 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
 
 1. You need the `k8s-extension` and `fleet` Azure CLI extensions. You can install them by running the following commands.
 
-```bash
-az extension add --name k8s-extension
-az extension add --name fleet
-```
+   ```bash
+   az extension add --name k8s-extension
+   az extension add --name fleet
+   ```
 
-Run the `az extension update` command to update to the latest version of the extensions.
+   Run the `az extension update` command to update to the latest version of the extensions.
 
-```bash
-az extension update --name k8s-extension
-az extension update --name fleet
-```
+   ```bash
+   az extension update --name k8s-extension
+   az extension update --name fleet
+   ```
 
 1. Enable the Flux extension on the Fleet Manager hub cluster.
 
@@ -38,7 +38,7 @@ az extension update --name fleet
        --scope cluster
    ```
 
-If you want to limit Flux to managing resources in a specific namespace, provide the namespace by using the `--release-namespace` parameter and update the `--scope` argument to `namespace`.
+   If you want to limit Flux to managing resources in a specific namespace, provide the namespace by using the `--release-namespace` parameter and update the `--scope` argument to `namespace`.
 
 1. Get the kubeconfig file of the Fleet Manager hub cluster by using the [`az fleet get-credentials`][az-fleet-get-credentials] command:
 
@@ -54,59 +54,59 @@ If you want to limit Flux to managing resources in a specific namespace, provide
    kubectl create namespace aks-store-demo
    ```
 
-1. Distribute the new namespace all member clusters, excluding any existing or future child resources by specifying `selectionScope: NamespaceOnly`. You can create the on the Fleet Manager hub cluster manually via `kubectl` or via the Azure portal. If you use the Azure portal you need to manually add the `selectionScope` before applying.
-
-```yaml
-apiVersion: placement.kubernetes-fleet.io/v1
-kind: ClusterResourcePlacement
-metadata:
-  name: distribute-test-app
-spec:
-  resourceSelectors:
-    - group: ""
-      kind: Namespace
-      version: v1
-      name: aks-store-demo
-      selectionScope: NamespaceOnly
-  policy:
-    placementType: PickAll
-```
-
 1. Authorize the `flux-applier` user on the hub cluster to manage resources in the newly created namespace. Modify `rules` to meet your requirements. In this configuration Flux can manage any resoure type in the `aks-store-demo` namespace. You can apply via `kubectl` on the hub cluster, or via the Azure portal by using the _Apply YAML_ option, pasting in the below and then applying.
 
-> NOTE: you can use a `ResourcePlacement` to distribute this authorization across member clusters as required.
+   > NOTE: you can use a `ResourcePlacement` to distribute this authorization across member clusters as required.
 
-```yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: flux-applier
-  namespace: aks-store-demo
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: flux-applier
-  namespace: aks-store-demo
-rules:
-  - apiGroups: ["*"]
-    resources: ["*"]
-    verbs: ["*"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: flux-applier
-  namespace: aks-store-demo
-subjects:
-  - kind: ServiceAccount
-    name: flux-applier
-    namespace: aks-store-demo
-roleRef:
-  kind: Role
-  name: flux-applier
-  apiGroup: rbac.authorization.k8s.io
-```
+   ```yaml
+   apiVersion: v1
+   kind: ServiceAccount
+   metadata:
+     name: flux-applier
+     namespace: aks-store-demo
+   ---
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: Role
+   metadata:
+     name: flux-applier
+     namespace: aks-store-demo
+   rules:
+     - apiGroups: ["*"]
+       resources: ["*"]
+       verbs: ["*"]
+   ---
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: RoleBinding
+   metadata:
+     name: flux-applier
+     namespace: aks-store-demo
+   subjects:
+     - kind: ServiceAccount
+       name: flux-applier
+       namespace: aks-store-demo
+   roleRef:
+     kind: Role
+     name: flux-applier
+     apiGroup: rbac.authorization.k8s.io
+   ```
+
+1. Distribute the new namespace all member clusters using [Azure Kubernetes Fleet Manager resource placement](https://aka.ms/kubernetes-fleet/placement). We exclude any existing or future child resources by specifying `selectionScope: NamespaceOnly`.
+
+   ```yaml
+   apiVersion: placement.kubernetes-fleet.io/v1
+   kind: ClusterResourcePlacement
+   metadata:
+     name: distribute-test-app
+   spec:
+     resourceSelectors:
+       - group: ""
+         kind: Namespace
+         version: v1
+         name: aks-store-demo
+         selectionScope: NamespaceOnly
+     policy:
+       placementType: PickAll
+   ```
 
 1. Bootstrap your configuration by applying these resources to the `aks-store-demo` namespace on the Fleet Manager hub cluster. You can create the on the Fleet Manager hub cluster manually via `kubectl` or via the Azure portal by using the _Apply YAML_ option, pasting in the below and then applying.
    1. Try the OCI deployment by setting `spec.path` in the `Kustomization` to point at [./aks-store-demo-oci](./aks-store-demo-oci).
