@@ -77,6 +77,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: order-service
+  annotations:
+    service.cilium.io/global: "true"
 spec:
   type: ClusterIP
   ports:
