@@ -56,7 +56,7 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
 
 1. Authorize the `flux-applier` user on the hub cluster to manage resources in the newly created namespace. Modify `rules` to meet your requirements. In this configuration Flux can manage any resource type in the `aks-store-demo` namespace. You can apply via `kubectl` on the hub cluster, or via the Azure portal by using the _Apply YAML_ option, pasting in the below and then applying.
 
-   > NOTE: you could also use a `ResourcePlacement` to distribute this authorization across member clusters so that Flux is authorized to reconcile resources there also.
+   > IMPORTANT: For member clusters using the Azure Flux extension with multi-tenancy enforcement and the `flux-applier` default service account, apply the ServiceAccount, Role, and RoleBinding below on every member after the `aks-store-demo` namespace has been distributed and before placing the application resources. Alternatively, distribute all three resources with a `ResourcePlacement`. The `NamespaceOnly` placement below does not copy this authorization.
 
    ```yaml
    apiVersion: v1
