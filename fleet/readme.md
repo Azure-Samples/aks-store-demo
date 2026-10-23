@@ -54,7 +54,7 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
    kubectl create namespace aks-store-demo
    ```
 
-1. Authorize the `flux-applier` user on the hub cluster to manage resources in the newly created namespace. Modify `rules` to meet your requirements. In this configuration Flux can manage any resoure type in the `aks-store-demo` namespace. You can apply via `kubectl` on the hub cluster, or via the Azure portal by using the _Apply YAML_ option, pasting in the below and then applying.
+1. Authorize the `flux-applier` user on the hub cluster to manage resources in the newly created namespace. Modify `rules` to meet your requirements. In this configuration Flux can manage any resource type in the `aks-store-demo` namespace. You can apply via `kubectl` on the hub cluster, or via the Azure portal by using the _Apply YAML_ option, pasting in the below and then applying.
 
    > NOTE: you could also use a `ResourcePlacement` to distribute this authorization across member clusters so that Flux is authorized to reconcile resources there also.
 
@@ -140,7 +140,7 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
 
    > NOTE: You can use other supported Flux source and release types as required.
 
-   The resources contained in the aks-store-demo folder will be syncronized by Flux to the Fleet Manager hub cluster, then distributed to member clusters using Fleet Manager resource placement.
+   The resources contained in the aks-store-demo folder will be synchronized by Flux to the Fleet Manager hub cluster, then distributed to member clusters using Fleet Manager resource placement.
 
 ## What happens on the hub cluster?
 
@@ -164,7 +164,7 @@ The file contents in the folder perform the following functions.
 - [fleet-resource-override.yaml](./aks-store-fleet-helm/fleet-resource-override.yaml) - A Fleet Manager resource placement override that removes the `suspend` from the app components when they are distributed to member clusters.
 - [fleet-resource-placement.yaml](./aks-store-fleet-helm/fleet-resource-placement.yaml) - A Fleet Manager resource placement that selects the HelmRepository and HelmRelease resources and distributes them to all clusters.
 
-> Note: both app components are bundled with `suspend` set to `true` so that the resources aren't reconciled on the Fleet Manager hub cluster. The hub cluster can't schedule workloads, so there's no impact other than an unecessary use of scheduler time on the hub.
+> Note: both app components are bundled with `suspend` set to `true` so that the resources aren't reconciled on the Fleet Manager hub cluster. The hub cluster can't schedule workloads, so there's no impact other than an unnecessary use of scheduler time on the hub.
 
 ## View the running application
 
@@ -201,12 +201,12 @@ You can view the workloads and services configured by the sample application on 
 
 ## Other things to try out
 
-Fleet Manager resource placement includes the concept of staged rollouts that provide additional controls beyond the default `RollingUpdate` that is used in this sample.
+Fleet Manager resource placement includes the concept of staged roll outs that provide additional controls beyond the default `RollingUpdate` that is used in this sample.
 
 You can group clusters and add approvals to the rollout of your application updates without the overhead of managing branch merges. Rolling back becomes a matter of cancelling the rollout and re-applying the last good version.
 
-Read more about staged rollouts with Fleet Manager resource placement on [Microsoft Learn](https://aka.ms/kubernetes-fleet/placement/staged-rollout).
+Read more about staged roll outs with Fleet Manager resource placement on [Microsoft Learn](https://aka.ms/kubernetes-fleet/placement/staged-rollout).
 
 ## Uninstalling the application
 
-The easiest way to remove the application from all clusers is to delete the `kustomize-fleet-config` Kustomization on the Fleet Manager hub cluster. This removes the resource placement on the hub cluster which in turn causes the member clusters to remove the placed resources.
+The easiest way to remove the application from all clusters is to delete the `kustomize-fleet-config` Kustomization on the Fleet Manager hub cluster. This removes the resource placement on the hub cluster which in turn causes the member clusters to remove the placed resources.
