@@ -1,45 +1,58 @@
-# Deploy AKS Store Demo to multiple clusters using GitOps
+# Use Azure Kubernetes Fleet Manager and GitOps to deploy to multiple clusters using GitOps
 
-Stage changes on hub cluster.
+You can use the Flux extension on [Azure Kubernetes Fleet Manager](https://aka.ms/kubernetes-fleet/) to control the rollout of the AKS store demo application across multiple clusters.
 
-```yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: git-repo-fleet-config
-  namespace: aks-store-demo
-spec:
-  interval: 1m
-  url: https://github.com/sjwaight/aks-store-demo
-  ref:
-    branch: add-fleet-gitops
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: kustomize-fleet-config
-  namespace: aks-store-demo
-spec:
-  interval: 1m
-  prune: true
-  path: ./fleet/aks-store-demo-helm
-  sourceRef:
-    kind: GitRepository
-    name: git-repo-fleet-config
-```
+This guide assumes you have created a Fleet Manager with a hub cluster and have added one or more Kubernetes clusters that are already configured with Flux.
 
-1. Enable Flux extension on the Azure Kubernetes Fleet Manager - requires a hub cluster.
+1. For the subscription where Fleet Manager is deployed, register the following Azure resource providers.
+
+   ```bash
+   az provider register --namespace Microsoft.Kubernetes
+   az provider register --namespace Microsoft.ContainerService
+   az provider register --namespace Microsoft.KubernetesConfiguration
+   ```
+
+1. You need the `k8s-extension` and `fleet` Azure CLI extensions. You can install them by running the following commands.
 
 ```bash
-az k8s-extension create \
-  --resource-group {rg-fleet-test-group} \
-  --cluster-name {fleet-name} \
-  --cluster-type fleets \
-  --name flux \
-  --extension-type microsoft.flux
+az extension add --name k8s-extension
+az extension add --name fleet
 ```
 
+Run the `az extension update` command to update to the latest version of the extensions.
+
+```bash
+az extension update --name k8s-extension
+az extension update --name fleet
+```
+
+1. Enable the Flux extension on the Fleet Manager hub cluster.
+
+   ```bash
+   az k8s-extension create \
+       --name flux \
+       --extension-type microsoft.flux \
+       --cluster-name ${FLEET} \
+       --resource-group ${GROUP} \
+       --cluster-type fleets \
+       --scope cluster
+   ```
+
+If you want to limit Flux to managing resources in a specific namespace, provide the namespace by using the `--release-namespace` parameter and update the `--scope` argument to `namespace`.
+
+1. Get the kubeconfig file of the Fleet Manager hub cluster by using the [`az fleet get-credentials`][az-fleet-get-credentials] command:
+
+   ```azurecli-interactive
+   az fleet get-credentials \
+       --resource-group ${GROUP} \
+       --name ${FLEET}
+   ```
+
 1. Create a namespace on your Fleet Manager hub cluster named `aks-store-demo`.
+
+   ```bash
+   kubectl create namespace aks-store-demo
+   ```
 
 1. Distribute the new namespace all member clusters, excluding any existing or future child resources by specifying `selectionScope: NamespaceOnly`. You can create the on the Fleet Manager hub cluster manually via `kubectl` or via the Azure portal. If you use the Azure portal you need to manually add the `selectionScope` before applying.
 
@@ -61,7 +74,7 @@ spec:
 
 1. Authorize the `flux-applier` user on the hub cluster to manage resources in the newly created namespace. Modify `rules` to meet your requirements. In this configuration Flux can manage any resoure type in the `aks-store-demo` namespace. You can apply via `kubectl` on the hub cluster, or via the Azure portal by using the _Apply YAML_ option, pasting in the below and then applying.
 
-> NOTE: you can use a `ResourcePlacement` to distribute this mapping across member clusters as required.
+> NOTE: you can use a `ResourcePlacement` to distribute this authorization across member clusters as required.
 
 ```yaml
 apiVersion: v1
@@ -99,31 +112,38 @@ roleRef:
    1. Try the OCI deployment by setting `spec.path` in the `Kustomization` to point at [./aks-store-demo-oci](./aks-store-demo-oci).
    1. Try the Helm deployment by setting `spec.path` in the `Kustomization` to point at [./aks-store-demo-helm](./aks-store-demo-helm).
 
-```yaml
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: git-repo-fleet-config
-  namespace: aks-store-demo
-spec:
-  interval: 1m
-  url: https://github.com/sjwaight/fleet-gitops-01
-  ref:
-    branch: main
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: kustomize-fleet-config
-  namespace: aks-store-demo
-spec:
-  interval: 1m
-  sourceRef:
-    kind: GitRepository
-    name: git-repo-fleet-config
-  path: ./aks-store-demo-helm
-  prune: true
-```
+1. Connect the source repository with the hub cluster, selecting the artifacts to deploy. You can create these on the Fleet Manager hub cluster manually via `kubectl` or via the Azure portal by using the _Apply YAML_ option under **Namespaces**, pasting in the below and then applying.
+   1. Try the OCI deployment by setting `spec.path` in the `Kustomization` to point at [./fleet/aks-store-fleet-oci](./aks-store-demo-oci).
+   1. Try the Helm deployment by setting `spec.path` in the `Kustomization` to point at [./fleet/aks-store-fleet-helm](./aks-store-demo-helm).
+
+   ```yaml
+   apiVersion: source.toolkit.fluxcd.io/v1
+   kind: GitRepository
+   metadata:
+     name: git-repo-fleet-config
+     namespace: aks-store-demo
+   spec:
+     interval: 1m
+     url: https://github.com/azure-samples/aks-store-demo
+     ref:
+       branch: main
+   ---
+   apiVersion: kustomize.toolkit.fluxcd.io/v1
+   kind: Kustomization
+   metadata:
+     name: kustomize-fleet-config
+     namespace: aks-store-demo
+   spec:
+     interval: 1m
+     prune: true
+     path: ./fleet/aks-store-fleet-helm
+     sourceRef:
+       kind: GitRepository
+       name: git-repo-fleet-config
+   ```
+
+   > [!NOTE]
+   > You can use other supported source and release types as required.
 
 The resources contained in the aks-store-demo folder will be syncronized by Flux to the Fleet Manager hub cluster, then distributed to member clusters using Fleet Manager resource placement.
 
