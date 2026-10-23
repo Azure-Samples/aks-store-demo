@@ -108,7 +108,7 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
        placementType: PickAll
    ```
 
-1. Connect the source repository with the hub cluster, selecting the artifacts to deploy. You can create these on the Fleet Manager hub cluster manually via `kubectl` or via the Azure portal by using the _Apply YAML_ option under **Namespaces**, pasting in the below and then applying.
+1. Connect the source repository with the Fleet Manager hub cluster, selecting which artifact type to deploy. You can create these on the Fleet Manager hub cluster manually via `kubectl`.
    1. Try the OCI deployment by setting `spec.path` in the `Kustomization` to point at [./fleet/aks-store-fleet-oci](./aks-store-fleet-oci).
    1. Try the Helm deployment by setting `spec.path` in the `Kustomization` to point at [./fleet/aks-store-fleet-helm](./aks-store-fleet-helm).
 
@@ -142,51 +142,57 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
 
    The resources contained in the aks-store-demo folder will be syncronized by Flux to the Fleet Manager hub cluster, then distributed to member clusters using Fleet Manager resource placement.
 
-### What happens on the hub cluster?
+## What happens on the hub cluster?
 
 When Flux synchronizes the GitRepo source, the manifests in the selected folder are applied and the Kustomization runs.
 
-The file contents in the folder perform the following function:
+The file contents in the folder perform the following functions.
 
-- [app-kustomization.yaml](./aks-store-demo/app-kustomization.yaml) - Kustomization that runs on each member cluster, deploying the contents of the OCIRepository.
-- [app-source.yaml](./aks-store-demo/app-source.yaml) - OCIRepository source that points to the artifact to deploy.
-- [fleet-resource-override.yaml](./aks-store-demo/fleet-resource-override.yaml) - A Fleet Manager resource placement override that removes the `suspend` from the app components when they are distributed to member clusters.
-- [fleet-resource-placement.yaml](./aks-store-demo/fleet-resource-placement.yaml) - A Fleet Manager resource placement that selects the OCIRepository and Kustomization resources and distributes them to all clusters.
-- [hub-kustomization.yaml](./aks-store-demo/hub-kustomization.yaml) - Kustomization that runs on the Fleet Manager hub cluster and is responsible for processing the manifests in the folder.
+### OCI Artifact
+
+- [app-kustomization.yaml](./aks-store-fleet-oci/app-kustomization.yaml) - Kustomization that runs on each member cluster, deploying the contents of the OCIRepository.
+- [app-source.yaml](./aks-store-fleet-oci/app-source.yaml) - OCIRepository source that points to the artifact to deploy.
+- [fleet-resource-override.yaml](./aks-store-fleet-oci/fleet-resource-override.yaml) - A Fleet Manager resource placement override that removes the `suspend` from the app components when they are distributed to member clusters.
+- [fleet-resource-placement.yaml](./aks-store-fleet-oci/fleet-resource-placement.yaml) - A Fleet Manager resource placement that selects the OCIRepository and Kustomization resources and distributes them to all clusters.
+
+### Helm Chart
+
+- [app-release.yaml](./aks-store-fleet-helm/app-release.yaml) - HelmRelease that runs on each member cluster, deploying the contents of the HelmRepository.
+- [app-source.yaml](./aks-store-fleet-helm/app-source.yaml) - HelmRepository source that points to the repository containing the Helm chart to deploy.
+- [fleet-resource-override.yaml](./aks-store-fleet-helm/fleet-resource-override.yaml) - A Fleet Manager resource placement override that removes the `suspend` from the app components when they are distributed to member clusters.
+- [fleet-resource-placement.yaml](./aks-store-fleet-helm/fleet-resource-placement.yaml) - A Fleet Manager resource placement that selects the HelmRepository and HelmRelease resources and distributes them to all clusters.
 
 > Note: both app components are bundled with `suspend` set to `true` so that the resources aren't reconciled on the Fleet Manager hub cluster. The hub cluster can't schedule workloads, so there's no impact other than an unecessary use of scheduler time on the hub.
-
-## Enable Flux on member clusters
-
-The OCIRepository and Kustomization resources are distributed to member clusters, leaving local reconciliation to Flux on the cluster.
-
-1. Enable the Flux extension on member clusters (AKS or Arc-enabled Kubernetes)
-
-```bash
-az k8s-extension create \
-  --resource-group {rg-test-group} \
-  --cluster-name {cluster-name} \
-  --cluster-type managedClusters \
-  --name flux \
-      --extension-type microsoft.flux
-```
-
-1. As we don't use the FluxConfig ARM resource to configure this cluster, we must manually authorize the `flux-applier` so that the Kustomize controller works as expected. Patch using the same YAML as shown above.
-
-> NOTE: assumption is that if a cluster has the ARM extension already installed it likely also has a FluxConfig ARM resource in place that has already authorized `flux-applier`.
 
 ## View the running application
 
 You can view the workloads and services configured by the sample application on the member clusters.
 
-### Workloads
+1. Get the kubeconfig file of the Fleet Manager hub cluster by using the [`az fleet get-credentials`][az-fleet-get-credentials] command:
 
-![Application workloads](./img/petstore-workloads.png)
+   ```azurecli-interactive
+   az aks get-credentials \
+       --resource-group ${GROUP} \
+       --name ${AKSCLUSTER}
+   ```
 
-### Services
+1. Check running services in the `aks-store-demo` namespace.
 
-![Application services](./img/petstore-services.png)
+   ```bash
+   kubectl get services -n aks-store-demo
+   ```
 
-View the admin and store front web applications by selecting the `External IP` which will open them in the web browser.
+   Your results should look similar to the following.
 
-![Application services](./img/petstore-storefront.png)
+   ```output
+   NAME               TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)              AGE
+   documentdb         ClusterIP      10.0.160.116   <none>            10260/TCP            4h20m
+   makeline-service   ClusterIP      10.0.18.157    <none>            3001/TCP             4h20m
+   order-service      ClusterIP      10.0.115.69    <none>            3000/TCP             4h20m
+   product-service    ClusterIP      10.0.106.112   <none>            3002/TCP             4h20m
+   rabbitmq           ClusterIP      10.0.13.191    <none>            5672/TCP,15672/TCP   4h20m
+   store-admin        LoadBalancer   10.0.112.214   172.131.163.101   80:30654/TCP         4h20m
+   store-front        LoadBalancer   10.0.163.238   172.134.8.222     80:31027/TCP         4h20m
+   ```
+
+   Open either the `store-admin` or `store-front` external IP addresses to view the resulting web experiences for the two services.
