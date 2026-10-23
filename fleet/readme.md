@@ -146,6 +146,8 @@ This guide assumes you have created a Fleet Manager with a hub cluster and have 
 
 When Flux synchronizes the GitRepo source, the manifests in the selected folder are applied and the Kustomization runs.
 
+The Fleet Manager hub cluster doesn't run the staged workloads. If you review the pods on the hub cluster you will see that they remain unscheduled. This is intended.
+
 The file contents in the folder perform the following functions.
 
 ### OCI Artifact
@@ -204,3 +206,7 @@ Fleet Manager resource placement includes the concept of staged rollouts that pr
 You can group clusters and add approvals to the rollout of your application updates without the overhead of managing branch merges. Rolling back becomes a matter of cancelling the rollout and re-applying the last good version.
 
 Read more about staged rollouts with Fleet Manager resource placement on [Microsoft Learn](https://aka.ms/kubernetes-fleet/placement/staged-rollout).
+
+## Uninstalling the application
+
+The easiest way to remove the application from all clusers is to delete the `kustomize-fleet-config` Kustomization on the Fleet Manager hub cluster. This removes the resource placement on the hub cluster which in turn causes the member clusters to remove the placed resources.
