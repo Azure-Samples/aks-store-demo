@@ -191,8 +191,8 @@ You can view the workloads and services configured by the sample application on 
    order-service      ClusterIP      10.0.115.69    <none>            3000/TCP             4h20m
    product-service    ClusterIP      10.0.106.112   <none>            3002/TCP             4h20m
    rabbitmq           ClusterIP      10.0.13.191    <none>            5672/TCP,15672/TCP   4h20m
-   store-admin        LoadBalancer   10.0.112.214   172.131.163.101   80:30654/TCP         4h20m
-   store-front        LoadBalancer   10.0.163.238   172.134.8.222     80:31027/TCP         4h20m
+   store-admin        LoadBalancer   10.0.112.214   172.131.163.xxx   80:30654/TCP         4h20m
+   store-front        LoadBalancer   10.0.163.238   172.134.8.yyy     80:31027/TCP         4h20m
    ```
 
    Open either the `store-admin` or `store-front` external IP addresses to view the resulting web experiences for the two services.
@@ -203,4 +203,4 @@ Fleet Manager resource placement includes the concept of staged rollouts that pr
 
 You can group clusters and add approvals to the rollout of your application updates without the overhead of managing branch merges. Rolling back becomes a matter of cancelling the rollout and re-applying the last good version.
 
-Read more about staged rollouts with Fleet Manager resource placement on [Microsoft Learn](https://aka.ms/kubernetes-fleet/placement/staged-rollout)
+Read more about staged rollouts with Fleet Manager resource placement on [Microsoft Learn](https://aka.ms/kubernetes-fleet/placement/staged-rollout).
