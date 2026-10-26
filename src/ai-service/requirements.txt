@@ -7,6 +7,6 @@ pyyaml==6.0.3
 azure.identity==1.25.3
 requests==2.34.0
 openai==2.43.0
-pillow==12.2.0
+pillow==12.3.0
 dotenv==0.9.9
 pylint==4.0.6
