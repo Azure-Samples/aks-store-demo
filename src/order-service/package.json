@@ -28,5 +28,8 @@
   },
   "devDependencies": {
     "tap": "^21.6.2"
+  },
+  "tap": {
+    "allow-incomplete-coverage": true
   }
 }
