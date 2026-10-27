@@ -1,0 +1,14 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: aks-store-demo-kustomize
+  namespace: aks-store-demo
+spec:
+  suspend: true
+  interval: 10m
+  path: ./
+  prune: true
+  sourceRef:
+    kind: OCIRepository
+    name: aks-store-demo-source
+  targetNamespace: aks-store-demo

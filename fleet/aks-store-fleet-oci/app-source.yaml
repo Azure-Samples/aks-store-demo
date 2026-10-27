@@ -1,0 +1,11 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: aks-store-demo-source
+  namespace: aks-store-demo
+spec:
+  suspend: true
+  interval: 10m
+  url: oci://ghcr.io/azure-samples/aks-store-demo
+  ref:
+    tag: 2.2.0

@@ -1,0 +1,19 @@
+apiVersion: placement.kubernetes-fleet.io/v1
+kind: ResourcePlacement
+metadata:
+  name: aks-store-demo-flux-placement
+  namespace: aks-store-demo
+spec:
+  resourceSelectors:
+    - group: source.toolkit.fluxcd.io
+      version: v1
+      kind: OCIRepository
+      name: aks-store-demo-source
+
+    - group: kustomize.toolkit.fluxcd.io
+      version: v1
+      kind: Kustomization
+      name: aks-store-demo-kustomize
+
+  policy:
+    placementType: PickAll
