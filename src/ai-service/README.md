@@ -8,7 +8,7 @@ The app does not rely on any other services other than OpenAI or Azure OpenAI en
 
 ### Prerequisites
 
-- [Python3](https://www.python.org/downloads/)
+- [Python 3.11 or later](https://www.python.org/downloads/) (Pillow 13 requires Python 3.11+; the container uses Python 3.12)
 - [pip](https://pip.pypa.io/en/stable/installation/)
 - [OpenAI API Key](https://beta.openai.com/docs/developer-quickstart/your-api-keys)
 - [Azure OpenAI API Key](https://azure.microsoft.com/products/cognitive-services/openai-service/)
