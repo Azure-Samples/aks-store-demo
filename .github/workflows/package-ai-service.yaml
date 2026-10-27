@@ -42,6 +42,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: src/ai-service/requirements.txt
+
+      - name: Install test dependencies
+        run: python -m pip install -r requirements.txt && python -m pip check
+        working-directory: src/ai-service
+
+      - name: Run unit tests
+        run: python -m pytest -q
+        working-directory: src/ai-service
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
