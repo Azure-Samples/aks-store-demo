@@ -1,0 +1,6 @@
+{
+  "order-service": "ghcr.io/azure-samples/aks-store-demo/order-service:2.2.0@sha256:c44632ea9eaa847de390ff3cf5c99c203951720b8373480038b9a0f22d802ee9",
+  "makeline-service": "ghcr.io/azure-samples/aks-store-demo/makeline-service:2.2.0@sha256:807f651de8a294d5288d49c8f0b3332f1241be292335056aa3215925a35d37de",
+  "product-service": "ghcr.io/azure-samples/aks-store-demo/product-service:2.2.0@sha256:4843934ec03808540fd73b5e94628eac4a0c21d216528c6b14aab9b4b17ac13b",
+  "rabbitmq": "docker.io/library/rabbitmq:4.3.2-management-alpine@sha256:0753b75ce99094c385483d89449d532a0544fb85e4942a478b21cc497ab66d33"
+}

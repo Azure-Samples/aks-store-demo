@@ -70,6 +70,14 @@ To learn how to deploy this app on AKS, see [Quickstart: Deploy an Azure Kuberne
 > [!NOTE]
 > The above article shows a simplified version of the store app with some services removed. For the full application, you can use the `aks-store-all-in-one.yaml` file in this repo.
 
+### Optional operator-managed DocumentDB evaluation
+
+For a headless, single-instance evaluation of the DocumentDB Kubernetes Operator,
+see [the optional AKS sample](samples/documentdb-operator/README.md). It uses an
+isolated disposable cluster, verified TLS and scoped database NetworkPolicy. This
+preview evaluation does not change the all-in-one baseline and is not a production,
+HA, backup/restore, frontend or AI deployment guide.
+
 ## Run on any Kubernetes
 
 This application uses public images stored in GitHub Container Registry and Microsoft Container Registry (MCR). Once your Kubernetes cluster of choice is setup, you can deploy the full app with the below commands.
