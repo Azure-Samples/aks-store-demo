@@ -57,6 +57,35 @@ jobs:
         run: npm run test:unit -- --run
         working-directory: src/store-admin
 
+      - name: Run linters
+        run: npx --no-install oxlint . -D correctness --ignore-path .gitignore && npx --no-install eslint .
+        working-directory: src/store-admin
+
+      - name: Smoke test development server
+        working-directory: src/store-admin
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { createServer } from 'vite'
+          const server = await createServer({
+            server: { host: '127.0.0.1', port: 0, strictPort: false, open: false },
+          })
+          try {
+            await server.listen()
+            const address = server.httpServer.address()
+            assert(address && typeof address === 'object')
+            for (const path of ['/health', '/', '/src/main.ts', '/src/components/TopNav.vue']) {
+              const response = await fetch(`http://127.0.0.1:${address.port}${path}`)
+              assert.equal(response.status, 200, path)
+              if (path === '/health') assert.equal((await response.json()).status, 'ok')
+              else assert.ok((await response.text()).length > 0)
+              console.log(`PASS ${path}`)
+            }
+          } finally {
+            await server.close()
+          }
+          JS
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # v2.10.0
 
