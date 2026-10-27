@@ -57,6 +57,20 @@ jobs:
         run: npm run test:unit -- --run
         working-directory: src/store-front
 
+      - name: Run linters
+        run: npx --no-install oxlint . -D correctness --ignore-path .gitignore && npx --no-install eslint .
+        working-directory: src/store-front
+
+      - name: Install Chromium for smoke tests
+        run: npx --no-install playwright install --with-deps chromium --only-shell
+        working-directory: src/store-front
+
+      - name: Run browser smoke test
+        run: npm run build && npm run test:e2e -- --project=chromium --reporter=line
+        working-directory: src/store-front
+        env:
+          CI: "true"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # v2.10.0
 
