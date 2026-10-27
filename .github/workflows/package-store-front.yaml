@@ -61,6 +61,31 @@ jobs:
         run: npx --no-install oxlint . -D correctness --ignore-path .gitignore && npx --no-install eslint .
         working-directory: src/store-front
 
+      - name: Smoke test development server
+        working-directory: src/store-front
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import { createServer } from 'vite'
+          const server = await createServer({
+            server: { host: '127.0.0.1', port: 0, strictPort: false, open: false },
+          })
+          try {
+            await server.listen()
+            const address = server.httpServer.address()
+            assert(address && typeof address === 'object')
+            for (const path of ['/health', '/', '/src/main.ts', '/src/components/TopNav.vue']) {
+              const response = await fetch(`http://127.0.0.1:${address.port}${path}`)
+              assert.equal(response.status, 200, path)
+              if (path === '/health') assert.equal((await response.json()).status, 'ok')
+              else assert.ok((await response.text()).length > 0)
+              console.log(`PASS ${path}`)
+            }
+          } finally {
+            await server.close()
+          }
+          JS
+
       - name: Install Chromium for smoke tests
         run: npx --no-install playwright install --with-deps chromium --only-shell
         working-directory: src/store-front
