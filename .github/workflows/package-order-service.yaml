@@ -21,6 +21,20 @@ permissions:
 jobs:
   publish-container-image:
     runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:4.3.2-management-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: integration
+          RABBITMQ_DEFAULT_PASS: integration-test-only
+        ports:
+          - 127.0.0.1:5672:5672
+          - 127.0.0.1:15672:15672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
 
     steps:
       - name: Set environment variables
@@ -56,6 +70,18 @@ jobs:
       - name: Run unit tests
         run: npm test
         working-directory: src/order-service
+
+      - name: Run RabbitMQ integration test
+        run: npm run test:integration
+        working-directory: src/order-service
+        timeout-minutes: 2
+        env:
+          ORDER_QUEUE_HOSTNAME: 127.0.0.1
+          ORDER_QUEUE_PORT: "5672"
+          ORDER_QUEUE_USERNAME: integration
+          ORDER_QUEUE_PASSWORD: integration-test-only
+          ORDER_QUEUE_NAME: orders-integration
+          RABBITMQ_MANAGEMENT_URL: http://127.0.0.1:15672
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
