@@ -1,0 +1,15 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: aks-store-demo-rel
+  namespace: aks-store-demo
+spec:
+  suspend: true
+  interval: 30m
+  chart:
+    spec:
+      chart: aks-store-demo-chart
+      version: 1.6.0
+      sourceRef:
+        kind: HelmRepository
+        name: aks-store-demo-source

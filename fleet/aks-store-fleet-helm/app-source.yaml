@@ -1,0 +1,9 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: aks-store-demo-source
+  namespace: aks-store-demo
+spec:
+  suspend: true
+  interval: 10m
+  url: https://azure-samples.github.io/aks-store-demo
