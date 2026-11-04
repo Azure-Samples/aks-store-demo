@@ -12,7 +12,7 @@ param tags object
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/container-service/managed-cluster
 // https://mcr.microsoft.com/v2/bicep/avm/res/container-service/managed-cluster/tags/list
-module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.9.0' = {
+module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.14.0' = {
   name: 'managedClusterDeployment'
   params: {
     name: 'aks-${nameSuffix}'
@@ -28,26 +28,43 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.9.0
     networkPluginMode: 'overlay'
     networkPolicy: 'cilium'
     networkDataplane: 'cilium'
-    autoNodeOsUpgradeProfileUpgradeChannel: 'SecurityPatch'
+    autoUpgradeProfile: {
+      upgradeChannel: 'stable'
+      nodeOSUpgradeChannel: 'SecurityPatch'
+    }
     enableOidcIssuerProfile: true
-    enableWorkloadIdentity: true
+    securityProfile: {
+      workloadIdentity: {
+        enabled: true
+      }
+    }
     enableKeyvaultSecretsProvider: true
     enableSecretRotation: true
-    enableAzureMonitorProfileMetrics: configureMonitorSettings
-    enableContainerInsights: configureMonitorSettings
-    disablePrometheusMetricsScraping: !configureMonitorSettings
+    azureMonitorProfile: configureMonitorSettings
+      ? {
+          metrics: {
+            enabled: true
+            kubeStateMetrics: {
+              metricLabelsAllowlist: ''
+              metricAnnotationsAllowList: ''
+            }
+          }
+        }
+      : null
     monitoringWorkspaceResourceId: configureMonitorSettings ? logsWorkspaceResourceId : null
     aadProfile: {
-      aadProfileEnableAzureRBAC: true
-      aadProfileManaged: true
+      enableAzureRBAC: true
+      managed: true
     }
     managedIdentities: {
       systemAssigned: true
     }
     publicNetworkAccess: 'Enabled'
-    authorizedIPRanges: [
-      currentIpAddress
-    ]
+    apiServerAccessProfile: {
+      authorizedIPRanges: [
+        currentIpAddress
+      ]
+    }
     roleAssignments: [
       {
         principalId: currentUserObjectId
