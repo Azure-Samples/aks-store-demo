@@ -32,7 +32,7 @@ spec:
               cpu: 5m
               memory: 75Mi
             limits:
-              cpu: 25m
+              cpu: 1000m
               memory: 1024Mi
           startupProbe:
             tcpSocket:
@@ -286,7 +286,7 @@ spec:
               cpu: 1m
               memory: 6Mi
             limits:
-              cpu: 5m
+              cpu: 100m
               memory: 20Mi
           startupProbe:
             httpGet:
@@ -351,7 +351,7 @@ spec:
               cpu: 1m
               memory: 1Mi
             limits:
-              cpu: 2m
+              cpu: 100m
               memory: 20Mi
           readinessProbe:
             httpGet:
@@ -536,7 +536,7 @@ spec:
               cpu: 1m
               memory: 1Mi
             limits:
-              cpu: 2m
+              cpu: 50m
               memory: 20Mi
           readinessProbe:
             exec:
@@ -584,7 +584,7 @@ spec:
               cpu: 1m
               memory: 1Mi
             limits:
-              cpu: 2m
+              cpu: 50m
               memory: 20Mi
           readinessProbe:
             exec:
