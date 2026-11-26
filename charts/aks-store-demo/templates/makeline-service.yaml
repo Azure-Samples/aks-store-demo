@@ -52,7 +52,7 @@ spec:
         {{- end }}
     spec:
       {{- if eq .Values.useAzureAd true }}
-      serviceAccount: {{ .Values.managedIdentityName }}
+      serviceAccountName: {{ .Values.managedIdentityName }}
       {{- end }}
       nodeSelector:
         "kubernetes.io/os": linux
